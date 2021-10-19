@@ -1,0 +1,68 @@
+{
+  "name": "@webdiscus/pug-loader",
+  "version": "1.0.0",
+  "description": "The pug loader for webpack compiles pug templates in HTML.",
+  "keywords": [
+    "pug",
+    "loader",
+    "pug-loader",
+    "template",
+    "webpack"
+  ],
+  "license": "ISC",
+  "author": "webdiscus (https://github.com/webdiscus)",
+  "maintainers": [
+    "webdiscus (https://github.com/webdiscus)"
+  ],
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/biodiscus"
+  },
+  "homepage": "https://github.com/webdiscus/pug-loader",
+  "bugs": "https://github.com/webdiscus/pug-loader/issues",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdiscus/pug-loader.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=10.22.1"
+  },
+  "scripts": {
+    "test": "jest --detectOpenHandles --config ./test/jest.config.js",
+    "test:coverage": "jest --detectOpenHandles --collectCoverage --config ./test/jest.config.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "webpack": ">=5.11.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.15.4",
+    "@types/jest": "^27.0.2",
+    "fs": "^0.0.1-security",
+    "html-webpack-plugin": "^5.4.0",
+    "jest": "^27.3.1",
+    "pug": "^3.0.2",
+    "rimraf": "^3.0.2",
+    "terser-webpack-plugin": "^5.2.4",
+    "webpack": "^5.58.2",
+    "webpack-merge": "^5.8.0"
+  }
+}

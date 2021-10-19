@@ -1,0 +1,8 @@
+p require-variable-sub-dir
+
+- file = 'images/image.jpeg'
+img(src=require(file))
+
+- file = 'image.jpeg'
+img(src=require('./images/' + file))
+img(src=require(`./images/${file}`))

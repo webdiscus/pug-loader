@@ -1,0 +1,8 @@
+p require-alias
+
+- file = 'image.jpeg'
+
+img(src=require('SourceImages/image.jpeg'))
+img(src=require('SourceImages/' + file))
+img(src=require(`SourceImages/${file}`))
+img(src=require(`Source/images/${file}`))

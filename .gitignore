@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+coverage
+coverage.lcov
+node_modules
+test/output/
