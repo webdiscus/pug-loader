@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The pug loader for webpack compiles pug templates in HTML.",
   "keywords": [
     "pug-loader",

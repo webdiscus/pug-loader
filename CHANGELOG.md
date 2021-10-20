@@ -1,5 +1,9 @@
 # Change log
 
+## 1.0.2 (2021-10-20)
+- added the test case to cover the `pugjs/pug-loader` [issue](https://github.com/pugjs/pug-loader/issues/123) : `Module not found: Error: Can't resolve` when use a mixin and require on same file.\
+  Note: this pug-loader work fine und hasn't this issue. Here is just added the test case for the problem of pugjs/pug-loader to be sure that this problem doesn't occur in this pug-loader.
+
 ## 1.0.1 (2021-10-20)
 - update devDependencies in `package.json`
 - update readme

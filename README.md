@@ -330,8 +330,7 @@ Code | @webdiscus/pug-loader| pugjs/pug-loader | Note
 `- file = '../images/image.jpeg'`<br>`img(src=require(file))`| <span style="color:red">fail</span> | <span style="color:red">fail</span> | Don't use a path in a variable.
 `- file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> | Define a path separately as string and add to she the variable contained only a filename.
 `- file = 'image.jpeg'`<br>``img(src=require(`../images/${file}`))``| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`include mixins`<br>`- file = 'image.jpeg'`<br>``img(src=require(`../../images/${file}`))``| <span style="color:green">**OK**</span> | <span style="color:red">fail</span> | If a mixin file is included before the tag with the embedded resource, then `pugjs/pug-loader` does not find the relative path with a variable.
-
+Include the template from sub directory: <br> `include mixins`<br>``img(src=require('./image.jpeg'))``| <span style="color:green">**OK**</span> | <span style="color:red">fail</span> | when use a mixin and require on same file, then `pugjs/pug-loader` can't resolve the file in require().
 
 ### Usage in frontend JavaScript
 

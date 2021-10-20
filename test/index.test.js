@@ -323,9 +323,10 @@ describe('extends, include require javascript', () => {
 // because when in template used a variable in require(),
 // then will be loaded all other, not included, templates from current und sub directories.
 describe('require embedded resources', () => {
+  const relTestCasePath = 'require-embedded-resources';
+
   it('require-string', (done) => {
-    const relTestCasePath = 'require-embedded-resources',
-      absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
       template = './src/includes/require-string/index.pug';
 
     compileTemplate(PATHS, relTestCasePath, template).then(() => {
@@ -337,8 +338,7 @@ describe('require embedded resources', () => {
   });
 
   it('require-alias', (done) => {
-    const relTestCasePath = 'require-embedded-resources',
-      absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
       template = './src/includes/require-alias/index.pug';
 
     compileTemplate(PATHS, relTestCasePath, template).then(() => {
@@ -349,9 +349,20 @@ describe('require embedded resources', () => {
     });
   });
 
+  it('require-include-mixin', (done) => {
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+      template = './src/includes/require-include-mixin/index.pug';
+
+    compileTemplate(PATHS, relTestCasePath, template).then(() => {
+      const received = readTextFileSync(path.join(absTestPath, PATHS.webRoot, 'index.html'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'require-include-mixin.html'));
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
   it('require-variable-current-dir', (done) => {
-    const relTestCasePath = 'require-embedded-resources',
-      absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
       template = './src/includes/require-variable-current-dir/index.pug';
 
     compileTemplate(PATHS, relTestCasePath, template).then(() => {
@@ -363,8 +374,7 @@ describe('require embedded resources', () => {
   });
 
   it('require-variable-parent-dir', (done) => {
-    const relTestCasePath = 'require-embedded-resources',
-      absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
       template = './src/includes/require-variable-parent-dir/index.pug';
 
     compileTemplate(PATHS, relTestCasePath, template).then(() => {
@@ -376,8 +386,7 @@ describe('require embedded resources', () => {
   });
 
   it('require-variable-sub-dir', (done) => {
-    const relTestCasePath = 'require-embedded-resources',
-      absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+    const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
       template = './src/includes/require-variable-sub-dir/index.pug';
 
     compileTemplate(PATHS, relTestCasePath, template).then(() => {

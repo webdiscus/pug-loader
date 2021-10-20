@@ -2,9 +2,5 @@ h2 included sub dir
 
 - file = 'image.jpeg'
 
-//- Test case:
-    if a mixin file is included before the img with the embedded resource,
-    then pugjs/pug-loader does not find the relative path with a variable.
-include mixins
 img(src=require('../../../images/' + file))
 img(src=require(`../../../images/${file}`))
