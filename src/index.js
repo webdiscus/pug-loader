@@ -38,15 +38,15 @@ const resolveAlias = (value, aliases, regexp) => {
  *
  * @param {string} value The resource value include require().
  * @param {string} templateFile
- * @param {{}} resolveAliases The webpack config of resolve.alias.
+ * @param {{}} aliases The resolve.alias from webpack config.
  * @return {string|null}
  */
-const resolveRequirePath = function (value, templateFile, resolveAliases) {
+const resolveRequirePath = function (value, templateFile, aliases) {
   // 1. delete `./` from path, because at begin will be added full path like `/path/to/current/dir/`
   value = value.replace(/(?<=[^\.])(\.\/)/, '');
 
   // 2. replace alias with absolute path
-  let result = resolveAlias(value, resolveAliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
+  let result = resolveAlias(value, aliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
   if (result !== value) return result;
 
   // 3. if the alias is not found in the path,
@@ -71,7 +71,7 @@ const resolveRequirePath = function (value, templateFile, resolveAliases) {
 };
 
 /**
- * Pug plugin to resolve path ny include, extend, require.
+ * Pug plugin to resolve path for include, extend, require.
  *
  * @type {{preLoad: (function(*): *)}}
  */
@@ -101,6 +101,8 @@ const compilePugContent = function (content, callback) {
   const loaderContext = this,
     loaderOptions = loaderContext.getOptions() || {},
     filename = loaderContext.resourcePath;
+
+  if (!callback) callback = loaderContext.callback;
 
   // resolve.alias from webpack config, see https://webpack.js.org/api/loaders/#this_compiler
   webpackResolveAlias = loaderContext._compiler.options.resolve.alias || {};
@@ -140,7 +142,6 @@ const compilePugContent = function (content, callback) {
     // watch files in which an error occurred
     loaderContext.addDependency(path.normalize(exception.filename));
     // show original error
-    if (!callback) callback = loaderContext.callback;
     callback(exception);
     return;
   }
@@ -150,18 +151,8 @@ const compilePugContent = function (content, callback) {
     res.dependencies.forEach(loaderContext.addDependency);
   }
 
-  if (callback) {
-    callback(null, res.body);
-    return;
-  }
-
-  return res.body;
+  callback(null, res.body);
 };
-
-// Synchronous Loader, see https://webpack.js.org/api/loaders/#synchronous-loaders
-/*module.exports = function (content) {
-  return compilePugContent.call(this, content);
-};*/
 
 // Asynchronous Loader, see https://webpack.js.org/api/loaders/#asynchronous-loaders
 module.exports = function (content, map, meta) {

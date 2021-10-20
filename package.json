@@ -1,13 +1,14 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The pug loader for webpack compiles pug templates in HTML.",
   "keywords": [
+    "pug-loader",
     "pug",
     "loader",
-    "pug-loader",
+    "webpack",
     "template",
-    "webpack"
+    "html"
   ],
   "license": "ISC",
   "author": "webdiscus (https://github.com/webdiscus)",
@@ -19,7 +20,9 @@
     "url": "https://patreon.com/biodiscus"
   },
   "homepage": "https://github.com/webdiscus/pug-loader",
-  "bugs": "https://github.com/webdiscus/pug-loader/issues",
+  "bugs": {
+    "url": "https://github.com/webdiscus/pug-loader/issues"
+  },
   "main": "src/index.js",
   "repository": {
     "type": "git",
@@ -52,7 +55,6 @@
   "peerDependencies": {
     "webpack": ">=5.11.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.15.4",
     "@types/jest": "^27.0.2",
@@ -62,7 +64,7 @@
     "pug": "^3.0.2",
     "rimraf": "^3.0.2",
     "terser-webpack-plugin": "^5.2.4",
-    "webpack": "^5.58.2",
+    "webpack": "^5.59.0",
     "webpack-merge": "^5.8.0"
   }
 }

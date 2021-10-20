@@ -1,15 +1,19 @@
-[![npm version](https://badge.fury.io/js/@webdiscus/pug-loader.svg)](https://www.npmjs.com/package/@webdiscus/pug-loader)
+[![npm version](https://badge.fury.io/js/@webdiscus%2Fpug-loader.svg)](https://badge.fury.io/js/@webdiscus%2Fpug-loader)
 
 # [pug-loader](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
 Webpack loader for the [Pug](https://pugjs.org) templates.\
-This loader can be used to generate static HTML or javascript template function from Pug templates.
+The `pug-loader` resolve paths and webpack aliases for `extends`/`include`/`require()` in pug template and compiles it into static HTML or into javascript template function.
+
+Using the `HtmlWebpackPlugin`, the pug template compiles into static HTML.\
+In the javascript file, the pug template loaded via `require()` compiles into template function.
+
 
 ## Features
  - supports **Webpack 5** and **Pug 3**
- - support of original `pugjs/pug-loader` features and options
- - up to 4x faster than original `pugjs/pug-loader` by starting webpack
- - up to 8x faster than original `pugjs/pug-loader` by compile changes in dependencies via watching
+ - supports all features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
+ - up to 4x faster than original `pugjs/pug-loader` at webpack starting 
+ - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
  - supports Webpack `resolve.alias`, work fine with and without the prefixes `~` or `@`, e.g. this works:
    - `extends UIComponents/layout.pug`
    - `extends ~UIComponents/layout.pug`
@@ -21,11 +25,11 @@ This loader can be used to generate static HTML or javascript template function 
    - `- const colors = require('UIComponents/colors.json')`
    - `img(src=require('UIComponents/image.jpeg'))`
    - `const tmpl = require('UIComponents/index.pug');`
- - supports watching of change in dependencies
- - all features have integration tests processed through a webpack runner
+ - supports watching of changes in all dependencies
+ - all features have integration [tests](https://github.com/webdiscus/pug-loader/blob/master/test/index.test.js) processed through a webpack runner
  
 Why use this particular pug loader instead of the original one?
-- the original `pugjs/pug-loader` is outdated and not supported more
+- the original `pugjs/pug-loader` is outdated and not maintained more
 - the original `pugjs/pug-loader` has error by `npm install` [see issue](https://github.com/pugjs/pug-loader/issues/126): 
   - `npm ERR! Found: pug@3.0.2 ... pug-loader@2.4.0" has incorrect peer dependency "pug@^2.0.0"`
 - this pug loader is many times faster than the original `pugjs/pug-loader`
@@ -40,7 +44,25 @@ npm install @webdiscus/pug-loader --save-dev
 
 ## Webpack config
 
-The example of a webpack.config.js file:
+For usage pug templates only in javascript is enough add to a webpack config:
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: '@webdiscus/pug-loader',
+        options: pugLoaderOptions
+      }
+    ]
+  }
+}
+```
+
+For rendering pug templates into static HTML is needed the `HtmlWebpackPlugin`.
+
+The complete example of the webpack config file:
+
 ```js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -52,7 +74,7 @@ const pugLoaderOptions = {};
 
 module.exports  = {
   resolve: {
-    // the aliases used in pug templates
+    // aliases used in the code examples below
     alias: {
       UIComponents: path.join(basePath, 'src/lib/components/ui/'),
       Images: path.join(basePath, 'src/images/'),
@@ -71,7 +93,8 @@ module.exports  = {
   },
 
   plugins: [
-    // this plugin extract content of pug template and save compiled content to html file
+    // this plugin extract the content of a pug template 
+    // and save compiled via pug-loader content into html file
     new HtmlWebpackPlugin({
       filename: path.join(basePath, '/src/templates/index.pug'),
       template: './public/index.html',
@@ -81,11 +104,9 @@ module.exports  = {
 
   module: {
     rules: [
-      // the pug loader recive raw pug content from `HtmlWebpackPlugin`, 
-      // compile to ´HTML´ and return compiled content back to `HtmlWebpackPlugin`
       {
         test: /\.pug$/,
-        loader: 'webpack-pug-loader',
+        loader: '@webdiscus/pug-loader',
         options: pugLoaderOptions
       }
     ]
@@ -159,22 +180,28 @@ The example of simple file structure of an application under the path `/srv/vhos
 |  |  ├--script.js
 |  |  └--data.json
 |  └--templates/
-|     ├--index.jpeg
+|     ├--index.pug
 |     └--mixins.pug
+|     ├--widget.pug
 └--webpack.config.js
 ```
 
-The source Pug templates from `src/templates/` after compilation are saved as HTML in `public/`.
+The source Pug templates from `src/templates/` after compilation are saved as HTML files in `public/`.
 
 ### Usage in Pug templates
 
-File `./lib/components/ui/mixins.pug`
+File `./src/templates/index.pug`
 
 ```pug
-mixin show-colors(colors)
-  each color in colors
-    div(style=`background-color:${color.hex};`)= color.name
+extends UIComponents/layout.pug
+include UIComponents/mixins.pug
 
+block content
+  - const colors = require('UIComponents/colors.json')`
+  
+  .color-container
+    +show-colors(colors)
+  
 ```
 
 File `./lib/components/ui/layout.pug`
@@ -184,6 +211,15 @@ html
     block head
   body
     block content
+```
+
+File `./lib/components/ui/mixins.pug`
+
+```pug
+mixin show-colors(colors)
+  each color in colors
+    div(style=`background-color:${color.hex};`)= color.name
+
 ```
 
 File `./lib/components/ui/colors.json`
@@ -205,19 +241,6 @@ File `./lib/components/ui/colors.json`
 ]
 ```
 
-File `./src/templates/index.pug`
-
-```pug
-extends UIComponents/layout.pug
-include UIComponents/mixins.pug
-
-block content
-  - const colors = require('UIComponents/colors.json')`
-  
-  .color-container
-    +show-colors(colors)
-  
-```
 
 In the sample above uses Webpack alias `UIComponents` instand of relative path `../../lib/components/ui/`.
 
@@ -226,11 +249,10 @@ In the sample above uses Webpack alias `UIComponents` instand of relative path `
 For processing image resources in templates with webpack use the `require()` function:
 
 ```pug
-div
-  img(src=require('./my/image.jpeg'))
+img(src=require('./path/to/image.jpeg'))
 ```
 
-For usage embedded resources is need add an asset-module to configure `module.rules` in webpack.config.js:
+For usage embedded resources is need add an asset-module to `module.rules` in webpack config:
 ```js
 module.exports = {
   module: {
@@ -246,24 +268,38 @@ module.exports = {
 More information about asset-modules [see here](https://webpack.js.org/guides/asset-modules/).
 
 ### Known issues / features by usage embedded resources
-Due to the peculiarities of the pug compiler, the formation of the file name
-depends on the string and variable parts of argument in the `require()` function.\
+Due to the peculiarities of the pug compiler,
+the interpolation of the argument to the `require()` function depends on its string and variable parts.\
 Use a relative path only in the string before the variable.
-The variable must contain ONLY the filename without specifying a path.
+The variable must contain only the filename without specifying a path.
 
-Correct usage example:
+Examples of <span style="color: red">incorrect</span> usage:
+```pug
+- filename = './image.jpeg'
+img(src=require(filename))
+```
+```pug
+- filename = '../relative/path/to/resource/image.jpeg'
+img(src=require(filename))
+```
+
+Examples of <span style="color: green">correct</span> usage:
 ```pug
 - filename = 'image.jpeg'
-img(src=require('../relative/path/to/resource/', filename))
+img(src=require(filename))
 ```
-An example of dynamically generating embedded resources in template:
+```pug
+- filename = 'image.jpeg'
+img(src=require('../relative/path/to/resource/' + filename))
+```
+The example of dynamically generating embedded resources in template:
 ```pug
 - files = ['image1.jpeg', 'image2.jpeg', 'image3.jpeg']
 each file in files
   img(src=require('../images/' + file))
 ```
 
-Example of webpack alias used in the table below: 
+The example of webpack alias used in the table below: 
 ```
 resolve: {
   alias: {
@@ -302,42 +338,68 @@ Code | @webdiscus/pug-loader| pugjs/pug-loader | Note
 This pug loader resolve all paths and aliases in Pug templates required from JavaScript.
 
 For example, see the file structure of the application above, the pug template can be loaded in JavaScript via require().
-The result of require() is a template function, where the argument is a object of variableName:value, which are available in the pug template.
+The result of require() is a template function, where the argument is an object of `variableName:value`, which are available in the pug template.
 
 File `./src/js/script.js`:
 ```js
 // 'Templates' is webpack alias
-const tmpl = require('Templates/index.pug');
-const text = 'Hello World!';
+// 'widgetTemplate' is template function
+const widgetTemplate = require('Templates/widget.pug');
 
-const output = tmpl({
-  // pass the variable `text` into pug template
-  text: text,
-});
+// variables passed to the pug template
+const locals = {
+  text: 'Hello World!',
+  colors: [
+    {
+      "name": "red",
+      "hex": "#f00"
+    },
+    {
+      "name": "green",
+      "hex": "#0f0"
+    },
+    {
+      "name": "blue",
+      "hex": "#00f"
+    }
+  ]
+}
 
-console.log(output);
+// render template function with variables to HTML
+const html = widgetTemplate(locals);
+
+console.log(html);
 
 ```
 
-File `./src/templates/index.pug`:
+File `./src/templates/widget.pug`:
 
 ```pug
 //- 'Templates' is webpack alias
 include ~Templates/mixins
 
-h2 Pug widget
-//- the variable 'text' is passed from 'script.js'
-+widget(text)
+h2 Pug demo widget
+//- the variables 'text' and `colors` are passed from 'script.js'
++widget(text, colors)
 ```
 
-File `./src/templates/mixin.pug`:
+File `./src/templates/mixins.pug`:
 
 ```pug
-mixin widget(text)
-  .widget= text
+mixin widget(text, colors)
+  .widget
+    p= text
+    each color in colors
+      div(style=`color:${color.hex};`)= color.name
 ```
 
-The result of `console.log(output)`:
+The result of `console.log(html)`:
 ```html
-<h2>Pug widget</h2><div class='widget'>Hello World!</div>
+<h2>Pug demo widget</h2>
+<div class='widget'>
+  <p>Hello World!</p>
+  <div style="color:#f00">red</div>
+  <div style="color:#0f0">green</div>
+  <div style="color:#00f">blue</div>
+</div>
 ```
