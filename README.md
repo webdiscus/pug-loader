@@ -52,7 +52,6 @@ For usage pug templates only in javascript is enough add to a webpack config:
       {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
-        options: pugLoaderOptions
       }
     ]
   }
@@ -108,6 +107,11 @@ module.exports  = {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
         options: pugLoaderOptions
+      },
+      // it is need for usage embedded resources in pug, like img(src=require('./image.jpeg')) 
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource'
       }
     ]
   }
