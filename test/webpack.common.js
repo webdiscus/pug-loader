@@ -1,26 +1,24 @@
+const path = require('path');
+const basePath = path.resolve(__dirname);
+
 module.exports = {
   output: {
     filename: '[name].js',
+    publicPath: '',
+    assetModuleFilename: 'assets/images/[hash][ext][query]',
+  },
+
+  resolveLoader: {
+    alias: {
+      //'pug-loader': '@webdiscus/pug-loader', // test it only after deploy to npm repository
+      'pug-loader': path.join(basePath, '../'),
+    },
   },
 
   plugins: [],
 
   module: {
-    rules: [
-      // Process image resources in pug templates with webpack
-      {
-        test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource',
-      },
-      {
-        test: /\.pug$/,
-        // run test with original pugjs/pug-loader
-        //loader: 'pug-loader',
-
-        // relative path by test case directory
-        loader: '../../../',
-      },
-    ],
+    rules: [],
   },
 
   optimization: {

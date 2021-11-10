@@ -2,6 +2,9 @@ const path = require('path'),
   pug = require('pug'),
   walk = require('pug-walk');
 
+const { merge } = require('webpack-merge');
+const parseResourceData = require('./utils/parse');
+
 let webpackResolveAlias = {};
 
 /**
@@ -98,16 +101,36 @@ const resolvePlugin = {
  * @return {string|undefined}
  */
 const compilePugContent = function (content, callback) {
+  let res = {};
   const loaderContext = this,
+    filename = loaderContext.resourcePath,
     loaderOptions = loaderContext.getOptions() || {},
-    filename = loaderContext.resourcePath;
+    data = getResourceParams(loaderContext.resourceQuery),
+    map = [
+      {
+        method: 'compile',
+        queryParam: 'pug-compile',
+        moduleExport: (name) => `;module.exports=${name};`,
+      },
+      {
+        method: 'render',
+        queryParam: 'pug-render',
+        moduleExport: (name) => `;module.exports=${name}();`,
+      },
+    ],
+    // the rule: a method defined in the resource query has highest priority over a method defined in the loader options
+    // because a method from loader options is global but a query method override by local usage a global method
+    methodFromQuery = map.find((item) => data.hasOwnProperty(item.queryParam)),
+    methodFromOptions = map.find((item) => loaderOptions.method === item.method),
+    method = methodFromQuery || methodFromOptions || map[0];
 
-  if (!callback) callback = loaderContext.callback;
+  // remove pug method from query data to pass only clean data w/o meta params
+  delete data[method.queryParam];
 
-  // resolve.alias from webpack config, see https://webpack.js.org/api/loaders/#this_compiler
-  webpackResolveAlias = loaderContext._compiler.options.resolve.alias || {};
-  loaderContext.cacheable && loaderContext.cacheable(true);
+  // template variables from loader options data and resource query
+  const locals = merge(loaderOptions.data || {}, data);
 
+  // pug compiler options
   const options = {
     // used to resolve imports/extends and to improve errors
     filename: filename,
@@ -126,14 +149,15 @@ const compilePugContent = function (content, callback) {
     globals: ['require', ...(loaderOptions.globals || [])],
     // Load all requires as function. Must be true.
     inlineRuntimeFunctions: true,
+    //inlineRuntimeFunctions: false,
     // default name of template function is `template`
-    name: 'template',
-    // Use cache file as module. This is not a documented option, but very important, see in pug source. Must be true.
-    module: true,
+    name: loaderOptions.name || 'template',
+    // the template without export module syntax, because the export will be determined depending on the method
+    module: false,
     plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
   };
 
-  let res;
+  loaderContext.cacheable && loaderContext.cacheable(true);
 
   try {
     /** @type {{body: string, dependencies: []}} */
@@ -142,28 +166,59 @@ const compilePugContent = function (content, callback) {
     // watch files in which an error occurred
     loaderContext.addDependency(path.normalize(exception.filename));
     // show original error
+    console.log('[pug compiler error] ', exception);
     callback(exception);
     return;
   }
 
   // add dependency files to watch changes
-  if (res.dependencies) {
-    res.dependencies.forEach(loaderContext.addDependency);
+  if (res.dependencies.length) res.dependencies.forEach(loaderContext.addDependency);
+
+  let template = res.body;
+
+  if (Object.keys(locals).length) {
+    // merge the template variable `locals` in the code `var locals_for_with = (locals || {});`
+    // with a data from resource query and loader options, to allow pass a data into template at compile time, e.g.:
+    // const html = require('template.pug?{"a":10,"b":"abc"}');
+    const templateLocalsPattern = /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
+      mergedQueryDataAndLocals = 'Object.assign(' + JSON.stringify(locals) + ', locals)';
+
+    template = template.replace(templateLocalsPattern, mergedQueryDataAndLocals);
   }
 
-  callback(null, res.body);
+  template += method.moduleExport(options.name);
+  callback(null, template);
+};
+
+/**
+ * Get data from the resource query.
+ *
+ * @param {string} str
+ * @return {{}}
+ */
+const getResourceParams = function (str) {
+  if (str[0] !== '?') return {};
+  const query = str.substr(1);
+
+  return parseResourceData(query);
 };
 
 // Asynchronous Loader, see https://webpack.js.org/api/loaders/#asynchronous-loaders
 module.exports = function (content, map, meta) {
   const callback = this.async();
-  compilePugContent.call(this, content, function (err, result) {
+
+  // save resolve.alias from webpack config for usage in pug plugin,
+  // see https://webpack.js.org/api/loaders/#this_compiler
+  webpackResolveAlias = this._compiler.options.resolve.alias || {};
+
+  compilePugContent.call(this, content, (err, result) => {
     if (err) return callback(err);
     callback(null, result, map, meta);
   });
 };
 
 // exports for test
+module.exports.getResourceParams = getResourceParams;
 module.exports.regexpAlias = regexpAlias;
 module.exports.resolveAlias = resolveAlias;
 module.exports.resolveRequirePath = resolveRequirePath;

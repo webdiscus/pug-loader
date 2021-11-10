@@ -5,10 +5,6 @@
 Webpack loader for the [Pug](https://pugjs.org) templates.\
 The `pug-loader` resolve paths and webpack aliases for `extends`/`include`/`require()` in pug template and compiles it into static HTML or into javascript template function.
 
-Using the `HtmlWebpackPlugin`, the pug template compiles into static HTML.\
-In the javascript file, the pug template loaded via `require()` compiles into template function.
-
-
 ## Features
  - supports **Webpack 5** and **Pug 3**
  - supports all features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
@@ -25,15 +21,26 @@ In the javascript file, the pug template loaded via `require()` compiles into te
    - `- const colors = require('UIComponents/colors.json')`
    - `img(src=require('UIComponents/image.jpeg'))`
    - `const tmpl = require('UIComponents/index.pug');`
+ - compiling in JS a pug file into template function, e.g.:
+   ```js
+   const tmpl = require('template.pug');
+   const html = tmpl({ var1: "value1" })
+   ```
+ - rendering in JS a pug file directly into HTML (using loader option `{method:'render'}` or query parameter `?pug-render`), e.g.:
+   ```js
+   const html = require('template.pug?pug-render&{var1:"value1"}');
+   ```
+ - support for passing custom data to templates at compile time using loader option or resource query parameters 
  - supports watching of changes in all dependencies
  - all features have integration [tests](https://github.com/webdiscus/pug-loader/blob/master/test/index.test.js) processed through a webpack runner
  
-Why use this particular pug loader instead of the original one?
+**Why use this particular pug loader instead of the original one?**
 - the original `pugjs/pug-loader` is outdated and not maintained more
 - the original `pugjs/pug-loader` has error by `npm install` [see issue](https://github.com/pugjs/pug-loader/issues/126): 
   - `npm ERR! Found: pug@3.0.2 ... pug-loader@2.4.0" has incorrect peer dependency "pug@^2.0.0"`
-- this pug loader is many times faster than the original `pugjs/pug-loader`
+- this pug loader in JS can render a template directly in HTML, w/o usage an additional loader
 - this pug loader support Webpack `resolve.alias` also without the prefix `~`
+- this pug loader is many times faster than the original `pugjs/pug-loader`
 - this pug loader watch all change in all dependencies
 
 ## Install
@@ -52,6 +59,26 @@ For usage pug templates only in javascript is enough add to a webpack config:
       {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
+      }
+    ]
+  }
+}
+```
+
+Or you can define the `resolveLoader.alias` to use the `pug-loader` as default pug loader name:
+```js
+{
+  resolveLoader: {
+    alias: {
+      'pug-loader': '@webdiscus/pug-loader'
+    }
+  },
+  ...
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: 'pug-loader',
       }
     ]
   }
@@ -79,6 +106,13 @@ module.exports  = {
       Images: path.join(basePath, 'src/images/'),
       Templates: path.join(basePath, 'src/templates/'),
     }
+  }, 
+  
+  resolveLoader: {
+    // alias for pug-loader
+    alias: {
+      'pug-loader': '@webdiscus/pug-loader'
+    }
   },
   
   entry: {
@@ -105,7 +139,7 @@ module.exports  = {
     rules: [
       {
         test: /\.pug$/,
-        loader: '@webdiscus/pug-loader',
+        loader: 'pug-loader',
         options: pugLoaderOptions
       },
       // it is need for usage embedded resources in pug, like img(src=require('./image.jpeg')) 
@@ -118,7 +152,7 @@ module.exports  = {
 };
 ```
 
-## Options
+## Options of original pug-loader
 
 [See original description of options](https://pugjs.org/api/reference.html#options)
 
@@ -159,6 +193,20 @@ Type: `Array<Object>`<br>
 Default: `[]`<br>
 Plugins allow to manipulate pug tags, template content in compile process.
 How it works [see in source of pug](https://github.com/pugjs/pug/blob/master/packages/pug/lib/index.js).
+
+## Additional options of this implementation
+
+### `method`
+Type: `string`<br>
+Default: `compile`<br>
+Values:
+ - `compile` all templates required in JS files will be compiled into a template function, that can be called to generate a HTML 
+ - `render` all templates required in JS files will be rendered directly into HTML, it is usefully, e.g., for Angular @Component
+
+### `data`
+Type: `Object`<br>
+Default: `{}`<br>
+The custom data will be passed in all pug templates, it can be useful by pass global data, e.g. i18n data.
 
 ## Usage
 
@@ -406,3 +454,129 @@ The result of `console.log(html)`:
   <div style="color:#00f">blue</div>
 </div>
 ```
+
+### Usage methods `compile` or `render` in JavaScript
+Defaults, in JavaScript a required template will be compiled into template function.\
+For rendering a pug file directly into HTML you have 2 ways:
+
+1) for global rendering in all JS files set loader option `method: 'render'`:
+```js
+{
+  test: /\.pug$/,
+  loader: 'pug-loader',
+  options: {
+    method: 'render'
+  }
+}
+```
+Then in JavaScript can be used the result of require() as rendered HTML:
+```js
+const html = require('template.pug');
+```
+
+
+2) for local rendering of the pug file add the query parameter `?pug-render`:
+```js
+const html = require('template.pug?pug-render');
+```
+**Note:** if the query parameter `pug-render` is set, then will be used rendering, independent of the loader option `method`.
+
+#### Usage scenario 1: pug loader configured for compiling (defaults)
+
+Webpack config:
+```js
+{
+  test: /\.pug$/,
+  loader: 'pug-loader'
+}
+```
+
+JavaScript:
+```js
+// compile into template function, because loader option 'method' defaults is 'compile'
+const tmpl = require('template.pug');
+const html = tmpl({...});
+
+// render the pug file into HTML, using the parameter 'pug-render'
+const html2 = require('template2.pug?pug-render');
+```
+
+#### Usage scenario 2: pug loader configured for rendering
+
+Webpack config:
+```js
+{
+  test: /\.pug$/,
+  loader: 'pug-loader', 
+  options: {
+    method: 'render'
+  }
+}
+```
+
+JavaScript:
+```js
+// render directly into HTML, because loader option 'method' is 'render'
+const html = require('template.pug');
+
+// compile into template function, using the parameter 'pug-compile'
+const tmpl2 = require('template2.pug?pug-compile');
+const html2 = tmpl2({...});
+```
+
+### Passing a data into template
+
+By default, the pug file is compiled as template function, into which can be passed an object with template variables.
+```js
+const tmpl = require('template.pug');
+const html = tmpl2({
+   key: 'value',
+   foo: 'bar',
+});
+```
+
+But how pass variables in template which is directly rendered into HTML?
+```js
+const html = require('template.pug');
+```
+Variables can be passed with query parameters, e.g.:
+```js
+const html = require('template.pug?key=value&foo=bar');
+```
+or as a JSON object, e.g.:
+```js
+const html = require('template.pug?{"key":"value","foo":"bar"}');
+```
+Using the method `render` and JSON object:
+```js
+const html = require('template.pug?pug-render&{"key":"value","foo":"bar"}');
+```
+
+> Usage of query parameters is legal and [official documented](https://webpack.js.org/api/loaders/#thisresourcequery) feature of webpack loader.
+
+To pass variables global, in all templates at compile time use loader option `data`:
+```js
+{
+  test: /\.pug$/,
+  loader: 'pug-loader',
+  options: {
+    data: {
+      key: 'value',
+      foo: 'bar'  
+    }
+  }
+}
+```
+The variables will be passed in all templates independent of the method.
+
+More examples of usages see in [test cases](https://github.com/webdiscus/pug-loader/tree/master/test/cases).
+> Important: in examples used name of loader as `pug-loader`, because it is defined as **alias** at resolveLoader:
+> ```js
+> {
+>   resolveLoader: {
+>     alias: {
+>       'pug-loader': '@webdiscus/pug-loader'
+>     }
+>   },
+> }
+> ```

@@ -1,5 +1,18 @@
 # Change log
 
+## 1.1.0 (2021-11-10)
+- feature `compile` or `render` method by usage in JavaScript:  
+  - added loader option `method: render|compile` to render into HTML or compile into a template function all templates required in js file
+  - in the js require() can be used the query parameter `?pug-render` to render the pug template directly into HTML, independent of loader option `method`, \
+    e.g. `const html = require('template.pug?pug-render')`
+  - in the js require() query can be used the query parameter `?pug-compile`to compile the pug template into a template function, independent of loader option `method`, \
+    e.g. `const tmpl = require('template.pug?pug-compile')`
+- feature for pass a custom data into a template at compile time: 
+  - added loader option `data: {}` to pass a data into all templates at compile time, e.g. useful for the i18n data
+  - in the js require () query you can use URL `key=value` or JSON `{key:value}` parameters to pass them into the template at compile time, \
+    e.g. `const tmpl = require('template.pug?key1=value1&{"key2":"value2","key3":"value3"}')`
+- update dependencies
+
 ## 1.0.3 (2021-10-21)
 - added missed dependency for test
 - update dependencies for test

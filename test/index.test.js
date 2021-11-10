@@ -3,7 +3,7 @@ const rimraf = require('rimraf');
 
 import { copyRecursiveSync, readTextFileSync, readJsonSync, execScriptSync } from './utils/file';
 import { compile, compileTemplate } from './utils/webpack';
-import { regexpAlias, resolveAlias, resolveRequirePath } from '../src';
+import { regexpAlias, resolveAlias, resolveRequirePath, getResourceParams } from '../src';
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
@@ -399,8 +399,8 @@ describe('require embedded resources', () => {
 });
 
 describe('require pug in javascript', () => {
-  it(`require('template.pug')`, (done) => {
-    const relTestCasePath = 'javascript-require-pug',
+  it(`options.method default`, (done) => {
+    const relTestCasePath = 'javascript-option-method-default',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
     compile(PATHS, relTestCasePath).then(() => {
@@ -410,5 +410,212 @@ describe('require pug in javascript', () => {
       expect(received).toEqual(expected);
       done();
     });
+  });
+
+  it(`options.method=render`, (done) => {
+    const relTestCasePath = 'javascript-option-method-render',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`query method compile`, (done) => {
+    const relTestCasePath = 'javascript-query-method-compile',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`query method render`, (done) => {
+    const relTestCasePath = 'javascript-query-method-render',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`query methods compile and render`, (done) => {
+    const relTestCasePath = 'javascript-query-method-all',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`options.data for render`, (done) => {
+    const relTestCasePath = 'javascript-option-data-render',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`pug-loader in resource query`, (done) => {
+    const relTestCasePath = 'javascript-inline-loader',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`render embedded resources`, (done) => {
+    const relTestCasePath = 'javascript-render-embedded-resources',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+});
+
+describe('parse resource data', () => {
+  it('empty string', () => {
+    const expected = {};
+    const received = getResourceParams('');
+    expect(received).toEqual(expected);
+  });
+
+  it('?', () => {
+    const expected = {};
+    const received = getResourceParams('?');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method', () => {
+    const expected = {
+      pug_method: '',
+    };
+    const received = getResourceParams('?pug_method');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=', () => {
+    const expected = {
+      pug_method: '',
+    };
+    const received = getResourceParams('?pug_method=');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=&', () => {
+    const expected = {
+      pug_method: '',
+    };
+    const received = getResourceParams('?pug_method=&');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=render', () => {
+    const expected = {
+      pug_method: 'render',
+    };
+    const received = getResourceParams('?pug_method=render');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=render&', () => {
+    const expected = {
+      pug_method: 'render',
+    };
+    const received = getResourceParams('?pug_method=render&');
+    expect(received).toEqual(expected);
+  });
+
+  /*it('?pug_render=true', () => {
+    const expected = {
+      pug_render: true,
+    };
+    const received = getResourceParams('?pug_render=true');
+    expect(received).toEqual(expected);
+  });*/
+
+  /*it('?a=123', () => {
+    const expected = {
+      a: 123,
+    };
+    const received = getResourceParams('?a=123');
+    expect(received).toEqual(expected);
+  });*/
+
+  it('?{"a":10,"b":"abc"}', () => {
+    const expected = {
+      a: 10,
+      b: 'abc',
+    };
+    const received = getResourceParams('?{"a":10,"b":"abc"}');
+    expect(received).toEqual(expected);
+  });
+
+  it('?&{"a":10,"b":"abc"}', () => {
+    const expected = {
+      a: 10,
+      b: 'abc',
+    };
+    const received = getResourceParams('?&{"a":10,"b":"abc"}');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=render&{"a":10,"b":"abc"}', () => {
+    const expected = {
+      pug_method: 'render',
+      a: 10,
+      b: 'abc',
+    };
+    const received = getResourceParams('?pug_method=render&{"a":10,"b":"abc"}');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=render&opts={"a":10,"b":"abc"}', () => {
+    const expected = {
+      pug_method: 'render',
+      options: { a: 10, b: 'abc' },
+    };
+    const received = getResourceParams('?pug_method=render&options={"a":10,"b":"abc"}');
+    expect(received).toEqual(expected);
+  });
+
+  it('?pug_method=render&opts[]=a1&opts[]=a2', () => {
+    const expected = {
+      pug_method: 'render',
+      args: ['a1', 'a2'],
+    };
+    const received = getResourceParams('?pug_method=render&args[]=a1&args[]=a2');
+    expect(received).toEqual(expected);
   });
 });

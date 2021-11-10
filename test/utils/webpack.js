@@ -26,6 +26,11 @@ const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
     testConfig = require(configFile),
     commonConfig = require(commonConfigFile);
 
+  // remove module rules in common config when custom rules are defined by test config or options
+  if ((webpackOpts.module && webpackOpts.module.rules) || (testConfig.module && testConfig.module.rules)) {
+    commonConfig.module.rules = [];
+  }
+
   return merge(baseConfig, commonConfig, webpackOpts, testConfig);
 };
 

@@ -14,4 +14,15 @@ module.exports = {
     },
   },
   plugins: [],
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: 'pug-loader',
+        options: {
+          method: 'compile',
+        },
+      },
+    ],
+  },
 };
