@@ -1,10 +1,9 @@
 // require with alias 'Template'
+
 // usage inline a pug-loader in query, note: use it only if the pug-loader is not defined in webpack config
-//const output = require('../../../../src/index.js!Template/widget.pug?pug_render&{"a":10,"b":"abc"}');
+const tmpl = require('pug-loader!Template/widget.pug?pug-compile&{"a":10,"b":"abc"}');
+const html = tmpl();
 
-const output = require('pug2-loader!Template/widget.pug?pug_compile&{"a":10,"b":"abc"}');
+const html2 = require('pug-loader!Template/widget.pug?pug-render&{"a":20,"b":"def"}');
 
-// ok
-//const output = require('@webdiscus/pug-loader!Template/widget.pug?pug_render&{"a":10,"b":"abc"}');
-
-console.log(output());
+console.log(html + html2);
