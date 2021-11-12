@@ -425,6 +425,19 @@ describe('require pug in javascript', () => {
     });
   });
 
+  it(`options.method=html`, (done) => {
+    const relTestCasePath = 'javascript-option-method-html',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
   it(`query method compile`, (done) => {
     const relTestCasePath = 'javascript-query-method-compile',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);

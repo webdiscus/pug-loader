@@ -12,6 +12,7 @@ module.exports = {
     alias: {
       //'pug-loader': '@webdiscus/pug-loader', // test it only after deploy to npm repository
       'pug-loader': path.join(basePath, '../'),
+      'pug-render': path.join(basePath, '../src/render.js'),
     },
   },
 

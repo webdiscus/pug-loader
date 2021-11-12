@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "The pug loader for webpack resolves paths and webpack aliases in the pug template and compiles it to HTML.",
   "keywords": [
     "pug-loader",
@@ -59,6 +59,7 @@
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.0",
     "@types/jest": "^27.0.2",
+    "html-loader": "^3.0.1",
     "html-webpack-plugin": "^5.5.0",
     "jest": "^27.3.1",
     "jstransformer-markdown-it": "^2.1.0",

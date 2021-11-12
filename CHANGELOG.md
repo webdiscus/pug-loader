@@ -1,5 +1,14 @@
 # Change log
 
+## 1.2.0 (2021-11-12)
+- feature: added for the loader option `method` new value `html` to render the template function into pure HTML string,\
+  this method require additional loader, e.g. `html-loader`, see usage sample in readme
+- added directory with samples for usage this loader with Angular Component
+
+## 1.1.1 (2021-11-10)
+- fix config for tests
+- cleanup tests
+
 ## 1.1.0 (2021-11-10)
 - feature `compile` or `render` method by usage in JavaScript:  
   - added loader option `method: render|compile` to render into HTML or compile into a template function all templates required in js file
