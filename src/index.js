@@ -5,7 +5,9 @@ const path = require('path'),
 const { merge } = require('webpack-merge');
 const parseResourceData = require('./utils/parse');
 
+// variables with global scope in this module
 let webpackResolveAlias = {};
+let loaderMethod = null;
 
 /**
  * @param {string} match The matched alias.
@@ -42,35 +44,65 @@ const resolveAlias = (value, aliases, regexp) => {
  * @param {string} value The resource value include require().
  * @param {string} templateFile
  * @param {{}} aliases The resolve.alias from webpack config.
+ * @param {LoaderMethod} method The object of the current method.
  * @return {string|null}
  */
-const resolveRequirePath = function (value, templateFile, aliases) {
+const resolveResourcePath = function (value, templateFile, aliases, method) {
+  // match an argument of require(resourcePath)
+  let [, resourcePath] = /(?<=require\()(.+)(?=\))/.exec(value);
+  if (!resourcePath) return value;
+
   // 1. delete `./` from path, because at begin will be added full path like `/path/to/current/dir/`
-  value = value.replace(/(?<=[^\.])(\.\/)/, '');
+  resourcePath = resourcePath.replace(/(?<=[^\.])(\.\/)/, '');
 
   // 2. replace alias with absolute path
-  let result = resolveAlias(value, aliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
-  if (result !== value) return result;
+  let resolvedPath = resolveAlias(resourcePath, aliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
 
   // 3. if the alias is not found in the path,
   // then add the absolute path of the current template at the beginning of the argument,
   // e.g. like this require('/path/to/template/' + 'filename.jpeg')
-  const matches = /\((.+)\)/.exec(value);
-  if (matches) {
-    let arg = matches[1];
+  if (resolvedPath === resourcePath) {
     // 4. if an argument of require() begin with a relative parent path as the string template with a variable,
     // like require(`../images/${file}`), then extract the relative path to the separate string
-    if (arg.indexOf('`../') === 0) {
+    if (resourcePath.indexOf('`../') === 0) {
       const relPathRegex = /(?<=`)(.+)(?=\$\{)/;
       const relPathMatches = relPathRegex.exec(value);
       if (relPathMatches) {
-        arg = `'${relPathMatches[1]}' + ` + arg.replace(relPathRegex, '');
+        resourcePath = `'${relPathMatches[1]}' + ` + resourcePath.replace(relPathRegex, '');
       }
     }
-    result = `require('${path.dirname(templateFile)}/' + ${arg})`;
+    resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
   }
 
-  return result;
+  return method.require(resolvedPath);
+};
+
+/**
+ * Merge the template variable `locals` in the code `var locals_for_with = (locals || {});`
+ * with a data from resource query and loader options, to allow pass a data into template at compile time, e.g.:
+ * `const html = require('template.pug?{"a":10,"b":"abc"}');`
+ *
+ * @param {string} funcBody The function as string.
+ * @param {{}} locals The object of template variables.
+ * @return {string}
+ */
+const mergedTemplateVariables = (funcBody, locals) =>
+  funcBody.replace(
+    /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
+    'Object.assign(' + JSON.stringify(locals) + ', locals)'
+  );
+
+/**
+ * Get data from the resource query.
+ *
+ * @param {string} str
+ * @return {{}}
+ */
+const getResourceParams = function (str) {
+  if (str[0] !== '?') return {};
+  const query = str.substr(1);
+
+  return parseResourceData(query);
 };
 
 /**
@@ -87,7 +119,7 @@ const resolvePlugin = {
       } else if (node.attrs) {
         node.attrs.forEach((attr) => {
           if (attr.val && typeof attr.val === 'string' && attr.val.indexOf('require(') === 0) {
-            let result = resolveRequirePath(attr.val, attr.filename, webpackResolveAlias);
+            let result = resolveResourcePath(attr.val, attr.filename, webpackResolveAlias, loaderMethod);
             if (result && result !== attr.val) attr.val = result;
           }
         });
@@ -96,45 +128,60 @@ const resolvePlugin = {
 };
 
 /**
- * @typedef CompileMethod
+ * @typedef LoaderMethod
  * @property {string} method The compiler export method, defined in loader option.
  * @property {string} queryParam The same as `method`, but defined in resource query parameter.
+ * @property {function(string)} getLocals Get template variables. Here can be merged additional custom properties.
  * @property {function(string, string, {})} export The export method of compiled template function.
+ * @property {function(string)} require The inject require.
  */
 
 /**
- * Compiler methods to export template function.
+ * Loader methods to export template function.
  *
- * @type {CompileMethod[]}
+ * @type {LoaderMethod[]}
  */
-const compileMethods = [
+const loaderMethods = [
   {
-    // for use with require('template.pug') in js as the template function
+    // export the compiled template function
     method: 'compile',
     queryParam: 'pug-compile',
+    getLocals: (locals) => locals,
+    require: (file) => `require(${file})`,
     export: (funcBody, name, locals) => funcBody + ';module.exports=' + name + ';',
   },
   {
-    // for use with require('template.pug') in js as the auto rendered HTML string at runtime
+    // export rendered HTML string at compile time
     method: 'render',
     queryParam: 'pug-render',
+    getLocals: (locals) => ({
+      ...locals,
+      ...{ __asset_resource_require__: (file) => `' + __asset_resource_require__(\`${file}\`) + '` },
+    }),
+    require: (file) => `locals.__asset_resource_require__(${file})`,
+    export: (funcBody, name, locals) =>
+      ("module.exports='" + new Function('', funcBody + ';return ' + name + '')()(locals) + "'").replaceAll(
+        '__asset_resource_require__',
+        'require'
+      ),
+  },
+  {
+    // export the compiled template function, by require() it will be auto rendered into HTML string at runtime
+    // @deprecated, it is reserved only as rescue fallback, after stable release of method `render` will be removed
+    method: 'rtRender',
+    queryParam: 'pug-rtrender',
+    getLocals: (locals) => locals,
+    require: (file) => `require(${file})`,
     export: (funcBody, name, locals) => funcBody + ';module.exports=' + name + '();',
   },
   {
     // render to pure HTML string at compile time
-    // note: this method require additional loader, e.g. `html-loader`
+    // note: this method should be used with additional loader to handle HTML
     method: 'html',
-    queryParam: 'pug-html',
+    queryParam: null,
+    getLocals: (locals) => locals,
+    require: (file) => `(${file})`,
     export: (funcBody, name, locals) => new Function('', funcBody + ';return ' + name + '')()(locals),
-  },
-  {
-    // experimental: don't use this method for a development!
-    // export rendered pure HTML string at compile time,
-    // this method work without additional loader but don't handle embedded via `require()` resource
-    method: '_exportHtml',
-    queryParam: '_pug-export-html',
-    export: (funcBody, name, locals) =>
-      "module.exports='" + new Function('', funcBody + ';return ' + name + '')()(locals) + "'",
   },
 ];
 
@@ -151,9 +198,11 @@ const compilePugContent = function (content, callback) {
     data = getResourceParams(loaderContext.resourceQuery),
     // the rule: a method defined in the resource query has highest priority over a method defined in the loader options
     // because a method from loader options is global but a query method override by local usage a global method
-    methodFromQuery = compileMethods.find((item) => data.hasOwnProperty(item.queryParam)),
-    methodFromOptions = compileMethods.find((item) => loaderOptions.method === item.method),
-    methodObj = methodFromQuery || methodFromOptions || compileMethods[0];
+    methodFromQuery = loaderMethods.find((item) => data.hasOwnProperty(item.queryParam)),
+    methodFromOptions = loaderMethods.find((item) => loaderOptions.method === item.method);
+
+  // define the `loaderMethod` for global scope in this module
+  loaderMethod = methodFromQuery || methodFromOptions || loaderMethods[0];
 
   // pug compiler options
   const options = {
@@ -188,10 +237,10 @@ const compilePugContent = function (content, callback) {
     /** @type {{body: string, dependencies: []}} */
     res = pug.compileClientWithDependenciesTracked(content, options);
   } catch (exception) {
-    // watch files in which an error occurred
-    loaderContext.addDependency(path.normalize(exception.filename));
     // show original error
     console.log('[pug compiler error] ', exception);
+    // watch files in which an error occurred
+    if (exception.filename) loaderContext.addDependency(path.normalize(exception.filename));
     callback(exception);
     return;
   }
@@ -200,49 +249,20 @@ const compilePugContent = function (content, callback) {
   if (res.dependencies.length) res.dependencies.forEach(loaderContext.addDependency);
 
   // remove pug method from query data to pass only clean data w/o meta params
-  delete data[methodObj.queryParam];
+  delete data[loaderMethod.queryParam];
 
-  // merge variables from loader options and variables from resource query
-  const locals = merge(loaderOptions.data || {}, data),
+  const locals = loaderMethod.getLocals(merge(loaderOptions.data || {}, data)),
     funcBody = Object.keys(locals).length ? mergedTemplateVariables(res.body, locals) : res.body,
-    output = methodObj.export(funcBody, options.name, locals);
+    output = loaderMethod.export(funcBody, options.name, locals);
 
   callback(null, output);
-};
-
-/**
- * Merge the template variable `locals` in the code `var locals_for_with = (locals || {});`
- * with a data from resource query and loader options, to allow pass a data into template at compile time, e.g.:
- * `const html = require('template.pug?{"a":10,"b":"abc"}');`
- *
- * @param {string} funcBody The function as string.
- * @param {{}} locals The object of template variables.
- * @return {string}
- */
-const mergedTemplateVariables = (funcBody, locals) =>
-  funcBody.replace(
-    /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
-    'Object.assign(' + JSON.stringify(locals) + ', locals)'
-  );
-
-/**
- * Get data from the resource query.
- *
- * @param {string} str
- * @return {{}}
- */
-const getResourceParams = function (str) {
-  if (str[0] !== '?') return {};
-  const query = str.substr(1);
-
-  return parseResourceData(query);
 };
 
 // Asynchronous Loader, see https://webpack.js.org/api/loaders/#asynchronous-loaders
 module.exports = function (content, map, meta) {
   const callback = this.async();
 
-  // save resolve.alias from webpack config for usage in pug plugin,
+  // save resolve.alias from webpack config for global scope in this module,
   // see https://webpack.js.org/api/loaders/#this_compiler
   webpackResolveAlias = this._compiler.options.resolve.alias || {};
 
@@ -256,4 +276,5 @@ module.exports = function (content, map, meta) {
 module.exports.getResourceParams = getResourceParams;
 module.exports.regexpAlias = regexpAlias;
 module.exports.resolveAlias = resolveAlias;
-module.exports.resolveRequirePath = resolveRequirePath;
+module.exports.resolveResourcePath = resolveResourcePath;
+module.exports.loaderMethods = loaderMethods;

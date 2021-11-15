@@ -1,36 +1,44 @@
 [![npm version](https://badge.fury.io/js/@webdiscus%2Fpug-loader.svg)](https://badge.fury.io/js/@webdiscus%2Fpug-loader)
+[![node](https://img.shields.io/node/v/@webdiscus/pug-loader)](https://nodejs.org)
+[![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/peer/webpack)](https://webpack.js.org/)
+[![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/dev/pug)](https://github.com/pugjs/pug)
+[![node](https://img.shields.io/npm/dm/@webdiscus/pug-loader)](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
 # [pug-loader](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
 Webpack loader for the [Pug](https://pugjs.org) templates.\
-The `pug-loader` resolve paths and webpack aliases for `extends`/`include`/`require()` in pug template and compiles it into static HTML or into javascript template function.
+The pug loader resolves paths and webpack aliases for `extends`/`include`/`require()` in a pug template and compiles it to HTML or into a template function.
 
 ## Features
  - supports **Webpack 5** and **Pug 3**
  - supports all features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
  - up to 4x faster than original `pugjs/pug-loader` at webpack starting 
  - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
- - supports Webpack `resolve.alias`, work fine with and without the prefixes `~` or `@`, e.g. this works:
-   - `extends UIComponents/layout.pug`
-   - `extends ~UIComponents/layout.pug`
-   - `extends @UIComponents/layout.pug`
-   - `include UIComponents/mixins.pug`
-   - `include ~UIComponents/mixins.pug`
-   - `include @UIComponents/mixins.pug`
-   - `include:markdown-it UIComponents/components.md`
-   - `- const colors = require('UIComponents/colors.json')`
-   - `img(src=require('UIComponents/image.jpeg'))`
-   - `const tmpl = require('UIComponents/index.pug');`
- - compiling in JS a pug file into template function, e.g.:
+ - supports Webpack `resolve.alias`, work fine with and without the prefixes `~` or `@`, e.g. for the defined alias `Components` this works:
+   - `extends Components/layout.pug`
+   - `extends ~Components/layout.pug`
+   - `extends @Components/layout.pug`
+   - `include Components/mixins.pug`
+   - `include ~Components/mixins.pug`
+   - `include @Components/mixins.pug`
+   - `include:markdown-it Components/readme.md`
+   - `- const colors = require('Components/data/colors.json')`
+   - `img(src=require('Components/images/image.jpeg'))`
+   - `const tmpl = require('Components/index.pug');`
+ - compiling a pug into a templated function, e.g.:
    ```js
    const tmpl = require('template.pug');
-   const html = tmpl({ var1: "value1" })
+   const html = tmpl({ key: "value" })
    ```
- - rendering in JS a pug file directly into HTML (using loader option `{method:'render'}` or query parameter `?pug-render`), e.g.:
+ - rendering a pug into HTML at compile time (using loader method `'render'` or query parameter `?pug-render`), e.g.:
    ```js
-   const html = require('template.pug?pug-render&{var1:"value1"}');
+   const html = require('template.pug?pug-render');
    ```
- - support for passing custom data to templates at compile time using loader option or resource query parameters 
+ - rendering into a pure HTML (method `'html'`) to processing the HTML in additional loader, e.g. in `html-loader`
+ - support for passing custom data to templates at compile time using loader option or query parameters, e.g.:
+   ```js
+   const html = require('template.pug?pug-render&{"key":"value"}');
+   ```
  - supports watching of changes in all dependencies
  - all features have integration [tests](https://github.com/webdiscus/pug-loader/blob/master/test/index.test.js) processed through a webpack runner
  
@@ -38,7 +46,8 @@ The `pug-loader` resolve paths and webpack aliases for `extends`/`include`/`requ
 - the original `pugjs/pug-loader` is outdated and not maintained more
 - the original `pugjs/pug-loader` has error by `npm install` [see issue](https://github.com/pugjs/pug-loader/issues/126): 
   - `npm ERR! Found: pug@3.0.2 ... pug-loader@2.4.0" has incorrect peer dependency "pug@^2.0.0"`
-- this pug loader in JS can render a template directly in HTML, w/o usage an additional loader
+- this pug loader can render a pug into HTML without additional loader
+- this pug loader resolve a path in an embedded resource
 - this pug loader support Webpack `resolve.alias` also without the prefix `~`
 - this pug loader is many times faster than the original `pugjs/pug-loader`
 - this pug loader watch all change in all dependencies
@@ -100,8 +109,9 @@ Or you can define the `resolveLoader.alias` to use the `pug-loader` as default p
   }
 }
 ```
+For processing an embedded resource see [usage embedded resources](#usage-embedded-resources). 
 
-For rendering pug templates into static HTML is needed the `HtmlWebpackPlugin`.
+For rendering pug templates into static HTML is needed the [**HtmlWebpackPlugin**](https://github.com/jantimon/html-webpack-plugin).
 
 The complete example of the webpack config file:
 
@@ -118,7 +128,7 @@ module.exports  = {
   resolve: {
     // aliases used in the code examples below
     alias: {
-      UIComponents: path.join(basePath, 'src/lib/components/ui/'),
+      Components: path.join(basePath, 'src/lib/components/ui/'),
       Images: path.join(basePath, 'src/images/'),
       Templates: path.join(basePath, 'src/templates/'),
     }
@@ -159,7 +169,8 @@ module.exports  = {
         loader: 'pug-loader',
         options: pugLoaderOptions
       },
-      // it is need for usage embedded resources in pug, like img(src=require('./image.jpeg')) 
+      
+      // processing an embedded resource, e.g. img(src=require('./image.jpeg')) 
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource'
@@ -218,14 +229,15 @@ How it works [see in source of pug](https://github.com/pugjs/pug/blob/master/pac
 Type: `string`<br>
 Default: `compile`<br>
 Values:
- - `compile` the pug template compiles into a template function and in JavaScript can be called to render with variables into HTML at runtime, [see usage >>](#method-compile)
- - `render` the pug template compiles into a template function and by require() in JavaScript will automatically render to HTML at runtime, [see usage >>](#method-render)
- - `html` the template renders directly into a pure HTML string at compile time, [see usage >>](#method-html)
+ - `compile` the pug template compiles into a template function and in JavaScript can be called with variables to render into an HTML at runtime. \
+   Use this method, if the template have variables passed from JavaScript at runtime. [see usage](#method-compile)
+ - `render` the pug template renders into an HTML at compile time and exported as a string. 
+   All required resource will be processed by the webpack and separately included as added strings wrapped as a function. \
+   Use this method, if the template does not have variables passed from JavaScript at runtime. The method generates the most compact and fastest code. [see usage >>](#method-render)
+ - `html` the template renders into a pure HTML string at compile time. The method need an addition loader to handles the HTML. \
+   Use this method if the rendered HTML needs to be processed by another loader, e.g. by `html-loader` [see usage >>](#method-html)
  
-> With methods `compile` and `render` an embedded resource such as `img(src=require('./image.jpeg'))` handles at compile time by the webpack using `asset/resource`.
-
-> The method `html` need an additional loader, e.g. `html-loader`, to handle the HTML string and an embedded resource.<br>
-> ⚠ **Limitation:** an embedded resource such as `img(src='./image.jpeg')` must be assigned in pug without `require()` function, otherwise appear error: `require() not found`.
+> Embedded resources such as `img(src=require('./image.jpeg'))` handles at compile time by the webpack using [**asset/resource**](https://webpack.js.org/guides/asset-modules/#resource-assets).
 
 ### `data`
 Type: `Object`<br>
@@ -270,11 +282,11 @@ The source Pug templates from `src/templates/` after compilation are saved as HT
 File `./src/templates/index.pug`
 
 ```pug
-extends UIComponents/layout.pug
-include UIComponents/mixins.pug
+extends Components/layout.pug
+include Components/mixins.pug
 
 block content
-  - const colors = require('UIComponents/colors.json')`
+  - const colors = require('Components/colors.json')`
   
   .color-container
     +show-colors(colors)
@@ -318,7 +330,7 @@ File `./lib/components/ui/colors.json`
 ]
 ```
 
-In the sample above uses Webpack alias `UIComponents` instand of relative path `../../lib/components/ui/`.
+In the sample above uses Webpack alias `Components` instand of relative path `../../lib/components/ui/`.
 
 <a id="usage-in-javascript" name="usage-in-javascript" href="#usage-in-javascript"></a>
 ## Usage in JavaScript
@@ -411,20 +423,21 @@ In webpack config add to `module.rules`:
   }
 }
 ```
-In JavaScript the result of require() must be called with some variables to render the template into HTML:
+In JavaScript, the result of require () is a template function. Call the template function with some variables to render it то HTML:
 ```js
 const tmpl = require('template.pug');
-const html = tmpl({ key: 'value' });
+const html = tmpl({ key: 'value' }); // the HTML string
 ```
-Or add the query parameter `?pug-render` to render into HTML:
+You can apply the method `render` to single template using the query parameter `?pug-render`:
 ```js
-const html = require('template.pug?pug-render');
+const html = require('template.pug?pug-render&{"key":"value"}'); // the HTML string
 ```
-**Note:** if the query parameter `pug-render` is set, then will be used rendering, independent of the loader option `method`.
+> **Note:** if the query parameter `pug-render` is set, then will be used rendering for this template, independent of the loader option `method`.
+> Variables passed in template with method `render` will be used at compile time.
 
 <a id="method-render" name="method-render" href="#method-render"></a>
 ### **Method** `render`
-Rendering into HTML. This method compile the pug into template function, but by require() it will be transformed into HTML. \
+This method will render the pug into HTML at compile time. \
 In webpack config add to `module.rules`:
 ```js
 {
@@ -435,16 +448,15 @@ In webpack config add to `module.rules`:
   }
 }
 ```
-In JavaScript can be used the result of require() as HTML string, automatically rendered at runtime:
+In JavaScript the result of require() is an HTML string:
 ```js
-const html = require('template.pug');
+const html = require('template.pug'); // the HTML string
 ```
 
 <a id="method-html" name="method-html" href="#method-html"></a>
 ### **Method** `html`
 
-Rendering directly into pure HTML. \
-**Note:** additional loader `html-loader` is required. \
+This method will render the pug to pure HTML and should be used with an additional loader to handle HTML. \
 In webpack config add to `module.rules`:
 ```js
 {
@@ -453,7 +465,7 @@ In webpack config add to `module.rules`:
      { 
        loader: 'html-loader',
        options: {
-         esModule: false,
+         esModule: false, // need to allow use require() for load a tempale in JavaScript
        },
      },
      {
@@ -463,22 +475,12 @@ In webpack config add to `module.rules`:
        },
      },
    ],
-},
-// Process image resources with webpack
-{
-  test: /\.(png|jpg|jpeg)/,
-  type: 'asset/resource',
-},
+}
 ```
-In JavaScript the template will be directly rendered into HTML:
+In JavaScript the result of require() is an HTML string:
 ```js
-const html = require('template.pug');
+const html = require('template.pug'); // the HTML string
 ```
-> ⚠ **Limitation:** an embedded resource must be assigned in pug without `require()` function:
-> ```pug
-> img(src='./assets/image.jpeg')
-> ```
-
 
 ### Usage scenario 1: pug loader configured for compiling (defaults)
 
@@ -515,7 +517,7 @@ Webpack config:
 
 JavaScript:
 ```js
-// render directly into HTML, because loader option 'method' is 'render'
+// render into HTML, because loader option 'method' is 'render'
 const html = require('template.pug');
 
 // compile into template function, using the parameter 'pug-compile'
@@ -556,10 +558,10 @@ module.exports = {
         },
       },
 
-      // Process image resources in pug templates with webpack
+      // processing an embedded resource by webpack
       {
         test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource',
+        type: '`asset/resource`',
       },
     ],
   },
@@ -667,7 +669,7 @@ module.exports = {
         ],
       },
 
-      // Process image resources in pug templates with webpack
+      // processing an embedded resource by webpack
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',
@@ -693,7 +695,7 @@ const html = tmpl2({
 });
 ```
 
-But how pass variables in template which is directly rendered into HTML?
+But how pass variables in template which is rendered into HTML?
 ```js
 const html = require('template.pug');
 ```
@@ -737,7 +739,7 @@ For processing image resources in templates with webpack use the `require()` fun
 img(src=require('./path/to/image.jpeg'))
 ```
 
-For usage embedded resources is need add an asset-module to `module.rules` in webpack config:
+To handles embedded resources in pug is needed the webpack module `asset/resource`:
 ```js
 module.exports = {
   module: {
@@ -745,7 +747,8 @@ module.exports = {
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource'
-      }
+      },
+      ...
     ]
   },
 };

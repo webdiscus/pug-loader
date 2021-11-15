@@ -1,5 +1,6 @@
 .DS_Store
 .idea
+_ignored
 package-lock.json
 coverage
 coverage.lcov

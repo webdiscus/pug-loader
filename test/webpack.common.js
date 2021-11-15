@@ -3,8 +3,8 @@ const basePath = path.resolve(__dirname);
 
 module.exports = {
   output: {
-    filename: '[name].js',
     publicPath: '',
+    filename: '[name].js',
     assetModuleFilename: 'assets/images/[hash][ext][query]',
   },
 
@@ -12,7 +12,7 @@ module.exports = {
     alias: {
       //'pug-loader': '@webdiscus/pug-loader', // test it only after deploy to npm repository
       'pug-loader': path.join(basePath, '../'),
-      'pug-render': path.join(basePath, '../src/render.js'),
+      'asset-loader': path.join(basePath, '../src/asset-loader.js'),
     },
   },
 

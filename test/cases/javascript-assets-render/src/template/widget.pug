@@ -1,0 +1,11 @@
+- file2 = 'image2.jpeg'
+
+h1 Hello!
+p= '../images/image.jpeg'
+img(src=require('../images/image.jpeg'))
+p= 'Images/image.jpeg'
+img(src=require('Images/image.jpeg'))
+p= '"Images/" + file2'
+img(src=require('Images/' + file2))
+p= '`Images/${file2}`'
+img(src=require(`Images/${file2}`))
