@@ -1,5 +1,8 @@
 # Change log
 
+## 1.3.1 (2021-11-15)
+- update package version for samples
+
 ## 1.3.0 (2021-11-15)
 - feature: the `render` method has been improved. Now the method render a pug into HTML really at compile time without limitations for resolving an embedded resource.
   This method do same result as any other pug-loader + html-loader, even faster, generate smaller code and with all that not need an additional loader.
