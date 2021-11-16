@@ -329,4 +329,30 @@ describe('require pug in javascript', () => {
       done();
     });
   });
+
+  it(`javascript esModule=false require`, (done) => {
+    const relTestCasePath = 'javascript-esmodule-false-require',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`javascript esModule=true import`, (done) => {
+    const relTestCasePath = 'javascript-esmodule-true-import',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
 });

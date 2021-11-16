@@ -1,5 +1,9 @@
 # Change log
 
+## 1.4.0 (2021-11-16)
+- feature: added the option `esModule` to enable/disable ES modules syntax in generated JS modules
+- some code improvments
+
 ## 1.3.1 (2021-11-15)
 - update package version for samples
 

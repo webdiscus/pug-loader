@@ -1,4 +1,5 @@
-import { getResourceParams, regexpAlias, resolveAlias, resolveResourcePath, loaderMethods } from '../src';
+import { getResourceParams, resolveTemplatePath, resolveResourcePath } from '../src/utils';
+import loaderMethods from '../src/loader-methods';
 
 describe('self tests', () => {
   it('test it self', (done) => {
@@ -8,7 +9,6 @@ describe('self tests', () => {
 });
 
 describe('resolve alias', () => {
-  const regexp = regexpAlias;
   const aliases = {
     App: '/path/to/app/',
     Component: '/path/to/component/',
@@ -18,63 +18,63 @@ describe('resolve alias', () => {
   it('App/index.pug', () => {
     const value = `App/index.pug`;
     const expected = '/path/to/app/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('~App/index.pug', () => {
     const value = `~App/index.pug`;
     const expected = '/path/to/app/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('@App/index.pug', () => {
     const value = `@App/index.pug`;
     const expected = '/path/to/app/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('+App/index.pug', () => {
     const value = `+App/index.pug`;
     const expected = '+App/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('Component/index.pug', () => {
     const value = `Component/index.pug`;
     const expected = '/path/to/component/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('App/Component/index.pug', () => {
     const value = `App/Component/index.pug`;
     const expected = '/path/to/app/Component/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('App-Component/index.pug', () => {
     const value = `App-Component/index.pug`;
     const expected = 'App-Component/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('App_Component/index.pug', () => {
     const value = `App_Component/index.pug`;
     const expected = 'App_Component/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 
   it('/path/to/App/index.pug', () => {
     const value = `/path/to/App/index.pug`;
     const expected = '/path/to/App/index.pug';
-    const received = resolveAlias(value, aliases, regexp);
+    const received = resolveTemplatePath(value, aliases);
     expect(received).toEqual(expected);
   });
 });
