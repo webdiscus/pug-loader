@@ -66,14 +66,15 @@ const compilePugContent = function (content, callback) {
     debug: false,
     // Include the function source in the compiled template. Defaults is false.
     compileDebug: loaderOptions.debug || false,
-    globals: ['require', ...(loaderOptions.globals || [])],
-    // Load all requires as function. Must be true.
+    //globals: ['require', ...(loaderOptions.globals || [])],
+    globals: ['__asset_resource_require__', 'require', ...(loaderOptions.globals || [])],
+    // Include inline runtime functions must be true.
     inlineRuntimeFunctions: true,
-    //inlineRuntimeFunctions: false,
-    // default name of template function is `template`
-    name: loaderOptions.name || 'template',
-    // the template without export module syntax, because the export will be determined depending on the method
+    // module must be false to get compiled function body w/o export code
     module: false,
+    // default name of template function is `template`
+    name: 'template',
+    // the template without export module syntax, because the export will be determined depending on the method
     plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
   };
 
@@ -97,9 +98,9 @@ const compilePugContent = function (content, callback) {
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
 
-  const locals = loaderMethod.getLocals(merge(loaderOptions.data || {}, resourceParams)),
+  const locals = merge(loaderOptions.data || {}, resourceParams),
     funcBody = Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body,
-    output = loaderMethod.output(funcBody, options.name, locals, esModule);
+    output = loaderMethod.output(funcBody, locals, esModule);
 
   callback(null, output);
 };
