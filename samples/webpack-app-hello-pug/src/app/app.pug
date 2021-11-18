@@ -1,4 +1,10 @@
-h2 Simple webpack application.
+h2 Simple web application.
 p Hello Pug!
 
-img(src=require('../assets/image.jpeg'))
+img(src=require('Images/image.jpeg'))
+
+- var colors = require('App/colors.json')
+
+.colors
+  each color in colors
+    div(style=`background-color:${color.hex};`)= color.name

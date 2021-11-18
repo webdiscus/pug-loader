@@ -2,12 +2,12 @@
  * @typedef LoaderMethod
  * @property {string} method The compiler export method, defined in loader option.
  * @property {string} queryParam The same as `method`, but defined in resource query parameter.
- * @property {function(string)} require The inject require.
+ * @property {function(string)} requireResource The inject require of resource.
  * @property {function(string, {}, boolean)} output Generates a output content.
  */
 
 const getExportCode = (esModule) => (esModule ? 'export default ' : 'module.exports=');
-const requireAsset = (file) => `' + __asset_resource_require__('${file}') + '`;
+const requireResource = (file) => `' + __asset_resource_require__('${file}') + '`;
 
 /**
  * Loader methods to export template function.
@@ -19,27 +19,28 @@ const loaderMethods = [
     // export the compiled template function
     method: 'compile',
     queryParam: 'pug-compile',
-    require: (file) => `require(${file})`,
+    requireResource: (file) => `require(${file})`,
     output: (funcBody, locals, esModule) => funcBody + ';' + getExportCode(esModule) + 'template;',
   },
   {
     // export rendered HTML string at compile time
     method: 'render',
     queryParam: 'pug-render',
-    require: (file) => `requireAsset(${file})`,
+    requireResource: (file) => `requireResource(${file})`,
     output: (funcBody, locals, esModule) =>
       getExportCode(esModule) +
-      ("'" + new Function('requireAsset', funcBody + ';return template;')(requireAsset)(locals) + "';").replaceAll(
-        '__asset_resource_require__',
-        'require'
-      ),
+      (
+        "'" +
+        new Function('requireResource', funcBody + ';return template;')(requireResource)(locals) +
+        "';"
+      ).replaceAll('__asset_resource_require__', 'require'),
   },
   {
     // export the compiled template function, by require() it will be auto rendered into HTML string at runtime
     // @deprecated, it is reserved only as rescue fallback, after stable release of method `render` will be removed
     method: 'rtRender',
     queryParam: 'pug-rtrender',
-    require: (file) => `require(${file})`,
+    requireResource: (file) => `require(${file})`,
     output: (funcBody, locals, esModule) => funcBody + ';' + getExportCode(esModule) + 'template();',
   },
   {
@@ -47,7 +48,7 @@ const loaderMethods = [
     // note: this method should be used with additional loader to handle HTML
     method: 'html',
     queryParam: null,
-    require: (file) => `(${file})`,
+    requireResource: (file) => `(${file})`,
     output: (funcBody, locals, esModule) => new Function('', funcBody + ';return template;')()(locals),
   },
 ];

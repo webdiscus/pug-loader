@@ -1,7 +1,7 @@
 const path = require('path');
 const rimraf = require('rimraf');
 
-import { copyRecursiveSync, readTextFileSync, readJsonSync, execScriptSync } from './utils/file';
+import { copyRecursiveSync, readTextFileSync, execScriptSync } from './utils/file';
 import { compile, compileTemplate } from './utils/webpack';
 
 // The base path of test directory.
@@ -304,7 +304,7 @@ describe('require pug in javascript', () => {
     });
   });
 
-  it(`javascript compile embedded resources`, (done) => {
+  it(`javascript compile resources`, (done) => {
     const relTestCasePath = 'javascript-assets-compile',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
@@ -317,8 +317,21 @@ describe('require pug in javascript', () => {
     });
   });
 
-  it(`javascript render embedded resources`, (done) => {
+  it(`javascript render resources`, (done) => {
     const relTestCasePath = 'javascript-assets-render',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it(`javascript render to html resources`, (done) => {
+    const relTestCasePath = 'javascript-assets-html',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
     compile(PATHS, relTestCasePath).then(() => {

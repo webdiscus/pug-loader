@@ -63,18 +63,13 @@ const regexpAlias = (match) => `^[~@]?(${match})(?=\\/)`;
  * @return {string} The string with replaced alias.
  */
 const resolveAlias = (value, aliases, regexp) => {
-  let result = value;
   const patternAliases = Object.keys(aliases).join('|');
 
-  if (!patternAliases) return result;
+  if (!patternAliases) return value;
 
-  const aliasMatch = new RegExp(regexp(patternAliases)).exec(value);
-  if (aliasMatch) {
-    const alias = aliasMatch[1];
-    result = value.replace(new RegExp(regexp(alias)), aliases[alias]).replace('//', '/');
-  }
+  const [, alias] = new RegExp(regexp(patternAliases)).exec(value) || [];
 
-  return result;
+  return alias ? value.replace(new RegExp(regexp(alias)), aliases[alias]).replace('//', '/') : value;
 };
 
 /**
@@ -89,21 +84,22 @@ const resolveTemplatePath = (value, aliases) => resolveAlias(value, aliases, reg
 /**
  * Resolve a path in the argument of require() function.
  *
+ * @param {string} templateFile The filename of the template where resolves the resource.
  * @param {string} value The resource value include require().
- * @param {string} templateFile
  * @param {{}} aliases The resolve.alias from webpack config.
  * @param {LoaderMethod} method The object of the current method.
  * @return {string|null}
  */
-const resolveResourcePath = function (value, templateFile, aliases, method) {
-  // match an argument of require(resourcePath)
-  let [, resourcePath] = /(?<=require\()(.+)(?=\))/.exec(value);
-  if (!resourcePath) return value;
+const resolveResourcePath = function (templateFile, value, aliases, method) {
+  // match an argument of require(sourcePath)
+  const [, sourcePath] = /(?<=require\()(.+)(?=\))/.exec(value) || [];
+  if (!sourcePath) return value;
 
   // 1. delete `./` from path, because at begin will be added full path like `/path/to/current/dir/`
-  resourcePath = resourcePath.replace(/(?<=[^\.])(\.\/)/, '');
+  let resourcePath = sourcePath.replace(/(?<=[^\.])(\.\/)/, '');
 
   // 2. replace alias with absolute path
+  // todo Fix usage prefixes ~@, e.g. img(src=require('~Images/image.jpeg')) not found!
   let resolvedPath = resolveAlias(resourcePath, aliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
 
   // 3. if the alias is not found in the path,
@@ -122,7 +118,7 @@ const resolveResourcePath = function (value, templateFile, aliases, method) {
     resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
   }
 
-  return method.require(resolvedPath);
+  return method.requireResource(resolvedPath);
 };
 
 /**

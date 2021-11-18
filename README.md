@@ -11,23 +11,19 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
 
 ## Features
  - supports **Webpack 5** and **Pug 3**
- - supports all features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
+ - supports features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
  - up to 4x faster than original `pugjs/pug-loader` at webpack starting 
  - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
- - supports ES modules syntax in generated JS modules
- - supports Webpack `resolve.alias`, work fine with and without the prefixes `~` or `@`, e.g. for the defined alias `Components` this works:
-   - `extends Components/layout.pug`
-   - `extends ~Components/layout.pug`
-   - `extends @Components/layout.pug`
-   - `include Components/mixins.pug`
-   - `include ~Components/mixins.pug`
-   - `include @Components/mixins.pug`
-   - `include:markdown-it Components/readme.md`
-   - `- const colors = require('Components/data/colors.json')`
-   - `img(src=require('Components/images/image.jpeg'))`
-   - `import html from 'Components/index.pug';`
-   - `const tmpl = require('Components/index.pug');`
- - compiling a pug into a templated function, e.g.:
+ - supports Webpack `resolve.alias`, works with and without the prefixes: `~` `@`
+ - supports integration with `Angular Component`
+ - supports syntax of `CommonJS` and `ES modules` in generated JavaScript modules, e.g.:
+   ```js
+   const html = require('./template.pug');
+   ```
+   ```js
+   import html from './template.pug';
+   ```
+ - compiling a pug into a template function, e.g.:
    ```js
    const tmpl = require('template.pug');
    const html = tmpl({ key: "value" })
@@ -36,8 +32,33 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```js
    const html = require('template.pug?pug-render');
    ```
- - rendering into a pure HTML (method `'html'`) to processing the HTML in additional loader, e.g. in `html-loader`
- - support for passing custom data to templates at compile time using loader option or query parameters, e.g.:
+   **NEW** supports require of JS and JSON files in pug **at compile time**, e.g.: \
+   file `data.json`
+   ```json
+   [
+     { "id": 1, "name": "abc" },
+     { "id": 2, "name": "xyz" },
+   ]
+   ```
+   pug template
+   ```pug
+   - var myData = require('./data.json')
+   each item in myData
+     div #{item.id} #{item.name}
+   ```
+ - rendering into a pure HTML (method `'html'`) for processing the HTML in additional loaders, e.g. in `html-loader`
+ - support for passing custom data to templates at compile time using loader option `data`, e.g.:
+   ```js
+   {
+     test: /\.pug$/,
+     loader: 'pug-loader',
+     options: {
+       method: 'render',
+       data: { "key": "value" }
+     }
+   },
+   ```
+   or via query parameters:
    ```js
    const html = require('template.pug?pug-render&{"key":"value"}');
    ```

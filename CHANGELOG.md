@@ -1,5 +1,9 @@
 # Change log
 
+## 1.4.2 (2021-11-18)
+- feature fix: now supports require of JS and JSON files in pug at compile time
+- fix issues by samples
+
 ## 1.4.1 (2021-11-17)
 - inner optimizations for the `render` method
 - code cleanup
@@ -18,7 +22,7 @@
 
 ## 1.2.0 (2021-11-12)
 - feature: added for the loader option `method` new value `html` to render the template function into pure HTML string,\
-  this method require additional loader, e.g. `html-loader`, see usage sample in readme
+  this method require additional loader, e.g. `html-loader`
 - added directory with samples for usage this loader with Angular Component
 
 ## 1.1.1 (2021-11-10)
@@ -26,7 +30,7 @@
 - cleanup tests
 
 ## 1.1.0 (2021-11-10)
-- feature `compile` or `render` method by usage in JavaScript:  
+- feature for usage of `compile` or `render` methods in JavaScript:  
   - added loader option `method: render|compile` to render into HTML or compile into a template function all templates required in js file
   - in the js require() can be used the query parameter `?pug-render` to render the pug template directly into HTML, independent of loader option `method`, \
     e.g. `const html = require('template.pug?pug-render')`

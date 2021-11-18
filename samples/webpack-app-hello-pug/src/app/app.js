@@ -1,7 +1,7 @@
 const html = require('./app.pug');
-const appRootSelector = '#app-root';
+const appRootId = 'app-root';
 
 export function app() {
-  const appRootContainer = document.getElementById(appRootSelector);
-  appRootContainer.innerHTML = html;
+  const appRootContainer = document.getElementById(appRootId);
+  appRootContainer.innerHTML = html();
 }

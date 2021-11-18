@@ -1,0 +1,17 @@
+body {
+    font-family: monospace;
+}
+
+h1, h2 {
+    color: #555;
+}
+
+img {
+    width: 120px;
+}
+
+.colors {
+    width: 120px;
+    color: yellow;
+    text-align: center;
+}

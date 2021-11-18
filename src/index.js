@@ -3,11 +3,34 @@ const path = require('path'),
   walk = require('pug-walk'),
   { merge } = require('webpack-merge'),
   { resolveTemplatePath, resolveResourcePath, getResourceParams, injectExternalVariables } = require('./utils'),
-  loaderMethods = require('./loader-methods');
+  loaderMethods = require('./loader-methods'),
+  code = require('./code');
 
 // the variables with global scope for the resolvePlugin
 let webpackResolveAlias = {},
   loaderMethod = null;
+
+const isRendering = (loaderMethod) => ['render', 'html'].indexOf(loaderMethod.method) > -1;
+
+/**
+ * Resolve a source code in the argument of require() function and save source in cache.
+ *
+ * @param {string} templateFile The filename of the template where resolves the resource.
+ * @param {string} value The resource value include require().
+ * @param {{}} aliases The resolve.alias from webpack config.
+ * @return {string}
+ */
+const requireCode = (templateFile, value, aliases) =>
+  value.replaceAll(/(require\(.+\))/g, (value) => {
+    const [, sourcePath] = /(?<=require\("|'|`)(.+)(?="|'|`\))/.exec(value) || [];
+    let resolvedPath = resolveTemplatePath(sourcePath, aliases);
+    if (sourcePath === resolvedPath) resolvedPath = path.join(path.dirname(templateFile), resolvedPath);
+
+    // Important: delete the file from require.cache to allow reload cached files after changes.
+    delete require.cache[__filename];
+
+    return code.require(resolvedPath);
+  });
 
 /**
  * Pug plugin to resolve path for include, extend, require.
@@ -18,13 +41,20 @@ const resolvePlugin = {
   preLoad: (ast) =>
     walk(ast, (node) => {
       if (node.type === 'FileReference') {
-        //let result = resolveAlias(node.path, webpackResolveAlias, regexpAlias);
+        // resolving: extends/include
         let result = resolveTemplatePath(node.path, webpackResolveAlias);
         if (result && result !== node.path) node.path = result;
+      } else if (node.type === 'Code' && isRendering(loaderMethod)) {
+        if (node.val && node.val.indexOf('require(') > 0) {
+          // require a code (need only by rendering), e.g.: `- var data = require('./data.js')`
+          let result = requireCode(node.filename, node.val, webpackResolveAlias);
+          if (result && result !== node.val) node.val = result;
+        }
       } else if (node.attrs) {
+        // resolving: img(src=require('./image.jpeg'))
         node.attrs.forEach((attr) => {
           if (attr.val && typeof attr.val === 'string' && attr.val.indexOf('require(') === 0) {
-            let result = resolveResourcePath(attr.val, attr.filename, webpackResolveAlias, loaderMethod);
+            let result = resolveResourcePath(attr.filename, attr.val, webpackResolveAlias, loaderMethod);
             if (result && result !== attr.val) attr.val = result;
           }
         });
@@ -39,6 +69,7 @@ const resolvePlugin = {
  */
 const compilePugContent = function (content, callback) {
   let res = {};
+
   const loaderContext = this,
     loaderOptions = loaderContext.getOptions() || {},
     esModule = loaderOptions.esModule === true,
@@ -93,13 +124,19 @@ const compilePugContent = function (content, callback) {
   }
 
   // add dependency files to watch changes
-  if (res.dependencies.length) res.dependencies.forEach(loaderContext.addDependency);
+  res.dependencies.forEach(loaderContext.addDependency);
+  if (isRendering(loaderMethod)) code.getFiles().forEach(loaderContext.addDependency);
+
+  Object.keys(require.cache).forEach((file) => {
+    if (/node_module/.test(file)) return;
+    //console.log(' ==> file: ', file);
+  });
 
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
 
   const locals = merge(loaderOptions.data || {}, resourceParams),
-    funcBody = Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body,
+    funcBody = code.getCode() + (Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body),
     output = loaderMethod.output(funcBody, locals, esModule);
 
   callback(null, output);
