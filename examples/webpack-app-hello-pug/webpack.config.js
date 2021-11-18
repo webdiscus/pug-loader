@@ -46,7 +46,8 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          //method: 'render',
+          method: 'render',
+          esModule: true,
         },
       },
       // image resources processing

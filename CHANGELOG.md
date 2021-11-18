@@ -1,5 +1,8 @@
 # Change log
 
+## 1.4.3 (2021-11-18)
+- minor code update and cleanup
+
 ## 1.4.2 (2021-11-18)
 - feature fix: now supports require of JS and JSON files in pug at compile time
 - fix issues by samples
