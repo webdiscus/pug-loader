@@ -47,6 +47,18 @@ describe('self tests', () => {
 });
 
 describe('extends, include require javascript', () => {
+  it('include-script', (done) => {
+    const relTestCasePath = 'include-script',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath, {}).then(() => {
+      const received = readTextFileSync(path.join(absTestPath, PATHS.webRoot, 'index.html'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'index.html'));
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
   it('extends-relative', (done) => {
     const relTestCasePath = 'extends-relative',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);

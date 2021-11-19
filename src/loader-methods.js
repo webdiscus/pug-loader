@@ -1,3 +1,6 @@
+// add polyfill for node.js >= 12.0.0 && < 15.0.0
+require('./polyfills/string.replaceAll');
+
 /**
  * @typedef LoaderMethod
  * @property {string} method The compiler export method, defined in loader option.

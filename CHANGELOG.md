@@ -1,5 +1,9 @@
 # Change log
 
+## 1.4.4 (2021-11-19)
+- add polyfill `replaceAll()` for node.js >= 12 && < 15
+- bugfix for parsing multiple `require` in a single string code
+
 ## 1.4.3 (2021-11-18)
 - minor code update and cleanup
 

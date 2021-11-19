@@ -1,9 +1,47 @@
 import { getResourceParams, resolveTemplatePath, resolveResourcePath } from '../src/utils';
 import loaderMethods from '../src/loader-methods';
+import replaceAll from '../src/polyfills/string.replaceAll';
 
 describe('self tests', () => {
   it('test it self', (done) => {
     expect(1).toEqual(1);
+    done();
+  });
+});
+
+describe('polyfill replaceAll', () => {
+  it('replaceAll(str, newStr)', (done) => {
+    const str = 'a und a';
+    const expected = 'b und b';
+    const received = replaceAll(str, 'a', 'b');
+    expect(received).toEqual(expected);
+    done();
+  });
+
+  it('replaceAll(str, callback)', (done) => {
+    const str = 'a und a';
+    const expected = '`a` und `a`';
+    const received = replaceAll(str, 'a', (str) => '`' + str + '`');
+    expect(received).toEqual(expected);
+    done();
+  });
+
+  it('replaceAll(str, callback2)', (done) => {
+    const str = 'begin a und a end';
+    const expected = 'begin-a-und-a-end';
+    const received = replaceAll(str, ' ', (str) => '-');
+    expect(received).toEqual(expected);
+    done();
+  });
+
+  it('replaceAll(str, callback3)', (done) => {
+    const str = `[{data: require('./file1.js'),},{data: require('./file2.js'),}]`;
+    const expected = `[{data: __sources__['./file1.js'],},{data: __sources__['./file2.js'],}]`;
+    const received = replaceAll(str, /(require\(.+?\))/g, (value) => {
+      const [, sourcePath] = /(?<=require\("|'|`)(.+)(?="|'|`\))/.exec(value) || [];
+      return `__sources__['${sourcePath}']`;
+    });
+    expect(received).toEqual(expected);
     done();
   });
 });

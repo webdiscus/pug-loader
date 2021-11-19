@@ -1,3 +1,6 @@
+// add polyfill for node.js >= 12.0.0 && < 15.0.0
+require('./polyfills/string.replaceAll');
+
 const path = require('path'),
   pug = require('pug'),
   walk = require('pug-walk'),
@@ -21,7 +24,7 @@ const isRendering = (loaderMethod) => ['render', 'html'].indexOf(loaderMethod.me
  * @return {string}
  */
 const requireCode = (templateFile, value, aliases) =>
-  value.replaceAll(/(require\(.+\))/g, (value) => {
+  value.replaceAll(/(require\(.+?\))/g, (value) => {
     const [, sourcePath] = /(?<=require\("|'|`)(.+)(?="|'|`\))/.exec(value) || [];
     let resolvedPath = resolveTemplatePath(sourcePath, aliases);
     if (sourcePath === resolvedPath) resolvedPath = path.join(path.dirname(templateFile), resolvedPath);
@@ -126,11 +129,6 @@ const compilePugContent = function (content, callback) {
   // add dependency files to watch changes
   res.dependencies.forEach(loaderContext.addDependency);
   if (isRendering(loaderMethod)) code.getFiles().forEach(loaderContext.addDependency);
-
-  Object.keys(require.cache).forEach((file) => {
-    if (/node_module/.test(file)) return;
-    //console.log(' ==> file: ', file);
-  });
 
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
