@@ -6,37 +6,38 @@ const path = require('path'),
   walk = require('pug-walk'),
   { merge } = require('webpack-merge'),
   { resolveTemplatePath, resolveResourcePath, getResourceParams, injectExternalVariables } = require('./utils'),
-  loaderMethods = require('./loader-methods'),
-  code = require('./code');
+  loaderMethods = require('./loader-methods');
 
 // the variables with global scope for the resolvePlugin
 let webpackResolveAlias = {},
-  loaderMethod = null;
+  loaderMethod = null,
+  codeDependencies = [];
 
 const isRendering = (loaderMethod) => ['render', 'html'].indexOf(loaderMethod.method) > -1;
 
 /**
- * Resolve a source code in the argument of require() function and save source in cache.
+ * Resolve the code file path in require ().
  *
  * @param {string} templateFile The filename of the template where resolves the resource.
  * @param {string} value The resource value include require().
  * @param {{}} aliases The resolve.alias from webpack config.
  * @return {string}
  */
-const requireCode = (templateFile, value, aliases) =>
+const resolveCodePath = (templateFile, value, aliases) =>
   value.replaceAll(/(require\(.+?\))/g, (value) => {
     const [, sourcePath] = /(?<=require\("|'|`)(.+)(?="|'|`\))/.exec(value) || [];
     let resolvedPath = resolveTemplatePath(sourcePath, aliases);
     if (sourcePath === resolvedPath) resolvedPath = path.join(path.dirname(templateFile), resolvedPath);
 
-    // Important: delete the file from require.cache to allow reload cached files after changes.
-    delete require.cache[__filename];
+    // Important: delete the file from require.cache to allow reload cached files after changes by watch.
+    delete require.cache[resolvedPath];
+    codeDependencies.push(resolvedPath);
 
-    return code.require(resolvedPath);
+    return `require('${resolvedPath}')`;
   });
 
 /**
- * Pug plugin to resolve path for include, extend, require.
+ * The pug plugin to resolve path for include, extend, require.
  *
  * @type {{preLoad: (function(*): *)}}
  */
@@ -50,7 +51,7 @@ const resolvePlugin = {
       } else if (node.type === 'Code' && isRendering(loaderMethod)) {
         if (node.val && node.val.indexOf('require(') > 0) {
           // require a code (need only by rendering), e.g.: `- var data = require('./data.js')`
-          let result = requireCode(node.filename, node.val, webpackResolveAlias);
+          let result = resolveCodePath(node.filename, node.val, webpackResolveAlias);
           if (result && result !== node.val) node.val = result;
         }
       } else if (node.attrs) {
@@ -85,26 +86,24 @@ const compilePugContent = function (content, callback) {
   // define the `loaderMethod` for global scope in this module
   loaderMethod = methodFromQuery || methodFromOptions || loaderMethods[0];
 
-  // pug compiler options
   const options = {
     // used to resolve imports/extends and to improve errors
     filename: loaderContext.resourcePath,
-    // The root directory of all absolute inclusion. Defaults is /.
+    // the root directory of all absolute inclusion. Defaults is /
     basedir: loaderOptions.basedir || '/',
     doctype: loaderOptions.doctype || 'html',
     /** @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options */
     pretty: false,
     filters: loaderOptions.filters,
     self: loaderOptions.self || false,
-    // Output compiled function to stdout. Must be false.
+    // output compiled function to stdout, must be false
     debug: false,
-    // Include the function source in the compiled template. Defaults is false.
+    // include the function source in the compiled template, defaults is false
     compileDebug: loaderOptions.debug || false,
-    //globals: ['require', ...(loaderOptions.globals || [])],
-    globals: ['__asset_resource_require__', 'require', ...(loaderOptions.globals || [])],
-    // Include inline runtime functions must be true.
+    globals: ['require', ...(loaderOptions.globals || [])],
+    // include inline runtime functions must be true
     inlineRuntimeFunctions: true,
-    // module must be false to get compiled function body w/o export code
+    // for the pure function code w/o exports the module must be false
     module: false,
     // default name of template function is `template`
     name: 'template',
@@ -128,24 +127,24 @@ const compilePugContent = function (content, callback) {
 
   // add dependency files to watch changes
   res.dependencies.forEach(loaderContext.addDependency);
-  if (isRendering(loaderMethod)) code.getFiles().forEach(loaderContext.addDependency);
+  codeDependencies.forEach(loaderContext.addDependency);
 
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
 
   const locals = merge(loaderOptions.data || {}, resourceParams),
-    funcBody = code.getCode() + (Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body),
+    funcBody = Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body,
     output = loaderMethod.output(funcBody, locals, esModule);
+
+  //console.log('\n######################## OUT:\n', output);
 
   callback(null, output);
 };
 
-// Asynchronous Loader, see https://webpack.js.org/api/loaders/#asynchronous-loaders
 module.exports = function (content, map, meta) {
   const callback = this.async();
 
   // save resolve.alias from webpack config for global scope in this module,
-  // see https://webpack.js.org/api/loaders/#this_compiler
   webpackResolveAlias = this._compiler.options.resolve.alias || {};
 
   compilePugContent.call(this, content, (err, result) => {

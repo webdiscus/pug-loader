@@ -1,8 +1,7 @@
 h1 Hello!
 
-//- test resolve embedded resources
+//- test resolve of embedded resources
 - file2 = 'image2.jpeg'
-
 p= '../images/image.jpeg'
 img(src=require('../images/image.jpeg'))
 p= 'Images/image.jpeg'
@@ -12,14 +11,22 @@ img(src=require('Images/' + file2))
 p= '`Images/${file2}`'
 img(src=require(`Images/${file2}`))
 
-//- test single require
+//- test require of a function
+-
+  var colorModule = require('../includes/color')
+  colorModule.add(require('../includes/colors.json'))
+  var data = colorModule.getData()
+
+p #{ colorModule.getHelloColor('green') }
+
+//- test single require of a JSON
 - var colors = require('../includes/colors.json')
 
 .first
   each color in colors
     i= color.name
 
-//- test multiple requires in a object
+//- test multiple requires of a JSON in a object
 -
   var data = [
     {

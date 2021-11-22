@@ -17,13 +17,7 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
  - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
  - supports Webpack `resolve.alias`, works with and without the prefixes: `~` `@`
  - supports integration with `Angular Component`
- - supports syntax of `CommonJS` and `ES modules` in generated JavaScript modules, e.g.:
-   ```js
-   const html = require('./template.pug');
-   ```
-   ```js
-   import html from './template.pug';
-   ```
+ - supports the syntax of `CommonJS` and `ES modules` in generated templates for loading them via `require` or `import`
  - compiling a pug into a template function, e.g.:
    ```js
    const tmpl = require('template.pug');
@@ -33,22 +27,31 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```js
    const html = require('template.pug?pug-render');
    ```
-   **NEW** supports require of JS and JSON files in pug **at compile time**, e.g.: \
-   file `data.json`
+   **NEW** now supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
+   `data.json`
    ```json
    [
      { "id": 1, "name": "abc" },
      { "id": 2, "name": "xyz" },
    ]
    ```
-   pug template
+   `say-hello.js`
+   ```js
+   module.exports = function (name) {
+     return `Hello ${name}!`;
+   }
+   ```
+   `pug template`
    ```pug
+   - var sayHello = require('./say-hello')
+   h1 #{ sayHello('pug') }
+   
    - var myData = require('./data.json')
    each item in myData
      div #{item.id} #{item.name}
    ```
- - rendering into a pure HTML (method `'html'`) for processing the HTML in additional loaders, e.g. in `html-loader`
- - support for passing custom data to templates at compile time using loader option `data`, e.g.:
+ - rendering to pure HTML using method `'html'` to handle HTML in additional loaders, e.g. in `html-loader`
+ - support for passing custom data to templates at compile time using the loader option `data`, e.g.:
    ```js
    {
      test: /\.pug$/,
@@ -145,11 +148,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 // The absolute path to the base directory of application.
 const basePath = path.resolve(__dirname);
 
-// The options for pug-loader.
+// Default pug-loader options.
 const pugLoaderOptions = {
   method: 'compile',
   esModule: false,
-};
+};‚
 
 module.exports  = {
   resolve: {
@@ -257,12 +260,14 @@ Type: `string`<br>
 Default: `compile`<br>
 Values:
  - `compile` the pug template compiles into a template function and in JavaScript can be called with variables to render into HTML at runtime. \
+   The query parameter is `?pug-compile`. Can be used if the method is `render`. \
    Use this method, if the template have variables passed from JavaScript at runtime. [see usage](#method-compile)
  - `render` the pug template renders into HTML at compile time and exported as a string. 
    All required resource will be processed by the webpack and separately included as added strings wrapped to a function. \
+   The query parameter is `?pug-render`. Can be used if the method is `compile` or is not defined in options. \
    Use this method, if the template does not have variables passed from JavaScript at runtime. The method generates the most compact and fastest code. [see usage](#method-render)
  - `html` the template renders into a pure HTML string at compile time. The method need an addition loader to handles the HTML. \
-   Use this method if the rendered HTML needs to be processed by another loader, e.g. by `html-loader` [see usage](#method-html)
+   Use this method if the rendered HTML needs to be processed by additional loader, e.g. by `html-loader` [see usage](#method-html)
  
 > Embedded resources such as `img(src=require('./image.jpeg'))` handles at compile time by the webpack using [**asset/resource**](https://webpack.js.org/guides/asset-modules/#resource-assets).
 

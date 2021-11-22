@@ -50,7 +50,7 @@ export const compile = (PATHS, testCasePath, webpackOpts) => {
       if (error) throw new Error('[webpack compiler] ' + error);
       if (stats.hasErrors()) throw new Error('[webpack compiler stats] ' + stats.toString());
 
-      resolve(stats);
+      resolve(stats.hasErrors());
     });
   });
 };

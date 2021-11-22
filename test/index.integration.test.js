@@ -32,9 +32,21 @@ beforeEach(() => {
   jest.setTimeout(5000);
 });
 
-describe('self tests', () => {
+describe('pug tests', () => {
   it('hello-world', (done) => {
     const relTestCasePath = 'hello-world',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath, {}).then(() => {
+      const received = readTextFileSync(path.join(absTestPath, PATHS.webRoot, 'index.html'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'index.html'));
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
+  it('escape render', (done) => {
+    const relTestCasePath = 'escape-render',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
     compile(PATHS, relTestCasePath, {}).then(() => {
@@ -316,7 +328,7 @@ describe('require pug in javascript', () => {
     });
   });
 
-  it(`javascript compile resources`, (done) => {
+  it(`javascript assets compile`, (done) => {
     const relTestCasePath = 'javascript-assets-compile',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
@@ -329,7 +341,7 @@ describe('require pug in javascript', () => {
     });
   });
 
-  it(`javascript render resources`, (done) => {
+  it(`javascript assets render`, (done) => {
     const relTestCasePath = 'javascript-assets-render',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 
@@ -342,7 +354,7 @@ describe('require pug in javascript', () => {
     });
   });
 
-  it(`javascript render to html resources`, (done) => {
+  it(`javascript assets html`, (done) => {
     const relTestCasePath = 'javascript-assets-html',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
 

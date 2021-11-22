@@ -25,7 +25,6 @@ module.exports = {
               esModule: false,
             },
           },
-
           {
             loader: 'pug-loader',
             options: {

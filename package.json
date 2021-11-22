@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "The pug loader resolves paths and webpack aliases in a pug template and compiles it to HTML or into a template function.",
   "keywords": [
     "pug-loader",
@@ -32,9 +32,6 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "engines": {
-    "node": ">=12.13.0"
-  },
   "scripts": {
     "test": "jest --detectOpenHandles --config ./test/jest.config.js",
     "test:coverage": "jest --detectOpenHandles --collectCoverage --config ./test/jest.config.js"
@@ -52,6 +49,9 @@
     "README.md",
     "LICENSE"
   ],
+  "engines": {
+    "node": ">=12.14"
+  },
   "peerDependencies": {
     "pug": ">=3.0.2",
     "webpack": ">=5.32.0"

@@ -1,6 +1,3 @@
-// add polyfill for node.js >= 12.0.0 && < 15.0.0
-require('./polyfills/string.replaceAll');
-
 /**
  * @typedef LoaderMethod
  * @property {string} method The compiler export method, defined in loader option.
@@ -10,7 +7,6 @@ require('./polyfills/string.replaceAll');
  */
 
 const getExportCode = (esModule) => (esModule ? 'export default ' : 'module.exports=');
-const requireResource = (file) => `' + __asset_resource_require__('${file}') + '`;
 
 /**
  * Loader methods to export template function.
@@ -29,14 +25,18 @@ const loaderMethods = [
     // export rendered HTML string at compile time
     method: 'render',
     queryParam: 'pug-render',
-    requireResource: (file) => `requireResource(${file})`,
+    // the result of compiled string must be exact as this:
+    //requireResource: (file) => "((file) => `' + require('${file}') + '`)(" + file + ')',
+    // to prevent escaping the 'single quotes' they must be as HTML char '&quot;' encoded and at end decoded:
+    requireResource: (file) => '((file) => `&quot; + require(&quot;${file}&quot;) + &quot;`)(' + file + ')',
     output: (funcBody, locals, esModule) =>
       getExportCode(esModule) +
-      (
-        "'" +
-        new Function('requireResource', funcBody + ';return template;')(requireResource)(locals) +
-        "';"
-      ).replaceAll('__asset_resource_require__', 'require'),
+      "'" +
+      new Function('require', funcBody + ';return template;')(require)(locals)
+        .replace(/\n/g, '\\n')
+        .replace(/'/g, "\\'")
+        .replace(/&amp;quot;/g, "'") +
+      "';",
   },
   {
     // export the compiled template function, by require() it will be auto rendered into HTML string at runtime
@@ -48,11 +48,14 @@ const loaderMethods = [
   },
   {
     // render to pure HTML string at compile time
-    // note: this method should be used with additional loader to handle HTML
+    // notes:
+    //   - this method has not a query parameter for method
+    //   - this method should be used with additional loader to handle HTML
+    //   - the require() function for embedded resources must be removed to allow handle the `src` in `html-loader`
     method: 'html',
     queryParam: null,
     requireResource: (file) => `(${file})`,
-    output: (funcBody, locals, esModule) => new Function('', funcBody + ';return template;')()(locals),
+    output: (funcBody, locals, esModule) => new Function('require', funcBody + ';return template;')(require)(locals),
   },
 ];
 
