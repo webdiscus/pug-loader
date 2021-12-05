@@ -250,6 +250,19 @@ describe('require pug in javascript', () => {
     });
   });
 
+  it(`options.method=rtRender`, (done) => {
+    const relTestCasePath = 'javascript-option-method-rtrender',
+      absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+
+    compile(PATHS, relTestCasePath).then(() => {
+      const received = execScriptSync(path.join(absTestPath, PATHS.assets, 'index.js'));
+      const expected = readTextFileSync(path.join(absTestPath, PATHS.expected, 'output.html'));
+
+      expect(received).toEqual(expected);
+      done();
+    });
+  });
+
   it(`options.method=html`, (done) => {
     const relTestCasePath = 'javascript-option-method-html',
       absTestPath = path.join(PATHS.testOutput, relTestCasePath);
@@ -391,5 +404,19 @@ describe('require pug in javascript', () => {
       expect(received).toEqual(expected);
       done();
     });
+  });
+});
+
+describe('exception tests', () => {
+  test('exception: pug compile', (done) => {
+    const relTestCasePath = 'exception-pug-compile';
+    compile(PATHS, relTestCasePath, {})
+      .then(() => {
+        throw new Error('the test should throw an error');
+      })
+      .catch((error) => {
+        expect(error.toString()).toContain(`Pug compilation failed.`);
+        done();
+      });
   });
 });

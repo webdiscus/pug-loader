@@ -13,7 +13,7 @@ let webpackResolveAlias = {},
   loaderMethod = null,
   codeDependencies = [];
 
-const isRendering = (loaderMethod) => ['render', 'html'].indexOf(loaderMethod.method) > -1;
+const isRendering = (loaderMethod) => ['html', 'render'].indexOf(loaderMethod.method) > -1;
 
 /**
  * Resolve the code file path in require ().
@@ -45,17 +45,17 @@ const resolvePlugin = {
   preLoad: (ast) =>
     walk(ast, (node) => {
       if (node.type === 'FileReference') {
-        // resolving: extends/include
+        // resolving for extends/include
         let result = resolveTemplatePath(node.path, webpackResolveAlias);
         if (result && result !== node.path) node.path = result;
       } else if (node.type === 'Code' && isRendering(loaderMethod)) {
+        // resolving for require of a code, e.g.: `- var data = require('./data.js')` (its need only by rendering)
         if (node.val && node.val.indexOf('require(') > 0) {
-          // require a code (need only by rendering), e.g.: `- var data = require('./data.js')`
           let result = resolveCodePath(node.filename, node.val, webpackResolveAlias);
           if (result && result !== node.val) node.val = result;
         }
       } else if (node.attrs) {
-        // resolving: img(src=require('./image.jpeg'))
+        // resolving for tag attributes, e.g.: img(src=require('./image.jpeg'))
         node.attrs.forEach((attr) => {
           if (attr.val && typeof attr.val === 'string' && attr.val.indexOf('require(') === 0) {
             let result = resolveResourcePath(attr.filename, attr.val, webpackResolveAlias, loaderMethod);
@@ -103,7 +103,7 @@ const compilePugContent = function (content, callback) {
     globals: ['require', ...(loaderOptions.globals || [])],
     // include inline runtime functions must be true
     inlineRuntimeFunctions: true,
-    // for the pure function code w/o exports the module must be false
+    // for the pure function code w/o exports the module, must be false
     module: false,
     // default name of template function is `template`
     name: 'template',
@@ -117,11 +117,9 @@ const compilePugContent = function (content, callback) {
     /** @type {{body: string, dependencies: []}} */
     res = pug.compileClientWithDependenciesTracked(content, options);
   } catch (exception) {
-    // show original error
-    console.log('[pug compiler error] ', exception);
     // watch files in which an error occurred
     if (exception.filename) loaderContext.addDependency(path.normalize(exception.filename));
-    callback(exception);
+    callback('\n[pug-loader] Pug compilation failed.\n' + exception.toString());
     return;
   }
 
@@ -135,8 +133,6 @@ const compilePugContent = function (content, callback) {
   const locals = merge(loaderOptions.data || {}, resourceParams),
     funcBody = Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body,
     output = loaderMethod.output(funcBody, locals, esModule);
-
-  //console.log('\n######################## OUT:\n', output);
 
   callback(null, output);
 };

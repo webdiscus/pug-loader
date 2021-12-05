@@ -1,5 +1,12 @@
 # Change log
 
+## 1.4.6 (2021-12-06)
+- cleanup: remove needles console.log, cleanup code 
+- devDeps: update packages
+- docs: minor update readme
+- tests: add tests for an exception and an option
+- tests: refactoring test utils
+
 ## 1.4.5 (2021-11-22)
 - improvement: optimization of `render` and `html` methods
 - bugfix: fix require() for CommonJS module. Now is possible use the CommonJS module directly in the pug, e.g.:

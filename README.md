@@ -18,16 +18,16 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
  - supports Webpack `resolve.alias`, works with and without the prefixes: `~` `@`
  - supports integration with `Angular Component`
  - supports the syntax of `CommonJS` and `ES modules` in generated templates for loading them via `require` or `import`
- - compiling a pug into a template function, e.g.:
+ - compiling a pug into a template function, e.g. using in javascript:
    ```js
    const tmpl = require('template.pug');
    const html = tmpl({ key: "value" })
    ```
- - rendering a pug into HTML at compile time (using loader method `'render'` or query parameter `?pug-render`), e.g.:
+ - rendering a pug into HTML at compile time (using loader method `'render'` or query parameter `?pug-render`), e.g. using in javascript:
    ```js
    const html = require('template.pug?pug-render');
    ```
-   **NEW** now supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
+   supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
    `data.json`
    ```json
    [
@@ -51,7 +51,7 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
      div #{item.id} #{item.name}
    ```
  - rendering to pure HTML using method `'html'` to handle HTML in additional loaders, e.g. in `html-loader`
- - support for passing custom data to templates at compile time using the loader option `data`, e.g.:
+ - passing custom data to templates at compile time using the loader option `data`, e.g.:
    ```js
    {
      test: /\.pug$/,
@@ -288,7 +288,7 @@ Values:
 > For generates smaller and faster JS code, it is recommended to use this options:
 > ```js
 > {
->   method: 'render'
+>   method: 'render',
 >   esModule: true
 > }
 > 
@@ -337,6 +337,7 @@ The source Pug templates from `src/templates/` after compilation are saved as HT
 File `./src/templates/index.pug`
 
 ```pug
+// 'Components' is the webpack alias for 'src/lib/components/ui/'
 extends Components/layout.pug
 include Components/mixins.pug
 
@@ -397,8 +398,7 @@ The result of require() is a template function, where the argument is an object 
 
 File `./src/js/script.js`:
 ```js
-// 'Templates' is webpack alias
-// 'widgetTemplate' is template function
+// 'Templates' is the webpack alias for 'src/templates/'
 const widgetTemplate = require('Templates/widget.pug');
 
 // variables passed to the pug template
@@ -430,7 +430,6 @@ console.log(html);
 File `./src/templates/widget.pug`:
 
 ```pug
-//- 'Templates' is webpack alias
 include ~Templates/mixins
 
 h2 Pug demo widget
@@ -623,7 +622,7 @@ module.exports = {
 };
 ```
  
-Bind the file `webpack.config.js` in the Angular config file `angular.json`:
+Bind the file `webpack.config.js` in the Angular config `angular.json`:
 ```js
 {
   ...

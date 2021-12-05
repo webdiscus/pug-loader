@@ -40,7 +40,7 @@ const loaderMethods = [
   },
   {
     // export the compiled template function, by require() it will be auto rendered into HTML string at runtime
-    // @deprecated, it is reserved only as rescue fallback, after stable release of method `render` will be removed
+    // @deprecated, it is reserved only as rescue fallback, after stable release of method `render` may be removed
     method: 'rtRender',
     queryParam: 'pug-rtrender',
     requireResource: (file) => `require(${file})`,

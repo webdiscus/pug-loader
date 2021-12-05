@@ -18,17 +18,17 @@ module.exports = {
   plugins: [],
   module: {
     rules: [
-      // Process image resources in pug templates with webpack
-      {
-        test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource',
-      },
       {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
           method: 'compile',
         },
+      },
+      // process image resources in pug templates
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource',
       },
     ],
   },

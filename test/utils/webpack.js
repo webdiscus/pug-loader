@@ -3,7 +3,6 @@ const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webRootPath = path.join(__dirname, '/public/');
 
 const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
   const testPath = path.join(PATHS.testOutput, relTestCasePath),
@@ -39,25 +38,30 @@ export const compile = (PATHS, testCasePath, webpackOpts) => {
 
   try {
     config = prepareWebpackConfig(PATHS, testCasePath, webpackOpts);
-  } catch (e) {
-    throw new Error(e.toString());
+  } catch (error) {
+    throw new Error(error.toString());
   }
 
   const compiler = webpack(config);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     compiler.run((error, stats) => {
-      if (error) throw new Error('[webpack compiler] ' + error);
-      if (stats.hasErrors()) throw new Error('[webpack compiler stats] ' + stats.toString());
+      if (error) {
+        reject('[webpack compiler] ' + error);
+        return;
+      }
 
-      resolve(stats.hasErrors());
+      if (stats.hasErrors()) {
+        reject('[webpack compiler stats] ' + stats.toString());
+        return;
+      }
+
+      resolve(stats);
     });
   });
 };
 
 export const compileTemplate = (PATHS, testCasePath, template, webpackOpts = {}) => {
-  let config;
-
   webpackOpts['plugins'] = [
     new HtmlWebpackPlugin({
       filename: path.join(__dirname, '../output/', testCasePath, '/public/index.html'),
@@ -66,20 +70,5 @@ export const compileTemplate = (PATHS, testCasePath, template, webpackOpts = {})
     }),
   ];
 
-  try {
-    config = prepareWebpackConfig(PATHS, testCasePath, webpackOpts);
-  } catch (e) {
-    throw new Error(e.toString());
-  }
-
-  const compiler = webpack(config);
-
-  return new Promise((resolve) => {
-    compiler.run((error, stats) => {
-      if (error) throw new Error('[webpack compiler] ' + error);
-      if (stats.hasErrors()) throw new Error('[webpack compiler stats] ' + stats.toString());
-
-      resolve(stats);
-    });
-  });
+  return compile(PATHS, testCasePath, webpackOpts);
 };

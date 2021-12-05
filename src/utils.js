@@ -110,9 +110,9 @@ const resolveResourcePath = function (templateFile, value, aliases, method) {
     // like require(`../images/${file}`), then extract the relative path to the separate string
     if (resourcePath.indexOf('`../') === 0) {
       const relPathRegex = /(?<=`)(.+)(?=\$\{)/;
-      const relPathMatches = relPathRegex.exec(value);
-      if (relPathMatches) {
-        resourcePath = `'${relPathMatches[1]}' + ` + resourcePath.replace(relPathRegex, '');
+      const [, relPath] = relPathRegex.exec(value);
+      if (relPath) {
+        resourcePath = `'${relPath}' + ` + resourcePath.replace(relPathRegex, '');
       }
     }
     resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
