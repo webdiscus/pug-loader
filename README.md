@@ -10,6 +10,10 @@
 Webpack loader for the [Pug](https://pugjs.org) templates.\
 The pug loader resolves paths and webpack aliases for `extends`/`include`/`require()` in a pug template and compiles it to HTML or into a template function.
 
+> **NEW:** The `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
+> This plugin extract HTML and CSS from `pug` `html` `scss` files defined by webpack entry into output directory.
+> Now is possible define `pug` files directly in `webpack entry`. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples). 
+
 ## Features
  - supports **Webpack 5** and **Pug 3**
  - supports features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
@@ -29,10 +33,10 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```
    supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
    `data.json`
-   ```json
+   ```jsson
    [
      { "id": 1, "name": "abc" },
-     { "id": 2, "name": "xyz" },
+     { "id": 2, "name": "xyz" }
    ]
    ```
    `say-hello.js`
@@ -125,7 +129,7 @@ Or you can define the `resolveLoader.alias` to use the `pug-loader` as default p
       'pug-loader': '@webdiscus/pug-loader'
     }
   },
-  ...
+  // ...
   module: {
     rules: [
       {
@@ -138,13 +142,13 @@ Or you can define the `resolveLoader.alias` to use the `pug-loader` as default p
 ```
 For processing an embedded resource see [usage embedded resources](#usage-embedded-resources). 
 
-For rendering pug templates into static HTML is needed the [**HtmlWebpackPlugin**](https://github.com/jantimon/html-webpack-plugin).
+> For rendering pug templates into static HTML is needed the [pug-plugin](https://github.com/webdiscus/pug-plugin).
 
 The complete example of the webpack config file:
 
 ```js
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const PugPlugin = require('pug-plugin');
 // The absolute path to the base directory of application.
 const basePath = path.resolve(__dirname);
 
@@ -170,26 +174,23 @@ module.exports  = {
       'pug-loader': '@webdiscus/pug-loader'
     }
   },
+
+  output: {
+    path: path.join(basePath, 'public/'), // output path
+    publicPath: '/',
+    filename: '[name].js',
+  },
   
   entry: {
     // the script used a pug template
     'script': './src/js/script.js',
-  },
-
-  output: {
-    path: path.join(basePath, 'public'),
-    filename: '[name].js',
-    assetModuleFilename: 'assets/images/[hash][ext][query]',
+    // save HTML into output.path as index.html
+    'index': 'src/templates/index.pug',
   },
 
   plugins: [
-    // this plugin extract the content of a pug template 
-    // and save compiled via pug-loader content into html file
-    new HtmlWebpackPlugin({
-      template: path.join(basePath, '/src/templates/index.pug'),
-      filename: './public/index.html',
-      inject: false
-    }),
+    // this plugin extract HTML from pug template defined in webpack entry
+    new PugPlugin(),
   ],
 
   module: {
@@ -204,6 +205,9 @@ module.exports  = {
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource'
+        generator: {
+          filename: 'assets/images/[name]-[hash][ext][query]',
+        },
       }
     ]
   }
@@ -215,41 +219,38 @@ module.exports  = {
 
 [See original description of options](https://pugjs.org/api/reference.html#options)
 
+### `basedir`
+Type: `string` Default: `/`<br>
+The root directory of all absolute inclusion.
+
 ### `doctype`
-Type: `string`<br>
-Default: `html`<br>
+Type: `string` Default: `html`<br>
 Specifies the type of document. [See available doctypes](https://pugjs.org/language/doctype.html#doctype-option).
 
 ### `self`
-Type: `boolean`<br>
-Default: `false`<br>
+Type: `boolean` Default: `false`<br>
 Use the `self` as namespace for the local variables in template. It will speed up the compilation, but for access to variable, e.g. `myVariable`, you must write `self.myVariable`.
 
 ### `globals`
-Type: `Array<string>`<br>
-Default: `[]`<br>
+Type: `Array<string>` Default: `[]`<br>
 Add a list of global names to make accessible in templates.
 
 ### `filters`
-Type: `object`<br>
-Default: `undefined`<br>
+Type: `object` Default: `undefined`<br>
 Hash table of [custom filters](https://pugjs.org/language/filters.html#custom-filters).
 Filters let to use other languages in Pug templates.
 
 ### `plugins`
-Type: `Array<Object>`<br>
-Default: `[]`<br>
+Type: `Array<Object>` Default: `[]`<br>
 Plugins allow to manipulate pug tags, template content in compile process.
 How it works [see in source of pug](https://github.com/pugjs/pug/blob/master/packages/pug/lib/index.js).
 
 ### `compileDebug`
-Type: `boolean`<br>
-Default: `false`<br>
+Type: `boolean` Default: `false`<br>
 Includes the function source in the compiled template to improve error reporting.
 
 ### `pretty`
-Type: `boolean`<br>
-Default: `false`<br>
+Type: `boolean` Default: `false`<br>
 This option is **deprecated** by pugjs and always is `false`. Don't use it.
 
 
@@ -625,9 +626,9 @@ module.exports = {
 Bind the file `webpack.config.js` in the Angular config `angular.json`:
 ```js
 {
-  ...
+  // ...
   "projects": {
-      ...
+      // ...
       "architect": {
         "build": {
           // replace architect.build.builder with this value:
@@ -638,9 +639,9 @@ Bind the file `webpack.config.js` in the Angular config `angular.json`:
             "customWebpackConfig": {
               "path": "./webpack.config.js" // the path to webpack.config.js
             },
-            ...
+            // ...
           },
-          ...
+          // ...
         },
         "serve": {
           // replace architect.serve.builder with this value:
@@ -648,9 +649,9 @@ Bind the file `webpack.config.js` in the Angular config `angular.json`:
           "options": {
             "browserTarget": "<app-name>:build"
           },
-          ...
+          // ...
         },
-        ...
+        // ...
       }
     }
   },
@@ -802,7 +803,7 @@ module.exports = {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource'
       },
-      ...
+      // ...
     ]
   },
 };
@@ -875,7 +876,6 @@ Code | @webdiscus/pug-loader| pugjs/pug-loader | Note
 Include the template from sub directory: <br> `include mixins`<br>``img(src=require('./image.jpeg'))``| <span style="color:green">**OK**</span> | <span style="color:red">fail</span> | when use a mixin and require on same file, then `pugjs/pug-loader` can't resolve the file in require().
 
 ---
-More examples of usages see in [test cases](https://github.com/webdiscus/pug-loader/tree/master/test/cases).
 > Important: in examples used name of loader as `pug-loader`, because it is defined as **alias** at resolveLoader:
 > ```js
 > {
@@ -892,6 +892,19 @@ More examples of usages see in [test cases](https://github.com/webdiscus/pug-loa
 `npm run test` will run the unit and integration tests.\
 `npm run test:coverage` will run the tests with coverage.
 
+## Also See
+
+- more examples of usages see in [test cases](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
+- [`pug GitHub`][pug]
+- [`pug API Reference`][pug-api]
+- [`pug-plugin`][pug-plugin]
+
 ## License
 
 [ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)
+
+<!-- prettier-ignore-start -->
+[pug]: https://github.com/pugjs/pug
+[pug-api]: https://pugjs.org/api/reference.html
+[pug-plugin]: https://github.com/webdiscus/pug-plugin
+<!-- prettier-ignore-end -->

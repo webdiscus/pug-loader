@@ -1,17 +1,8 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const PugPlugin = require('pug-plugin');
 
 module.exports = {
   mode: 'production',
-
-  entry: {
-    main: './src/main.js',
-  },
-
-  output: {
-    path: path.join(__dirname, 'public'),
-    filename: '[name].js',
-  },
 
   resolveLoader: {
     alias: {
@@ -30,14 +21,20 @@ module.exports = {
     },
   },
 
+  output: {
+    path: path.join(__dirname, 'public'),
+    publicPath: '',
+    filename: '[name].js',
+  },
+
+  entry: {
+    main: './src/main.js',
+    index: 'src/templates/index.pug',
+  },
+
   plugins: [
-    // this plugin extract the content of a pug template
-    // and save compiled via pug-loader content into html file
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src/templates/index.pug'),
-      filename: 'index.html',
-      inject: false,
-    }),
+    // extract HTML from pug files defined by webpack entry
+    new PugPlugin(),
   ],
 
   module: {
@@ -45,6 +42,7 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: 'pug-loader',
+        //loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
         options: {
           method: 'render',
           esModule: true,
@@ -84,7 +82,10 @@ module.exports = {
         name: 'Firefox',
       },
     },*/
-    liveReload: true,
+    hot: false,
+    //hot: true,
+    //liveReload: true,
+    liveReload: false,
 
     client: {
       progress: true,

@@ -89,7 +89,7 @@ const compilePugContent = function (content, callback) {
   const options = {
     // used to resolve imports/extends and to improve errors
     filename: loaderContext.resourcePath,
-    // the root directory of all absolute inclusion. Defaults is /
+    // the root directory of all absolute inclusion, defaults is `/`.
     basedir: loaderOptions.basedir || '/',
     doctype: loaderOptions.doctype || 'html',
     /** @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options */

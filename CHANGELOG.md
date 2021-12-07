@@ -1,5 +1,11 @@
 # Change log
 
+## 1.5.0 (2021-12-07)
+- NEW: the `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
+- feature: added option `basedir` for all absolute inclusion
+- test: add test for new option `basedir`
+- test: refactoring of tests
+
 ## 1.4.6 (2021-12-06)
 - cleanup: remove needles console.log, cleanup code 
 - devDeps: update packages

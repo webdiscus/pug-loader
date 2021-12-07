@@ -44,6 +44,17 @@ describe('polyfill replaceAll', () => {
     expect(received).toEqual(expected);
     done();
   });
+
+  it('replaceAll(str, array) Exception', (done) => {
+    const str = 'a und a';
+    const expected = 'The replacement argument of replaceAll() must be a string or a function, but given: ["b"]';
+    try {
+      replaceAll(str, 'a', ['b']);
+    } catch (error) {
+      expect(error.toString()).toContain(expected);
+    }
+    done();
+  });
 });
 
 describe('resolve alias', () => {

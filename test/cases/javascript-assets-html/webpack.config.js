@@ -3,9 +3,16 @@ const basePath = path.resolve(__dirname);
 
 module.exports = {
   mode: 'production',
+
+  output: {
+    path: path.join(__dirname, 'public/'),
+    publicPath: '',
+  },
+
   entry: {
     index: './src/index.js',
   },
+
   resolve: {
     alias: {
       Includes: path.join(basePath, 'src/includes/'),
@@ -13,7 +20,9 @@ module.exports = {
       Template: path.join(basePath, 'src/template/'),
     },
   },
+
   plugins: [],
+
   module: {
     rules: [
       {
@@ -43,6 +52,9 @@ module.exports = {
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',
+        generator: {
+          filename: 'assets/images/[name]-[hash][ext]',
+        },
       },
     ],
   },

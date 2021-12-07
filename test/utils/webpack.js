@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
   const testPath = path.join(PATHS.testOutput, relTestCasePath),
@@ -59,16 +58,4 @@ export const compile = (PATHS, testCasePath, webpackOpts) => {
       resolve(stats);
     });
   });
-};
-
-export const compileTemplate = (PATHS, testCasePath, template, webpackOpts = {}) => {
-  webpackOpts['plugins'] = [
-    new HtmlWebpackPlugin({
-      filename: path.join(__dirname, '../output/', testCasePath, '/public/index.html'),
-      template: template,
-      inject: false,
-    }),
-  ];
-
-  return compile(PATHS, testCasePath, webpackOpts);
 };

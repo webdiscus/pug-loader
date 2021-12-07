@@ -17,7 +17,9 @@ const replaceAll = (str, searchValue, replacer) => {
   if (typeof replacer === 'string') {
     return str.replace(pattern, replacer);
   } else if (typeof replacer !== 'function') {
-    throw new Error('The replacement argument of replaceAll() must be a string or a function.');
+    throw new Error(
+      'The replacement argument of replaceAll() must be a string or a function, but given: ' + JSON.stringify(replacer)
+    );
   }
 
   let matches = str.matchAll(pattern),
