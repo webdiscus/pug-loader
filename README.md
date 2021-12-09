@@ -11,7 +11,7 @@ Webpack loader for the [Pug](https://pugjs.org) templates.\
 The pug loader resolves paths and webpack aliases for `extends`/`include`/`require()` in a pug template and compiles it to HTML or into a template function.
 
 > **NEW:** The `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
-> This plugin extract HTML and CSS from `pug` `html` `scss` files defined by webpack entry into output directory.
+> This plugin extracts HTML from the `pug` files defined in the webpack entry and save them in the output directory.
 > Now is possible define `pug` files directly in `webpack entry`. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples). 
 
 ## Features
@@ -33,7 +33,7 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```
    supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
    `data.json`
-   ```jsson
+   ```json
    [
      { "id": 1, "name": "abc" },
      { "id": 2, "name": "xyz" }
@@ -459,7 +459,7 @@ The result of `console.log(html)`:
 </div>
 ```
 
-[See the simple web app example >>](https://github.com/webdiscus/pug-loader/tree/master/examples/webpack-app-hello-pug/)
+See [the simple web app example](https://github.com/webdiscus/pug-loader/tree/master/examples/webpack-app-hello-pug/).
 
 <a id="usage-in-pug-javascript" name="usage-in-pug-javascript" href="#usage-in-pug-javascript"></a>
 ## Usage methods `compile`, `render` or `html` in JavaScript
@@ -682,7 +682,7 @@ h1 Hello Pug!
 p Description: #{description}
 ```
 
-[See the source files of this example >>](https://github.com/webdiscus/pug-loader/tree/master/examples/angular-component-render/)
+See [the source files of this example](https://github.com/webdiscus/pug-loader/tree/master/examples/angular-component-render/).
 
 
 ### Alternative usage with additional `html-loader`
@@ -735,7 +735,7 @@ module.exports = {
 
 ```
 
-[See the source files of this example >>](https://github.com/webdiscus/pug-loader/tree/master/examples/angular-component-html/)
+See [the source files of this example](https://github.com/webdiscus/pug-loader/tree/master/examples/angular-component-html/).
 
 
 <a id="passing-data-into-template" name="passing-data-into-template" href="#passing-data-into-template"></a>

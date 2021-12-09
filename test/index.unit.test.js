@@ -1,4 +1,4 @@
-import { getResourceParams, resolveTemplatePath, resolveResourcePath } from '../src/utils';
+import { getResourceParams, resolveTemplatePath, resolveRequireResource } from '../src/utils';
 import loaderMethods from '../src/loader-methods';
 import replaceAll from '../src/polyfills/string.replaceAll';
 
@@ -141,112 +141,112 @@ describe('resolve embedded resource', () => {
   it(`img(src=require('./image.jpeg'))`, () => {
     const value = `require('./image.jpeg')`;
     const expected = `require('/path/to/source/' + 'image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require("./image.jpeg"))`, () => {
     const value = `require("./image.jpeg")`;
     const expected = `require('/path/to/source/' + "image.jpeg")`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('../image.jpeg'))`, () => {
     const value = `require('../image.jpeg')`;
     const expected = `require('/path/to/source/' + '../image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('App/image.jpeg'))`, () => {
     const value = `require('App/image.jpeg')`;
     const expected = `require('/path/to/app/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('Component/image.jpeg'))`, () => {
     const value = `require('Component/image.jpeg')`;
     const expected = `require('/path/to/component/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('App/Component/image.jpeg'))`, () => {
     const value = `require('App/Component/image.jpeg')`;
     const expected = `require('/path/to/app/Component/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('AppTest/image.jpeg'))`, () => {
     const value = `require('AppTest/image.jpeg')`;
     const expected = `require('/path/to/source/' + 'AppTest/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('App-Component/image.jpeg'))`, () => {
     const value = `require('App-Component/image.jpeg')`;
     const expected = `require('/path/to/source/' + 'App-Component/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`img(src=require('App_Component/image.jpeg'))`, () => {
     const value = `require('App_Component/image.jpeg')`;
     const expected = `require('/path/to/source/' + 'App_Component/image.jpeg')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`require(path + '')`, () => {
     const value = `require(path + '')`;
     const expected = `require('/path/to/source/' + path + '')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`require('' + path)`, () => {
     const value = `require('' + path)`;
     const expected = `require('/path/to/source/' + '' + path)`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it(`require('' + path + '')`, () => {
     const value = `require('' + path + '')`;
     const expected = `require('/path/to/source/' + '' + path + '')`;
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it('img(src=require(`${path}`))', () => {
     const value = 'require(`${path}`)';
     const expected = "require('/path/to/source/' + `${path}`)";
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it('require(`App/images/${file}`)', () => {
     const value = 'require(`App/images/${file}`)';
     const expected = 'require(`/path/to/app/images/${file}`)';
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it('require(`../../../images/${file}`)', () => {
     const value = 'require(`../../../images/${file}`)';
     const expected = "require('/path/to/source/' + '../../../images/' + `${file}`)";
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 
   it('img(src=require(`App/${path}`))', () => {
     const value = 'require(`App/${path}`)';
     const expected = 'require(`/path/to/app/${path}`)';
-    const received = resolveResourcePath(templateFile, value, resolveAliases, compileMethod);
+    const received = resolveRequireResource(templateFile, value, resolveAliases, compileMethod);
     expect(received).toEqual(expected);
   });
 });

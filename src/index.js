@@ -5,65 +5,93 @@ const path = require('path'),
   pug = require('pug'),
   walk = require('pug-walk'),
   { merge } = require('webpack-merge'),
-  { resolveTemplatePath, resolveResourcePath, getResourceParams, injectExternalVariables } = require('./utils'),
-  loaderMethods = require('./loader-methods');
+  {
+    resolveTemplatePath,
+    resolveRequireCode,
+    resolveRequireResource,
+    getResourceParams,
+    injectExternalVariables,
+  } = require('./utils'),
+  loaderMethods = require('./loader-methods'),
+  loader = 'pug-loader';
 
 // the variables with global scope for the resolvePlugin
 let webpackResolveAlias = {},
   loaderMethod = null,
   codeDependencies = [];
 
-const isRendering = (loaderMethod) => ['html', 'render'].indexOf(loaderMethod.method) > -1;
-
 /**
- * Resolve the code file path in require ().
+ * The pug plugin to resolve path for include, extends, require.
  *
- * @param {string} templateFile The filename of the template where resolves the resource.
- * @param {string} value The resource value include require().
- * @param {{}} aliases The resolve.alias from webpack config.
- * @return {string}
- */
-const resolveCodePath = (templateFile, value, aliases) =>
-  value.replaceAll(/(require\(.+?\))/g, (value) => {
-    const [, sourcePath] = /(?<=require\("|'|`)(.+)(?="|'|`\))/.exec(value) || [];
-    let resolvedPath = resolveTemplatePath(sourcePath, aliases);
-    if (sourcePath === resolvedPath) resolvedPath = path.join(path.dirname(templateFile), resolvedPath);
-
-    // Important: delete the file from require.cache to allow reload cached files after changes by watch.
-    delete require.cache[resolvedPath];
-    codeDependencies.push(resolvedPath);
-
-    return `require('${resolvedPath}')`;
-  });
-
-/**
- * The pug plugin to resolve path for include, extend, require.
- *
- * @type {{preLoad: (function(*): *)}}
+ * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
  */
 const resolvePlugin = {
-  preLoad: (ast) =>
+  /**
+   * Resolve the filename for extends / include / raw include.
+   *
+   * @param {string} filename The extends/include filename in template.
+   * @param {string} source The absolute path to template.
+   * @param {{}} options The options of pug compiler.
+   * @return {string}
+   */
+  resolve: (filename, source, options) => {
+    let resolvedFile = filename.trim();
+
+    if (resolvedFile[0] === '/') {
+      if (!options.basedir) optionBasedirException();
+      resolvedFile = path.join(options.basedir, resolvedFile);
+    } else {
+      if (!source) noSourceException();
+      resolvedFile = resolveTemplatePath(resolvedFile, webpackResolveAlias);
+      // note: on windows an absolute path begin not with `/` otherwise as like `C:\`
+      if (!path.isAbsolute(resolvedFile)) {
+        resolvedFile = path.join(path.dirname(source.trim()), resolvedFile);
+      }
+    }
+
+    return resolvedFile;
+  },
+
+  /**
+   * Resolve the filename for require().
+   *
+   * @param {{}} ast The parsed tree of pug template.
+   * @return {{}}
+   */
+  preCodeGen: (ast) =>
     walk(ast, (node) => {
-      if (node.type === 'FileReference') {
-        // resolving for extends/include
-        let result = resolveTemplatePath(node.path, webpackResolveAlias);
-        if (result && result !== node.path) node.path = result;
-      } else if (node.type === 'Code' && isRendering(loaderMethod)) {
-        // resolving for require of a code, e.g.: `- var data = require('./data.js')` (its need only by rendering)
-        if (node.val && node.val.indexOf('require(') > 0) {
-          let result = resolveCodePath(node.filename, node.val, webpackResolveAlias);
+      if (node.type === 'Code') {
+        // resolving for require of a code, e.g.: `- var data = require('./data.js')`
+        if (containRequire(node)) {
+          let result = resolveRequireCode(node.filename, node.val, webpackResolveAlias, codeDependencies);
           if (result && result !== node.val) node.val = result;
         }
       } else if (node.attrs) {
         // resolving for tag attributes, e.g.: img(src=require('./image.jpeg'))
         node.attrs.forEach((attr) => {
-          if (attr.val && typeof attr.val === 'string' && attr.val.indexOf('require(') === 0) {
-            let result = resolveResourcePath(attr.filename, attr.val, webpackResolveAlias, loaderMethod);
+          if (containRequire(attr)) {
+            let result = resolveRequireResource(attr.filename, attr.val, webpackResolveAlias, loaderMethod);
             if (result && result !== attr.val) attr.val = result;
           }
         });
       }
     }),
+};
+
+/**
+ * Whether the node value contains the require().
+ *
+ * @param {{val: *}} obj
+ * @return {boolean}
+ */
+const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.val.indexOf('require(') >= 0;
+
+const optionBasedirException = () => {
+  throw new Error(`[${loader}] the "basedir" option is required to use includes and extends with "absolute" paths.`);
+};
+
+const noSourceException = () => {
+  throw new Error(`[${loader}] the "filename" option is required to use includes and extends with "relative" paths.`);
 };
 
 /**
@@ -119,7 +147,7 @@ const compilePugContent = function (content, callback) {
   } catch (exception) {
     // watch files in which an error occurred
     if (exception.filename) loaderContext.addDependency(path.normalize(exception.filename));
-    callback('\n[pug-loader] Pug compilation failed.\n' + exception.toString());
+    callback(`\n[${loader}] Pug compilation failed.\n` + exception.toString());
     return;
   }
 

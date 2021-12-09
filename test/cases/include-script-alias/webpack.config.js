@@ -1,6 +1,5 @@
 const path = require('path');
 const PugPlugin = require('pug-plugin');
-const basePath = path.resolve(__dirname);
 const webRootPath = path.join(__dirname, 'public/');
 
 module.exports = {
@@ -8,7 +7,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      Includes: path.join(basePath, 'src/includes/'),
+      Includes: path.join(__dirname, 'src/includes/'),
     },
   },
 
@@ -29,8 +28,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          //method: 'compile',
-          method: 'render',
+          method: 'compile',
         },
       },
     ],

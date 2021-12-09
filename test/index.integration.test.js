@@ -33,161 +33,165 @@ beforeEach(() => {
 });
 
 describe('pug tests', () => {
-  it('hello-world', (done) => {
+  test('hello-world', (done) => {
     const relTestCasePath = 'hello-world';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('escape render', (done) => {
+  test('escape render', (done) => {
     const relTestCasePath = 'escape-render';
     compareContent(PATHS, relTestCasePath, done);
   });
 });
 
-describe('extends, include require javascript', () => {
-  it('include-alias', (done) => {
-    const relTestCasePath = 'include-alias';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-
-  it('include-basedir', (done) => {
-    const relTestCasePath = 'include-basedir';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-
-  it('include-relative', (done) => {
-    const relTestCasePath = 'include-relative';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-
-  it('include-script', (done) => {
-    const relTestCasePath = 'include-script';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-
-  it('extends-alias', (done) => {
+describe('extend / include / raw include', () => {
+  test('extends-alias', (done) => {
     const relTestCasePath = 'extends-alias';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('extends-relative', (done) => {
+  test('extends-relative', (done) => {
     const relTestCasePath = 'extends-relative';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-json-alias', (done) => {
+  test('include-alias', (done) => {
+    const relTestCasePath = 'include-alias';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include-basedir', (done) => {
+    const relTestCasePath = 'include-basedir';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include-relative', (done) => {
+    const relTestCasePath = 'include-relative';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include-script-alias', (done) => {
+    const relTestCasePath = 'include-script-alias';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include-script-relative', (done) => {
+    const relTestCasePath = 'include-script-relative';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+});
+
+describe('require code', () => {
+  test('require-json-alias', (done) => {
     const relTestCasePath = 'require-json-alias';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-json-relative', (done) => {
+  test('require-json-relative', (done) => {
     const relTestCasePath = 'require-json-relative';
     compareContent(PATHS, relTestCasePath, done);
   });
 });
 
-// Note: the pug template for each test case must be in separate directory,
-// because when in template used a variable in require(),
-// then will be loaded all other, not included, templates from current und sub directories.
-describe('require embedded resources', () => {
-  it('require-string', (done) => {
+describe('require resource', () => {
+  test('require-string', (done) => {
     const relTestCasePath = 'require-resource-string';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-alias', (done) => {
+  test('require-alias', (done) => {
     const relTestCasePath = 'require-resource-alias';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-include-mixin', (done) => {
+  test('require-include-mixin', (done) => {
     const relTestCasePath = 'require-resource-include-mixin';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-variable-current-dir', (done) => {
+  test('require-variable-current-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-current-dir';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-variable-parent-dir', (done) => {
+  test('require-variable-parent-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-parent-dir';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  it('require-variable-sub-dir', (done) => {
+  test('require-variable-sub-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-sub-dir';
     compareContent(PATHS, relTestCasePath, done);
   });
 });
 
 describe('require pug in javascript', () => {
-  it(`options.method default`, (done) => {
+  test(`options.method default`, (done) => {
     const relTestCasePath = 'javascript-option-method-default';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`options.method=render`, (done) => {
+  test(`options.method=render`, (done) => {
     const relTestCasePath = 'javascript-option-method-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`options.method=rtRender`, (done) => {
+  test(`options.method=rtRender`, (done) => {
     const relTestCasePath = 'javascript-option-method-rtrender';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`options.method=html`, (done) => {
+  test(`options.method=html`, (done) => {
     const relTestCasePath = 'javascript-option-method-html';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`query method compile`, (done) => {
+  test(`query method compile`, (done) => {
     const relTestCasePath = 'javascript-query-method-compile';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`query method render`, (done) => {
+  test(`query method render`, (done) => {
     const relTestCasePath = 'javascript-query-method-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`query methods compile and render`, (done) => {
+  test(`query methods compile and render`, (done) => {
     const relTestCasePath = 'javascript-query-method-all';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`options.data for render`, (done) => {
+  test(`options.data for render`, (done) => {
     const relTestCasePath = 'javascript-option-data-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`pug-loader in resource query`, (done) => {
+  test(`pug-loader in resource query`, (done) => {
     const relTestCasePath = 'javascript-inline-loader';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`javascript assets compile`, (done) => {
+  test(`javascript assets compile`, (done) => {
     const relTestCasePath = 'javascript-assets-compile';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`javascript assets render`, (done) => {
+  test(`javascript assets render`, (done) => {
     const relTestCasePath = 'javascript-assets-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`javascript assets html`, (done) => {
+  test(`javascript assets html`, (done) => {
     const relTestCasePath = 'javascript-assets-html';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`javascript esModule=false require`, (done) => {
+  test(`javascript esModule=false require`, (done) => {
     const relTestCasePath = 'javascript-esmodule-false-require';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  it(`javascript esModule=true import`, (done) => {
+  test(`javascript esModule=true import`, (done) => {
     const relTestCasePath = 'javascript-esmodule-true-import';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
