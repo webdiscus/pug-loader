@@ -1,6 +1,7 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
 
+const isWin = path.sep === '\\';
 const isJSON = (str) => typeof str === 'string' && str.length > 1 && str[0] === '{' && str[str.length - 1] === '}';
 const parseValue = (value) => (isJSON(value) ? JSON.parse(value) : value == null ? '' : value);
 
@@ -49,10 +50,112 @@ const getResourceParams = function (str) {
 };
 
 /**
+ * Converts the win path to POSIX standard.
+ * The require() understands only POSIX format.
+ *
+ * For example:
+ *   - `..\\some\\path\\file.js` to `../some/path/file.js`
+ *   - `C:\\some\\path\\file.js` to `C:/some/path/file.js`
+ *
+ * @param {string} value The windows path.
+ * @return {*}
+ */
+const pathToPosix = (value) => value.replace(/\\/g, '/');
+
+/**
+ * Create regexp to match alias for extends / include / raw include.
+ *
  * @param {string} match The matched alias.
  * @return {string} The regex pattern with matched aliases.
  */
-const regexpAlias = (match) => `^[~@]?(${match})(?=\\/)`;
+const regexpFileAlias = (match) => `^[~@]?(${match})(?=\\/)`;
+
+/**
+ * Create regexp to match alias for require('').
+ *
+ * @param {string} match The matched alias.
+ * @return {string} The regex pattern with matched aliases.
+ */
+const regexpRequireAlias = (match) => `(?<=["'\`])[~@]?(${match})(?=\\/)`;
+
+/**
+ * Resolve a path in pug template.
+ *
+ * @param {string} value value The value of extends/include.
+ * @param {{}} aliases The `resolve.alias` of webpack config.
+ * @return {string}
+ */
+const resolveTemplatePath = (value, aliases) => resolveAlias(value, aliases, regexpFileAlias);
+
+/**
+ * Resolve the code file path in require().
+ *
+ * @param {string} templateFile The filename of the template where resolves the resource.
+ * @param {string} value The resource value include require().
+ * @param {{}} aliases The resolve.alias from webpack config.
+ * @param {string[]} dependencies The list of dependencies for watching.
+ * @return {string}
+ */
+const resolveRequireCode = (templateFile, value, aliases, dependencies) =>
+  value.replaceAll(/(require\(.+?\))/g, (value) => {
+    const [, sourcePath] = /(?<=require\("|'|`)(.+)(?=`|'|"\))/.exec(value) || [];
+    let resolvedPath = resolveTemplatePath(sourcePath, aliases);
+
+    if (resolvedPath === sourcePath) resolvedPath = path.join(path.dirname(templateFile), sourcePath);
+
+    // windows only: fix the path format
+    if (isWin) resolvedPath = pathToPosix(resolvedPath);
+
+    // Important: delete the file from require.cache to allow reload cached files after changes by watch.
+    delete require.cache[resolvedPath];
+    dependencies.push(resolvedPath);
+
+    return `require('${resolvedPath}')`;
+  });
+
+/**
+ * Resolve a path in the argument of require() function.
+ *
+ * @param {string} templateFile The filename of the template where resolves the resource.
+ * @param {string} value The resource value include require().
+ * @param {{}} aliases The resolve.alias from webpack config.
+ * @param {LoaderMethod} method The object of the current method.
+ * @return {string|null}
+ */
+const resolveRequireResource = function (templateFile, value, aliases, method) {
+  // match an argument of require(sourcePath)
+  const [, sourcePath] = /(?<=require\()(.+)(?=\))/.exec(value) || [];
+  if (!sourcePath) return value;
+
+  let resourcePath = sourcePath;
+
+  // replace alias with absolute path
+  let resolvedPath = resolveAlias(resourcePath, aliases, regexpRequireAlias);
+
+  // if the alias is not found in the path,
+  // then add the absolute path of the current template at the beginning of the argument,
+  // e.g. like this require('/path/to/template/' + 'filename.jpeg')
+  if (resolvedPath === resourcePath) {
+    // delete `./` from path, because at begin will be added full path like `/path/to/current/dir/`
+    resourcePath = resourcePath.replace(/(?<=[^\.])(\.\/)/, '');
+
+    // if an argument of require() begin with a relative parent path as the string template with a variable,
+    // like require(`../images/${file}`), then extract the relative path to the separate string
+    if (resourcePath.indexOf('`../') === 0) {
+      const relPathRegex = /(?<=`)(.+)(?=\$\{)/;
+      const [, relPath] = relPathRegex.exec(value);
+      if (relPath) {
+        resourcePath = `'${relPath}' + ` + resourcePath.replace(relPathRegex, '');
+      }
+    }
+    resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
+  }
+
+  // windows only: fix the path format
+  if (isWin) resolvedPath = pathToPosix(resolvedPath);
+
+  return method.requireResource(resolvedPath);
+};
 
 /**
  * Replace founded alias in require argument.
@@ -65,60 +168,15 @@ const regexpAlias = (match) => `^[~@]?(${match})(?=\\/)`;
 const resolveAlias = (value, aliases, regexp) => {
   const patternAliases = Object.keys(aliases).join('|');
 
+  // no aliases
   if (!patternAliases) return value;
 
   const [, alias] = new RegExp(regexp(patternAliases)).exec(value) || [];
 
-  return alias ? value.replace(new RegExp(regexp(alias)), aliases[alias]).replace('//', '/') : value;
-};
+  // path contains no alias
+  if (!alias) return value;
 
-/**
- * Resolve a path in pug template.
- *
- * @param {string} value value The value of extends/include.
- * @param {{}} aliases The `resolve.alias` of webpack config.
- * @return {string}
- */
-const resolveTemplatePath = (value, aliases) => resolveAlias(value, aliases, regexpAlias);
-
-/**
- * Resolve a path in the argument of require() function.
- *
- * @param {string} templateFile The filename of the template where resolves the resource.
- * @param {string} value The resource value include require().
- * @param {{}} aliases The resolve.alias from webpack config.
- * @param {LoaderMethod} method The object of the current method.
- * @return {string|null}
- */
-const resolveResourcePath = function (templateFile, value, aliases, method) {
-  // match an argument of require(sourcePath)
-  const [, sourcePath] = /(?<=require\()(.+)(?=\))/.exec(value) || [];
-  if (!sourcePath) return value;
-
-  // 1. delete `./` from path, because at begin will be added full path like `/path/to/current/dir/`
-  let resourcePath = sourcePath.replace(/(?<=[^\.])(\.\/)/, '');
-
-  // 2. replace alias with absolute path
-  // todo Fix usage prefixes ~@, e.g. img(src=require('~Images/image.jpeg')) not found!
-  let resolvedPath = resolveAlias(resourcePath, aliases, (match) => `(?<=["'\`])(${match})(?=\/)`);
-
-  // 3. if the alias is not found in the path,
-  // then add the absolute path of the current template at the beginning of the argument,
-  // e.g. like this require('/path/to/template/' + 'filename.jpeg')
-  if (resolvedPath === resourcePath) {
-    // 4. if an argument of require() begin with a relative parent path as the string template with a variable,
-    // like require(`../images/${file}`), then extract the relative path to the separate string
-    if (resourcePath.indexOf('`../') === 0) {
-      const relPathRegex = /(?<=`)(.+)(?=\$\{)/;
-      const [, relPath] = relPathRegex.exec(value);
-      if (relPath) {
-        resourcePath = `'${relPath}' + ` + resourcePath.replace(relPathRegex, '');
-      }
-    }
-    resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
-  }
-
-  return method.requireResource(resolvedPath);
+  return value.replace(new RegExp(regexp(alias)), aliases[alias]).replace('//', '/');
 };
 
 /**
@@ -136,8 +194,11 @@ const injectExternalVariables = (funcBody, locals) =>
   funcBody.replace(/(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/, 'Object.assign(__external_locals__, locals)');
 
 module.exports = {
+  isWin,
+  pathToPosix,
   getResourceParams,
   resolveTemplatePath,
-  resolveResourcePath,
+  resolveRequireCode,
+  resolveRequireResource,
   injectExternalVariables,
 };

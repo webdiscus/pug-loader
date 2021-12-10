@@ -82,10 +82,7 @@ module.exports = {
         name: 'Firefox',
       },
     },*/
-    hot: false,
-    //hot: true,
-    //liveReload: true,
-    liveReload: false,
+    liveReload: true,
 
     client: {
       progress: true,

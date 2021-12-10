@@ -26,7 +26,7 @@ const loaderMethods = [
     method: 'render',
     queryParam: 'pug-render',
     // the result of compiled string must be exact as this:
-    //requireResource: (file) => "((file) => `' + require('${file}') + '`)(" + file + ')',
+    // requireResource: (file) => "((file) => `' + require('${file}') + '`)(" + file + ')',
     // to prevent escaping the 'single quotes' they must be as HTML char '&quot;' encoded and at end decoded:
     requireResource: (file) => '((file) => `&quot; + require(&quot;${file}&quot;) + &quot;`)(' + file + ')',
     output: (funcBody, locals, esModule) =>

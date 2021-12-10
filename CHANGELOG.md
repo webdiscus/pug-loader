@@ -1,5 +1,10 @@
 # Change log
 
+## 1.5.1 (2021-12-10)
+- bugfix: fix path resolving on windows
+- some optimisations
+- code refactoring
+
 ## 1.5.0 (2021-12-07)
 - NEW: the `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
 - feature: added option `basedir` for all absolute inclusion
