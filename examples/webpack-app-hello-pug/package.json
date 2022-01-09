@@ -2,19 +2,20 @@
   "name": "webpack-app",
   "version": "1.0.0",
   "description": "Simple web app",
+  "author": "webdiscus",
+  "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "__start": "webpack serve",
+    "start": "webpack serve",
     "build": "webpack --mode=production --progress",
     "watch": "webpack --mode=production --watch --progress"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "@webdiscus/pug-loader": "^1.5.1",
-    "pug-plugin": "^1.1.0",
-    "webpack": "^5.64.0",
+    "@webdiscus/pug-loader": "^1.6.0",
+    "css-loader": "^6.5.1",
+    "pug-plugin": "^1.2.0",
+    "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.5.0"
+    "webpack-dev-server": "^4.7.2"
   }
 }

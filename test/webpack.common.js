@@ -9,7 +9,6 @@ module.exports = {
   resolveLoader: {
     alias: {
       'pug-loader': path.join(basePath, '../'),
-      'asset-loader': path.join(basePath, '../src/asset-loader.js'),
     },
   },
 

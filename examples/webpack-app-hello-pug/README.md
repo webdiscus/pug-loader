@@ -1,14 +1,19 @@
 ## Install
-npm install
+```
+npm i
+```
 
-## Start local app in browser
+## Start the app in browser for local development
+```
 npm run start
-> !!! currently not work !!! 
-> 
-> Bugfix in progress...
+```
 
 ## Build
+```
 npm run build
+```
 
 ## Watch
+```
 npm run watch
+```

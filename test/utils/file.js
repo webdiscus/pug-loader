@@ -64,6 +64,10 @@ export const readJsonSync = (file) => {
  * @return {any}
  */
 export const readTextFileSync = (file) => {
+  if (!fs.existsSync(file)) {
+    console.log(`WARN: the file "${file}" not found.`);
+    return '';
+  }
   return fs.readFileSync(file, 'utf-8');
 };
 

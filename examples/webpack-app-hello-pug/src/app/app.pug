@@ -4,7 +4,6 @@ p Hello Pug!
 img(src=require('Images/image.jpeg'))
 
 - var colors = require('App/colors.json')
-
 .colors
   each color in colors
     div(style=`background-color:${color.hex};`)= color.name

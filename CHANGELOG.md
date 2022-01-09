@@ -1,7 +1,12 @@
 # Change log
 
+## 1.6.0 (2022-01-12)
+- added supports resolving aliases from `webpack.resolve.plugins`
+  if a file is by `webpack.resolve.alais` not resolved, then uses the slow enhanced resolver
+- update packages
+
 ## 1.5.1 (2021-12-10)
-- bugfix: fix path resolving on windows
+- bugfix: fix path resolving on Windows
 - some optimisations
 - code refactoring
 

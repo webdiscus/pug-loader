@@ -51,13 +51,13 @@ const getResourceParams = function (str) {
 
 /**
  * Converts the win path to POSIX standard.
- * The require() understands only POSIX format.
+ * The require() function understands only POSIX format.
  *
- * For example:
+ * Fix path, for example:
  *   - `..\\some\\path\\file.js` to `../some/path/file.js`
  *   - `C:\\some\\path\\file.js` to `C:/some/path/file.js`
  *
- * @param {string} value The windows path.
+ * @param {string} value The path on Windows.
  * @return {*}
  */
 const pathToPosix = (value) => value.replace(/\\/g, '/');
@@ -103,7 +103,7 @@ const resolveRequireCode = (templateFile, value, aliases, dependencies) =>
 
     if (resolvedPath === sourcePath) resolvedPath = path.join(path.dirname(templateFile), sourcePath);
 
-    // windows only: fix the path format
+    // Windows only: fix the path format
     if (isWin) resolvedPath = pathToPosix(resolvedPath);
 
     // Important: delete the file from require.cache to allow reload cached files after changes by watch.
@@ -151,7 +151,7 @@ const resolveRequireResource = function (templateFile, value, aliases, method) {
     resolvedPath = `'${path.dirname(templateFile)}/' + ${resourcePath}`;
   }
 
-  // windows only: fix the path format
+  // Windows only: fix the path format
   if (isWin) resolvedPath = pathToPosix(resolvedPath);
 
   return method.requireResource(resolvedPath);
@@ -166,9 +166,11 @@ const resolveRequireResource = function (templateFile, value, aliases, method) {
  * @return {string} The string with replaced alias.
  */
 const resolveAlias = (value, aliases, regexp) => {
+  if (!aliases) return value;
+
   const patternAliases = Object.keys(aliases).join('|');
 
-  // no aliases
+  // webpack.alias is empty
   if (!patternAliases) return value;
 
   const [, alias] = new RegExp(regexp(patternAliases)).exec(value) || [];

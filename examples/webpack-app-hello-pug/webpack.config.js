@@ -34,7 +34,10 @@ module.exports = {
 
   plugins: [
     // extract HTML from pug files defined by webpack entry
-    new PugPlugin(),
+    new PugPlugin({
+      // extract CSS from required styles in pug and from webpack entry
+      modules: [PugPlugin.extractCss()],
+    }),
   ],
 
   module: {
@@ -61,8 +64,9 @@ module.exports = {
         test: /\.(css)/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/css/[hash][ext][query]',
+          filename: 'assets/css/[name].[hash][ext]',
         },
+        use: ['css-loader'],
       },
     ],
   },
@@ -71,21 +75,24 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'public'),
     },
-    compress: true,
     port: 9000,
     https: false,
-    // open in default browser
-    open: true,
-    // define a development browser
-    /*open: {
-      app: {
-        name: 'Firefox',
-      },
-    },*/
     liveReload: true,
-
+    hot: true,
     client: {
       progress: true,
     },
+    compress: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    // open in default browser
+    open: true,
+    // open: {
+    //   app: {
+    //     name: 'Firefox',
+    //   },
+    // },
   },
 };

@@ -1,24 +1,28 @@
 // add polyfill for node.js >= 12.0.0 && < 15.0.0
 require('./polyfills/string.replaceAll');
 
-const path = require('path'),
-  pug = require('pug'),
-  walk = require('pug-walk'),
-  { merge } = require('webpack-merge'),
-  {
-    resolveTemplatePath,
-    resolveRequireCode,
-    resolveRequireResource,
-    getResourceParams,
-    injectExternalVariables,
-  } = require('./utils'),
-  loaderMethods = require('./loader-methods'),
-  loader = 'pug-loader';
+const path = require('path');
+const pug = require('pug');
+const walk = require('pug-walk');
+const { merge } = require('webpack-merge');
+const {
+  resolveTemplatePath,
+  resolveRequireCode,
+  resolveRequireResource,
+  getResourceParams,
+  injectExternalVariables,
+} = require('./utils');
+const { getPugResolverSync, getDirResolverSync } = require('./resolver');
+const loaderMethods = require('./loader-methods');
+const loader = 'pug-loader';
 
 // the variables with global scope for the resolvePlugin
-let webpackResolveAlias = {},
+let webpackResolveAlias = null,
   loaderMethod = null,
-  codeDependencies = [];
+  codeDependencies = [],
+  loaderContext = null,
+  resolvePugSync,
+  resolveDirSync;
 
 /**
  * The pug plugin to resolve path for include, extends, require.
@@ -35,21 +39,49 @@ const resolvePlugin = {
    * @return {string}
    */
   resolve: (filename, source, options) => {
-    let resolvedFile = filename.trim();
+    const originalFile = filename.trim();
+    let result = originalFile;
 
-    if (resolvedFile[0] === '/') {
+    // absolute path is resolved by prepending options.basedir
+    if (originalFile[0] === '/') {
       if (!options.basedir) optionBasedirException();
-      resolvedFile = path.join(options.basedir, resolvedFile);
-    } else {
-      if (!source) noSourceException();
-      resolvedFile = resolveTemplatePath(resolvedFile, webpackResolveAlias);
-      // note: on windows an absolute path begin not with `/` otherwise as like `C:\`
-      if (!path.isAbsolute(resolvedFile)) {
-        resolvedFile = path.join(path.dirname(source.trim()), resolvedFile);
-      }
+      return path.join(options.basedir, originalFile);
     }
 
-    return resolvedFile;
+    // relative to the current file
+    if (originalFile[0] === '.') {
+      return path.join(path.dirname(source.trim()), result);
+    }
+
+    if (!source) noSourceException();
+
+    // resolve by `resolve.alias`
+    if (webpackResolveAlias) {
+      result = resolveTemplatePath(originalFile, webpackResolveAlias);
+    }
+
+    // #Method 1
+    // fallback to slow resolver for `resolve.plugins`
+    // resolve alias or relative path to the current file
+    // note: relative path is allowed without `./`
+    // see https://pugjs.org/language/includes.html
+    if (result === originalFile) {
+      result = resolvePugSync(path.dirname(source.trim()), filename);
+      //console.log('### RESOLVE\nfile:', filename, '\nsource:', source, '\n==', result);
+    }
+
+    // #Method 2
+    // fallback to slow resolver for `resolve.plugins`,
+    // the alias must begin with any non-word char, like @ or ~
+    // if (result === originalFile && !/^[a-z]{1}/i.test(result)) {
+    //   result = resolvePugSync(filename);
+    //   console.log('### RESOLVE\nfile:', filename, '\nsource:', source, '\n==', result);
+    // }
+    // if (!path.isAbsolute(result)) {
+    //   result = path.join(path.dirname(source.trim()), result);
+    // }
+
+    return result;
   },
 
   /**
@@ -166,10 +198,15 @@ const compilePugContent = function (content, callback) {
 };
 
 module.exports = function (content, map, meta) {
+  const webpackResolve = this._compiler.options.resolve || {};
   const callback = this.async();
+  loaderContext = this;
 
-  // save resolve.alias from webpack config for global scope in this module,
-  webpackResolveAlias = this._compiler.options.resolve.alias || {};
+  // save resolve.alias from webpack config for global scope in this module, defaults the `webpackResolveAlias` is null
+  if (webpackResolve.alias && Object.keys(webpackResolve.alias).length > 0) webpackResolveAlias = webpackResolve.alias;
+
+  resolvePugSync = getPugResolverSync(this.rootContext, webpackResolve);
+  //resolveDirSync = getDirResolverSync(this.rootContext, webpackResolve);
 
   compilePugContent.call(this, content, (err, result) => {
     if (err) return callback(err);

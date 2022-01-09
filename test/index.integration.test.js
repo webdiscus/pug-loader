@@ -55,8 +55,13 @@ describe('extend / include / raw include', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  test('include-alias', (done) => {
-    const relTestCasePath = 'include-alias';
+  test('include alias from resolve.alias', (done) => {
+    const relTestCasePath = 'include-alias-resolve.alias';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include alias from resolve.plugin', (done) => {
+    const relTestCasePath = 'include-alias-resolve.plugins';
     compareContent(PATHS, relTestCasePath, done);
   });
 

@@ -1,6 +1,6 @@
 p require-variable-current-dir
 
-- file = 'image.jpeg'
+- var file = 'image.jpeg'
 
 img(src=require(file))
 img(src=require(`${file}`))
@@ -10,6 +10,6 @@ img(src=require('./' + `${file}`))
 img(src=require(`./${file}`))
 
 //- fail
-//- file = './image.jpeg'
+//- var file = './image.jpeg'
 //-img(src=require(file))
 //-img(src=require('' + file))

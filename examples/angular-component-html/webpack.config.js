@@ -11,15 +11,15 @@ module.exports = {
 
   module: {
     rules: [
-      /*{
-        test: /\.pug$/,
-        loader: 'pug-loader',
-        options: {
-          method: 'render',
-          doctype: 'html',
-          plugins: [require('pug-plugin-ng')],
-        },
-      },*/
+      // {
+      //   test: /\.pug$/,
+      //   loader: 'pug-loader',
+      //   options: {
+      //     method: 'render',
+      //     doctype: 'html',
+      //     plugins: [require('pug-plugin-ng')],
+      //   },
+      // },
 
       {
         test: /\.pug$/,

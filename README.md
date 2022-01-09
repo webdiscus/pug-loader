@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/@webdiscus%2Fpug-loader.svg)](https://badge.fury.io/js/@webdiscus%2Fpug-loader)
+[![npm](https://img.shields.io/npm/v/@webdiscus/pug-loader?logo=npm&color=brightgreen "npm package")](https://www.npmjs.com/package/@webdiscus/pug-loader "download npm package")
 [![node](https://img.shields.io/node/v/@webdiscus/pug-loader)](https://nodejs.org)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/peer/webpack)](https://webpack.js.org/)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/peer/pug)](https://github.com/pugjs/pug)
@@ -19,7 +19,7 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
  - supports features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
  - up to 4x faster than original `pugjs/pug-loader` at webpack starting 
  - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
- - supports Webpack `resolve.alias`, works with and without the prefixes: `~` `@`
+ - supports Webpack `resolve.alias` and `resolve.plugins`, works with and without the prefixes `~` `@`
  - supports integration with `Angular Component`
  - supports the syntax of `CommonJS` and `ES modules` in generated templates for loading them via `require` or `import`
  - compiling a pug into a template function, e.g. using in javascript:
