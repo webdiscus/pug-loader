@@ -8,20 +8,20 @@
 # [pug-loader](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
 Webpack loader for the [Pug](https://pugjs.org) templates.\
-The pug loader resolves paths and webpack aliases for `extends`/`include`/`require()` in a pug template and compiles it to HTML or into a template function.
+The pug loader resolves paths and webpack aliases for `extends`/`include`/`require()` in a pug template and compiles it to HTML or to a template function.
 
 > **NEW:** The `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
 > This plugin extracts HTML from the `pug` files defined in the webpack entry and save them in the output directory.
 > Now is possible define `pug` files directly in `webpack entry`. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples). 
 
 ## Features
- - supports **Webpack 5** and **Pug 3**
- - supports features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
- - up to 4x faster than original `pugjs/pug-loader` at webpack starting 
- - up to 8x faster than original `pugjs/pug-loader` at webpack watching during compile changes in dependencies
- - supports Webpack `resolve.alias` and `resolve.plugins`, works with and without the prefixes `~` `@`
- - supports integration with `Angular Component`
- - supports the syntax of `CommonJS` and `ES modules` in generated templates for loading them via `require` or `import`
+ - supports for **Webpack 5** and **Pug 3**
+ - supports for features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
+ - many time faster than original `pugjs/pug-loader`
+ - supports for Webpack `resolve.alias` and `resolve.plugins`, works with and without the prefixes `~` `@`
+ - supports for the path resolving from `tsconfig.json` using [`tsconfig-paths-webpack-plugin`](https://github.com/dividab/tsconfig-paths-webpack-plugin)
+ - supports for the integration with `Angular Component`
+ - supports for the syntax of `CommonJS` and `ES modules` in generated templates for loading them via `require` or `import`
  - compiling a pug into a template function, e.g. using in javascript:
    ```js
    const tmpl = require('template.pug');
@@ -31,29 +31,37 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```js
    const html = require('template.pug?pug-render');
    ```
-   supports the `require()` for CommonJS and JSON files in pug templates **by all methods**, e.g.: \
-   `data.json`
-   ```json
-   [
-     { "id": 1, "name": "abc" },
-     { "id": 2, "name": "xyz" }
-   ]
-   ```
-   `say-hello.js`
-   ```js
-   module.exports = function (name) {
-     return `Hello ${name}!`;
-   }
-   ```
-   `pug template`
+ - resolving the attribute `srcset` in `img` tag:
    ```pug
-   - var sayHello = require('./say-hello')
-   h1 #{ sayHello('pug') }
-   
-   - var myData = require('./data.json')
-   each item in myData
-     div #{item.id} #{item.name}
+   img(srcset=`${require('./image1.jpeg')} 320w, ${require('./image2.jpeg')} 640w` src=require('./image.jpeg'))
    ```
+   output
+   ```html
+   <img srcset="/assets/image1.f78b30f4.jpeg 320w, /assets/image2.f78b30f4.jpeg 640w" src="/assets/image.f78b30f4.jpeg">
+   ```
+ - use the `require()` for CommonJS and JSON files in pug templates, e.g.: \
+    `data.json`
+    ```json
+    [
+      { "id": 1, "name": "abc" },
+      { "id": 2, "name": "xyz" }
+    ]
+    ```
+    `say-hello.js`
+    ```js
+    module.exports = function (name) {
+      return `Hello ${name}!`;
+    }
+    ```
+    `pug template`
+    ```pug
+    - var sayHello = require('./say-hello')
+    h1 #{ sayHello('pug') }
+   
+    - var myData = require('./data.json')
+    each item in myData
+      div #{item.id} #{item.name}
+    ```
  - rendering to pure HTML using method `'html'` to handle HTML in additional loaders, e.g. in `html-loader`
  - passing custom data to templates at compile time using the loader option `data`, e.g.:
    ```js
@@ -70,7 +78,7 @@ The pug loader resolves paths and webpack aliases for `extends`/`include`/`requi
    ```js
    const html = require('template.pug?pug-render&{"key":"value"}');
    ```
- - supports watching of changes in all dependencies
+ - supports for the watching of changes in all dependencies
  - all features have integration [tests](https://github.com/webdiscus/pug-loader/blob/master/test/index.test.js) processed through a webpack runner
  
 **Why use this particular pug loader instead of the original one?**
@@ -520,7 +528,7 @@ In webpack config add to `module.rules`:
      { 
        loader: 'html-loader',
        options: {
-         esModule: false, // need to allow use require() for load a tempale in JavaScript
+         esModule: false, // allow to use the require() for load a templqte in JavaScript
        },
      },
      {
@@ -810,70 +818,45 @@ module.exports = {
 ```
 More information about asset-modules [see here](https://webpack.js.org/guides/asset-modules/).
 
-### Known issues / features by usage embedded resources
-Due to the peculiarities of the pug compiler,
-the interpolation of the argument to the `require()` function depends on its string and variable parts.\
-Use a relative path only in the string before the variable.
-The variable must contain only the filename without specifying a path.
-
-Examples of <span style="color: red">incorrect</span> usage:
-```pug
-- filename = './image.jpeg'
-img(src=require(filename))
-```
-```pug
-- filename = '../relative/path/to/resource/image.jpeg'
-img(src=require(filename))
-```
-
-Examples of <span style="color: green">correct</span> usage:
-```pug
-- filename = 'image.jpeg'
-img(src=require(filename))
-```
-```pug
-- filename = 'image.jpeg'
-img(src=require('../relative/path/to/resource/' + filename))
-```
 The example of dynamically generating embedded resources in template:
 ```pug
 - files = ['image1.jpeg', 'image2.jpeg', 'image3.jpeg']
 each file in files
-  img(src=require('../images/' + file))
+  img(src=require(file))
 ```
+
+### File resolving examples
 
 The example of webpack alias used in the table below:
 ```
 resolve: {
   alias: {
-    SourceImages: path.join(__dirname, 'src/images/'),
+    Images: path.join(__dirname, 'src/images/'),
   },
 }
 ```
 
-Examples for using embedded resources:
-
-Code | @webdiscus/pug-loader| pugjs/pug-loader | Note
----|---|---|---
-`img(src=require('image.jpeg'))`| <span style="color:green">**OK**</span> | <span style="color:red">fail</span>
-`img(src=require('./image.jpeg'))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`img(src=require('./images/image.jpeg'))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`img(src=require('../images/image.jpeg'))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`img(src=require('SourceImages/image.jpeg'))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> | Usage of the webpack alias to images directory.
-`- file = 'image.jpeg'`<br>`img(src=require('SourceImages/' + file))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`- file = 'image.jpeg'`<br>``img(src=require(`SourceImages/${file}`))``|<span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`- file = 'image.jpeg'`<br>`img(src=require(file))`| <span style="color:green">**OK**</span> | <span style="color:red">fail</span>
-`- file = 'image.jpeg'`<br> ``img(src=require(`${file}`))``| <span style="color:green">**OK**</span> | <span style="color:red">fail</span>
-`- file = 'image.jpeg'`<br>`img(src=require('./' + file))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`- file = './image.jpeg'`<br>`img(src=require(file))`| <span style="color:red">fail</span> | <span style="color:red">fail</span> | Don't use `./` in variable of filename.
-`- file = './image.jpeg'`<br>`img(src=require('' + file))`| <span style="color:red">fail</span> | <span style="color:green">**OK**</span> | Don't use `./` in variable of filename.
-`- file = 'images/image.jpeg'`<br>`img(src=require(file))`| <span style="color:green">**OK**</span> | <span style="color:red">fail</span>
-`- file = 'image.jpeg'`<br>`img(src=require('./images/' + file))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`- file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-`- file = '../images/image.jpeg'`<br>`img(src=require(file))`| <span style="color:red">fail</span> | <span style="color:red">fail</span> | Don't use a path in a variable.
-`- file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> | Define a path separately as string and add to she the variable contained only a filename.
-`- file = 'image.jpeg'`<br>``img(src=require(`../images/${file}`))``| <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span>
-Include the template from sub directory: <br> `include mixins`<br>``img(src=require('./image.jpeg'))``| <span style="color:green">**OK**</span> | <span style="color:red">fail</span> | when use a mixin and require on same file, then `pugjs/pug-loader` can't resolve the file in require().
+| Code                                                                                                                                         | @webdiscus/pug-loader                   | pugjs/pug-loader                        |
+|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|-----------------------------------------|
+| `img(src=require('image.jpeg'))`                                                                                                             | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `img(src=require('./image.jpeg'))`                                                                                                           | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `img(src=require('./images/image.jpeg'))`                                                                                                    | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `img(src=require('../images/image.jpeg'))`                                                                                                   | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `img(src=require('Images/image.jpeg'))`                                                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'image.jpeg'`<br>`img(src=require('Images/' + file))`                                                                          | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`Images/${file}`))``                                                                        | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'image.jpeg'`<br>`img(src=require(file))`                                                                                      | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = 'image.jpeg'`<br> ``img(src=require(`${file}`))``                                                                              | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = 'image.jpeg'`<br>`img(src=require('./' + file))`                                                                               | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = './image.jpeg'`<br>`img(src=require(file))`                                                                                    | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = './image.jpeg'`<br>`img(src=require('' + file))`                                                                               | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'images/image.jpeg'`<br>`img(src=require(file))`                                                                               | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = 'image.jpeg'`<br>`img(src=require('./images/' + file))`                                                                        | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = '../images/image.jpeg'`<br>`img(src=require(file))`                                                                            | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`                                                                       | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`../images/${file}`))``                                                                     | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
+| the `pugjs/pug-loader` can't resolve when used a mixin and require on same file: <br> `include mixins`<br>`img(src=require('./image.jpeg'))` | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
 
 ---
 > Important: in examples used name of loader as `pug-loader`, because it is defined as **alias** at resolveLoader:
@@ -903,8 +886,6 @@ Include the template from sub directory: <br> `include mixins`<br>``img(src=requ
 
 [ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)
 
-<!-- prettier-ignore-start -->
 [pug]: https://github.com/pugjs/pug
 [pug-api]: https://pugjs.org/api/reference.html
 [pug-plugin]: https://github.com/webdiscus/pug-plugin
-<!-- prettier-ignore-end -->

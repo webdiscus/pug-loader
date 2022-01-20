@@ -38,12 +38,13 @@ module.exports = {
           method: 'render',
         },
       },
-      // process image resources in pug templates
+
+      // process required images in pug
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/images/[name]-[hash][ext]',
+          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
     ],

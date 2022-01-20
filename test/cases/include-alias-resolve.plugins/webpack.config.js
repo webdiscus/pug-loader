@@ -14,7 +14,9 @@ module.exports = {
 
   resolve: {
     plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
-    alias: {},
+    alias: {
+      AliasImages: path.join(__dirname, 'src/assets/images/'),
+    },
   },
 
   output: {
@@ -29,6 +31,18 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: 'pug-loader',
+        options: {
+          method: 'compile',
+        },
+      },
+
+      // process required images in pug
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/images/[name].[hash:8][ext]',
+        },
       },
     ],
   },

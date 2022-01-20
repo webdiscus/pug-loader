@@ -1,0 +1,17 @@
+h1 Hello World!
+
+//- Static resource URL from public web path should not be parsed, leave as is.
+link(rel='stylesheet' href='/absolute/assets/styles2.css')
+img(src='relative/assets/image2.jpeg')
+
+//- Required resource must be processed.
+link(rel='stylesheet' href=require('../styles.css'))
+img(src=require('../image.jpeg')).a
+
+//- test the resolving of an outer relative path
+- var image = '../image.jpeg'
+img(src=require(image)).b
+- var image3 = './img/image2.jpeg'
+- var image = './img/../../image.jpeg'
+img(src=require(image)).c
+img(src=require(image3)).d

@@ -38,8 +38,18 @@ describe('pug tests', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  test('escape render', (done) => {
-    const relTestCasePath = 'escape-render';
+  test('escape method compile', (done) => {
+    const relTestCasePath = 'escape-method-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('escape method render', (done) => {
+    const relTestCasePath = 'escape-method-render';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('escape method html', (done) => {
+    const relTestCasePath = 'escape-method-html';
     compareContent(PATHS, relTestCasePath, done);
   });
 });
@@ -87,18 +97,28 @@ describe('extend / include / raw include', () => {
 });
 
 describe('require code', () => {
-  test('require-json-alias', (done) => {
+  test('require json via alias', (done) => {
     const relTestCasePath = 'require-json-alias';
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  test('require-json-relative', (done) => {
+  test('require json relative', (done) => {
     const relTestCasePath = 'require-json-relative';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require js module relative', (done) => {
+    const relTestCasePath = 'require-js-relative';
     compareContent(PATHS, relTestCasePath, done);
   });
 });
 
 describe('require resource', () => {
+  test('require-img-srcset', (done) => {
+    const relTestCasePath = 'require-img-srcset';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-string', (done) => {
     const relTestCasePath = 'require-resource-string';
     compareContent(PATHS, relTestCasePath, done);
@@ -128,6 +148,21 @@ describe('require resource', () => {
     const relTestCasePath = 'require-resource-variable-sub-dir';
     compareContent(PATHS, relTestCasePath, done);
   });
+
+  test('require-assets-method-compile', (done) => {
+    const relTestCasePath = 'require-assets-method-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-assets-method-render', (done) => {
+    const relTestCasePath = 'require-assets-method-render';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-assets-method-html', (done) => {
+    const relTestCasePath = 'require-assets-method-html';
+    compareContent(PATHS, relTestCasePath, done);
+  });
 });
 
 describe('require pug in javascript', () => {
@@ -138,11 +173,6 @@ describe('require pug in javascript', () => {
 
   test(`options.method=render`, (done) => {
     const relTestCasePath = 'javascript-option-method-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.method=rtRender`, (done) => {
-    const relTestCasePath = 'javascript-option-method-rtrender';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
@@ -206,6 +236,12 @@ describe('exception tests', () => {
   test('exception: pug compile', (done) => {
     const relTestCasePath = 'exception-pug-compile';
     const containString = `Pug compilation failed.`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: file cannot be resolved', (done) => {
+    const relTestCasePath = 'exception-resolve';
+    const containString = `can't be resolved`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 });
