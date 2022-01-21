@@ -6,8 +6,8 @@ module.exports = {
 
   resolveLoader: {
     alias: {
-      'pug-loader': '@webdiscus/pug-loader',
-      //'pug-loader': path.join(__dirname, '../../'), // use it only for local development
+      //'pug-loader': '@webdiscus/pug-loader',
+      'pug-loader': path.join(__dirname, '../../'), // use it only for local development
     },
   },
 

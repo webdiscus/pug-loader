@@ -151,11 +151,12 @@ const resolver = {
   resolveRequireCode: (templateFile, value, dependencies) =>
     value.replaceAll(/(require\(.+?\))/g, (value) => {
       const [, file] = /(?<=require\("|'|`)(.+)(?=`|'|"\))/.exec(value) || [];
-      let resolvedPath = resolver.resolve(file, templateFile);
+      const resolvedPath = resolver.resolve(file, templateFile);
+      const dependencyFile = isWin ? path.normalize(resolvedPath) : resolvedPath;
 
       // Important: delete the file from require.cache to allow reloading cached files after changes by watch.
-      delete require.cache[resolvedPath];
-      dependencies.push(resolvedPath);
+      delete require.cache[dependencyFile];
+      dependencies.push(dependencyFile);
 
       return `require('${resolvedPath}')`;
     }),

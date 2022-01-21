@@ -1,5 +1,9 @@
 # Change log
 
+## 1.6.2 (2022-01-21)
+- fix the path of dependencies in windows
+- update npm packages
+
 ## 1.6.1 (2022-01-20)
 - added supports for resolving of aliases from webpack `resolve.plugins` by required resources, like styles, scripts
 - added supports for resolving of `srcset` attribute in `img` tag
