@@ -52,6 +52,11 @@ describe('pug tests', () => {
     const relTestCasePath = 'escape-method-html';
     compareContent(PATHS, relTestCasePath, done);
   });
+
+  test('pass options from html-webpack-plugin', (done) => {
+    const relTestCasePath = 'html-webpack-plugin-pass-options';
+    compareContent(PATHS, relTestCasePath, done);
+  });
 });
 
 describe('extend / include / raw include', () => {
