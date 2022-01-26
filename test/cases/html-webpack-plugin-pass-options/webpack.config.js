@@ -15,10 +15,13 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'My title',
-      template: path.join(__dirname, 'src/index.pug'),
-      // use following with method `render` or `html`:
-      //template: path.join(__dirname, 'src/index.pug?htmlWebpackPlugin={"options":{"title":"My title"}}'),
+      title: 'My title', // this option is in pug template not available
+      // pass into template the variables via query,
+      // because at render time the variable `htmlWebpackPlugin` still not exists
+      template: path.join(
+        __dirname,
+        'src/index.pug?htmlWebpackPlugin=' + JSON.stringify({ options: { title: 'My title' } })
+      ),
       filename: 'index.html',
     }),
   ],
@@ -28,19 +31,13 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: 'pug-loader',
-        options: {
-          // ACHTUNG:
-          // the object `htmlWebpackPlugin` will be passed only into a template function at runtime
-          // via the plugin HtmlWebpackPlugin.
-          // The template function is generated with the method `compile` only. Default option method is `compile`.
-          //method: 'compile', // defaults method, don't need to define the option
-          //
-          // If you use the method `render` or `html`, then the loader render the template into HTML at compile time,
-          // before the plugin HtmlWebpackPlugin will be called.
-          // Therefore, pass a custom data via query string, e.g.:
-          // 'src/index.pug?htmlWebpackPlugin={"options":{"title":"My title"}}'
-          // or simple 'src/index.pug?title=My title', then use in pug: div= title
-          //method: 'render',
+      },
+
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
     ],

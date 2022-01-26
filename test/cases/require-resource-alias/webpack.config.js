@@ -34,12 +34,10 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          //method: 'compile',
           method: 'render',
         },
       },
 
-      // process required images in pug
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',

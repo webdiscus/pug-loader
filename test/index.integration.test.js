@@ -244,6 +244,12 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
+  test('exception: execute template function', (done) => {
+    const relTestCasePath = 'exception-evaluate-template';
+    const containString = `Failed to execute template function`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
   test('exception: file cannot be resolved', (done) => {
     const relTestCasePath = 'exception-resolve';
     const containString = `can't be resolved`;

@@ -43,8 +43,7 @@ module.exports = {
             },
           },
           {
-            //loader: PugPlugin.loader,
-            loader: 'pug-loader', // local dev
+            loader: 'pug-loader',
             options: {
               method: 'html',
             },

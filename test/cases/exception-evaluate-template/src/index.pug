@@ -1,0 +1,6 @@
+//- To reproduce the error:
+  - with the method `compile` must be used undefined variable and required image
+  - with methods `render` or `html` must be used undefined variable
+
+div= htmlWebpackPlugin.options.title
+img(src=require('./image.jpeg'))

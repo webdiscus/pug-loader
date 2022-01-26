@@ -28,8 +28,7 @@ module.exports = {
             },
           },
           {
-            //loader: PugPlugin.loader,
-            loader: 'pug-loader', // local dev
+            loader: 'pug-loader',
             options: {
               method: 'html',
             },
@@ -37,7 +36,6 @@ module.exports = {
         ],
       },
 
-      // process required images in pug
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',

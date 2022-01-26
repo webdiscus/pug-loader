@@ -5,9 +5,10 @@ const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
 const { merge } = require('webpack-merge');
-const { loaderName, getResourceParams, injectExternalVariables } = require('./utils');
+const { getResourceParams, injectExternalVariables } = require('./utils');
 const resolver = require('./resolver');
 const loader = require('./loader');
+const { getPugCompileErrorMessage } = require('./exeptions');
 
 // the variables with global scope for the resolvePlugin
 let loaderMethod = null,
@@ -71,7 +72,7 @@ const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.va
  */
 const compilePugContent = function (content, callback) {
   const webpackOptionsResolve = this._compiler.options.resolve || {};
-  let res = {};
+  let pugResult = {};
 
   const loaderContext = this,
     loaderOptions = loaderContext.getOptions() || {},
@@ -118,26 +119,26 @@ const compilePugContent = function (content, callback) {
 
   try {
     /** @type {{body: string, dependencies: []}} */
-    res = pug.compileClientWithDependenciesTracked(content, options);
-  } catch (exception) {
+    pugResult = pug.compileClientWithDependenciesTracked(content, options);
+  } catch (error) {
     // watch files in which an error occurred
-    if (exception.filename) loaderContext.addDependency(path.normalize(exception.filename));
-    callback(`\n[${loaderName}] Pug compilation failed.\n` + exception.toString());
+    if (error.filename) loaderContext.addDependency(path.normalize(error.filename));
+    callback(getPugCompileErrorMessage(error));
     return;
   }
 
   // add dependency files to watch changes
-  res.dependencies.forEach(loaderContext.addDependency);
+  pugResult.dependencies.forEach(loaderContext.addDependency);
   codeDependencies.forEach(loaderContext.addDependency);
 
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
 
   const locals = merge(loaderOptions.data || {}, resourceParams),
-    funcBody = Object.keys(locals).length ? injectExternalVariables(res.body, locals) : res.body,
-    output = loaderMethod.output(funcBody, locals, esModule);
+    funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body,
+    result = loaderMethod.run(loaderContext.resourcePath, funcBody, locals, esModule);
 
-  callback(null, output);
+  callback(null, result);
 };
 
 module.exports = function (content, map, meta) {

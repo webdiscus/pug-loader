@@ -34,7 +34,6 @@ module.exports = {
         test: /\.(css|sass|scss)$/,
         type: 'asset/resource',
         generator: {
-          // save required styles
           filename: 'assets/css/[name].[contenthash:8].css',
         },
         use: [
@@ -44,7 +43,6 @@ module.exports = {
         ],
       },
 
-      // process required images in pug
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',

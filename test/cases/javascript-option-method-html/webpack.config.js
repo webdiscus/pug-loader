@@ -50,7 +50,6 @@ module.exports = {
         ],
       },
 
-      // process required images in pug
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',

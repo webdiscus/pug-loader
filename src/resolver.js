@@ -1,8 +1,8 @@
 // the 'enhanced-resolve' package already used in webpack, don't need to define it in package.json
 const ResolverFactory = require('enhanced-resolve');
 const path = require('path');
-const ansis = require('ansis');
-const { loaderName, isWin, pathToPosix } = require('./utils');
+const { isWin, pathToPosix } = require('./utils');
+const { resolveException } = require('./exeptions');
 
 /**
  * Create regexp to match alias.
@@ -63,16 +63,6 @@ const getFileResolverSync = (path, options) => {
   };
 };
 
-const resolveException = (file, templateFile, error) => {
-  throw new Error(
-    `\n${ansis.black.bgRedBright(`[${loaderName}]`)} the file ${ansis.yellow(
-      file
-    )} can't be resolved in the pug template:\n` +
-      ansis.cyan(templateFile) +
-      ``
-  );
-};
-
 /**
  * @typedef {Object} LoaderResolver
  * @property {function(basedir:string, path:string, options:{})} init
@@ -131,7 +121,7 @@ const resolver = {
       try {
         resolvedPath = resolveFile(context, file);
       } catch (error) {
-        resolveException(file, templateFile, error);
+        resolveException(error, file, templateFile);
       }
     }
 

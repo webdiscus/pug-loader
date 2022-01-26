@@ -1,5 +1,10 @@
 # Change log
 
+## 1.6.3 (2022-01-25)
+- improve error message due to template function failure
+- refactor exceptions
+- update readme
+
 ## 1.6.2 (2022-01-21)
 - fix the path of dependencies in windows
 - update npm packages
