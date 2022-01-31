@@ -1,7 +1,7 @@
 <div align="center">
     <h1>
         <a href="https://pugjs.org">
-            <img height="140" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+            <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
         </a>
         <a href="https://github.com/webpack/webpack">
             <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
@@ -42,9 +42,16 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 1. [Example "Hello World!"](https://github.com/webdiscus/pug-loader/tree/master/examples/webpack-app-hello-pug/)
 1. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
 
+## Requirements
+- **Webpack 5** \
+  ⚠️ Working with Webpack 4 is not guaranteed.
+- **Asset Modules** for Webpack 5: `asset/resource` `asset/inline` `asset/source` `asset` \
+  ⚠️ Does not support deprecated modules such as `file-loader` `url-loader` `raw-loader`.
+- **Pug 3** \
+  ⚠️ By usage Pug v2.x is required extra install the `pug-walk` package. Working with Pug < v3.0.2 is not guaranteed.
+
 <a id="features" name="features" href="#features"></a>
 ## Features
- - supports for **Webpack 5** and **Pug 3**
  - rendereing pug into pure `HTML string` to save it as static HTML file
  - compiling pug into `template function` for usage in JavaScript
  - generates template function with `CommonJS` or `ESM` syntax
@@ -429,19 +436,17 @@ body
 
 ### Passing data in HtmlWebpackPlugin
 
-> **Limitation**
-> 
-> The `htmlWebpackPlugin.options` object in pug is `undefined`, 
-> because the `pug-loader` loads and compiles the pug template before the plugin is called. \
-> Pass the variable into pug via query.
-> 
+The user data can be passed into pug template with two ways:
+- via HtmlWebpackPlugin options
+- via query parameters of template file
+
 
 ```js
 module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
-      myVar: 'value', // DON'T pass a variable into pug via plugin options
-      template: path.join(__dirname, 'src/index.pug?myVar=value'), // <= pass variable via query
+      title: 'The some page', // avaliable in pug as `htmlWebpackPlugin.options.title`
+      template: path.join(__dirname, 'src/index.pug?' + JSON.stringify({ myVar: 'value' })), // avaliable as `myVar`
       filename: 'index.html',
     }),
   ],
@@ -456,25 +461,14 @@ module.exports = {
 };
 ```
 
-If you use any plugin options in pug, like `htmlWebpackPlugin.options.title`, 
-then for compatibility pass complete options in pug via query.
-
-```js
-new HtmlWebpackPlugin({
-  template: path.join(
-    __dirname, 
-    'src/index.pug?htmlWebpackPlugin=' + JSON.stringify({ options: { title: 'My title' } })
-  ),
-  filename: 'index.html',
-})
-```
-
-Use the `htmlWebpackPlugin.options` in pug template:
+Use the passed variables `htmlWebpackPlugin.options` and `myVar` in pug template:
 
 ```pug
 html
   head
-    title= #{htmlWebpackPlugin.options.title}
+    title= htmlWebpackPlugin.options.title
+  body
+    div= myVar
 ```
 
 
@@ -549,11 +543,10 @@ resolve: {
 | `img(src=require('../images/image.jpeg'))`                                                                                                   | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
 | `img(src=require('Images/image.jpeg'))`                                                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
 | `- var file = 'image.jpeg'`<br>``img(src=require(`Images/${file}`))``                                                                        | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `- var file = 'image.jpeg'`<br>`img(src=require(file))`                                                                                      | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
 | `- var file = './image.jpeg'`<br>`img(src=require(file))`                                                                                    | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
 | `- var file = 'images/image.jpeg'`<br>`img(src=require(file))`                                                                               | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
-| `- var file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
 | `- var file = '../images/image.jpeg'`<br>`img(src=require(file))`                                                                            | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
 | `- var file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`                                                                       | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
 | the `pugjs/pug-loader` can't resolve when used a mixin and require on same file: <br> `include mixins`<br>`img(src=require('./image.jpeg'))` | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
 

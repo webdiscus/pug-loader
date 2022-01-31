@@ -15,14 +15,27 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'My title', // this option is in pug template not available
-      // pass into template the variables via query,
-      // because at render time the variable `htmlWebpackPlugin` still not exists
+      title: 'Startseite',
+      tmplData: {
+        lang: 'de-DE',
+      },
       template: path.join(
         __dirname,
-        'src/index.pug?htmlWebpackPlugin=' + JSON.stringify({ options: { title: 'My title' } })
+        'src/index.pug?dataFromQuery=' + JSON.stringify({ options: { description: 'Benutzerdefinierte Homepage' } })
       ),
       filename: 'index.html',
+    }),
+
+    new HtmlWebpackPlugin({
+      title: 'About',
+      tmplData: {
+        lang: 'en-US',
+      },
+      template: path.join(
+        __dirname,
+        'src/about.pug?dataFromQuery=' + JSON.stringify({ options: { description: 'Custom about page' } })
+      ),
+      filename: 'about.html',
     }),
   ],
 
@@ -31,6 +44,9 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: 'pug-loader',
+        options: {
+          method: 'render',
+        },
       },
 
       {

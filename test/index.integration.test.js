@@ -1,8 +1,8 @@
 const path = require('path');
 const rimraf = require('rimraf');
 
-import { copyRecursiveSync, readTextFileSync } from './utils/file';
-import { compareContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
+import { copyRecursiveSync } from './utils/file';
+import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
@@ -54,8 +54,8 @@ describe('pug tests', () => {
   });
 
   test('pass options from html-webpack-plugin', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-pass-options';
-    compareContent(PATHS, relTestCasePath, done);
+    const relTestCasePath = 'html-webpack-plugin-options';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
 
@@ -119,6 +119,11 @@ describe('require code', () => {
 });
 
 describe('require resource', () => {
+  test('require-fonts', (done) => {
+    const relTestCasePath = 'require-fonts';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-img-srcset', (done) => {
     const relTestCasePath = 'require-img-srcset';
     compareContent(PATHS, relTestCasePath, done);
@@ -156,17 +161,17 @@ describe('require resource', () => {
 
   test('require-assets-method-compile', (done) => {
     const relTestCasePath = 'require-assets-method-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-assets-method-render', (done) => {
     const relTestCasePath = 'require-assets-method-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-assets-method-html', (done) => {
     const relTestCasePath = 'require-assets-method-html';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
 

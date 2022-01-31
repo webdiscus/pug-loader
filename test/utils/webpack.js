@@ -32,18 +32,18 @@ const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
   return merge(baseConfig, commonConfig, webpackOpts, testConfig);
 };
 
-export const compile = (PATHS, testCasePath, webpackOpts) => {
-  let config;
+export const compile = (PATHS, testCasePath, webpackOpts) =>
+  new Promise((resolve, reject) => {
+    let config;
 
-  try {
-    config = prepareWebpackConfig(PATHS, testCasePath, webpackOpts);
-  } catch (error) {
-    throw new Error(error.toString());
-  }
+    try {
+      config = prepareWebpackConfig(PATHS, testCasePath, webpackOpts);
+    } catch (error) {
+      reject('[webpack prepare config] ' + error.toString());
+      return;
+    }
 
-  const compiler = webpack(config);
-
-  return new Promise((resolve, reject) => {
+    const compiler = webpack(config);
     compiler.run((error, stats) => {
       if (error) {
         reject('[webpack compiler] ' + error);
@@ -58,4 +58,3 @@ export const compile = (PATHS, testCasePath, webpackOpts) => {
       resolve(stats);
     });
   });
-};

@@ -1,5 +1,10 @@
 # Change log
 
+## 1.6.4 (2022-01-31)
+- added supports the `htmlWebpackPlugin.options` in pug template, #8
+- added test case for require fonts in pug template
+- refactoring of tests
+
 ## 1.6.3 (2022-01-25)
 - improve error message due to template function failure
 - refactor exceptions

@@ -51,7 +51,7 @@ const executeTemplateFunctionException = (error, sourceFile) => {
     `${ansis.red.bold(`Template file:`)} ${ansis.cyan(sourceFile)}\n` +
     `${ansis.red.bold(`Possible reason:`)} in the template may be used undefined variable.\n` +
     `${ansis.black.bgYellow(`Solution`)} in this case pass a variable into a pug file via the query parameter.\n` +
-    `For example, if you use in pug the external variable, like ${ansis.yellow(`title= customData.options.title`)},\n` +
+    `For example, if in pug is used the external variable, like ${ansis.yellow(`title= customData.options.title`)},\n` +
     `then pass it into pug ${ansis.magenta(
       `'template.pug?customData=' + JSON.stringify({options:{title:'My title'}})`
     )}`;

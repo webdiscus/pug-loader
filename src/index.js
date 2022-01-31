@@ -71,10 +71,9 @@ const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.va
  * @return {string|undefined}
  */
 const compilePugContent = function (content, callback) {
-  const webpackOptionsResolve = this._compiler.options.resolve || {};
   let pugResult = {};
-
   const loaderContext = this,
+    webpackOptionsResolve = getWebpackOptionsResolve(loaderContext),
     loaderOptions = loaderContext.getOptions() || {},
     esModule = loaderOptions.esModule === true,
     resourceParams = getResourceParams(loaderContext.resourceQuery),
@@ -134,11 +133,53 @@ const compilePugContent = function (content, callback) {
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];
 
-  const locals = merge(loaderOptions.data || {}, resourceParams),
+  // custom options from HtmlWebpackPlugin can be used in pug
+  let htmlWebpackPluginOptions = getHtmlWebpackPluginOptions(loaderContext);
+
+  const locals = merge(loaderOptions.data || {}, htmlWebpackPluginOptions, resourceParams),
     funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body,
     result = loaderMethod.run(loaderContext.resourcePath, funcBody, locals, esModule);
 
   callback(null, result);
+};
+
+/**
+ * Get user options of HtmlWebpackPlugin({}).
+ *
+ * @param {Object} loaderContext The context object of webpack loader.
+ * @returns {{htmlWebpackPlugin: {options: {}}}}
+ */
+const getHtmlWebpackPluginOptions = (loaderContext) => {
+  const sourceFile = loaderContext.resourcePath;
+  let options = {
+    htmlWebpackPlugin: { options: {} },
+  };
+
+  if (loaderContext.hasOwnProperty('_compiler')) {
+    const plugins = loaderContext._compiler.options.plugins || [];
+    const obj = plugins.find(
+      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(sourceFile) >= 0
+    );
+
+    if (obj && obj.hasOwnProperty('userOptions')) {
+      options.htmlWebpackPlugin.options = obj.userOptions;
+    }
+  }
+
+  return options;
+};
+
+/**
+ * @param {Object} loaderContext The context object of webpack loader.
+ * @returns {{}}
+ */
+const getWebpackOptionsResolve = (loaderContext) => {
+  let options = {};
+  if (loaderContext.hasOwnProperty('_compiler')) {
+    options = loaderContext._compiler.options.resolve || {};
+  }
+
+  return options;
 };
 
 module.exports = function (content, map, meta) {
