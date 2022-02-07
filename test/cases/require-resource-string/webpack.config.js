@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../pug-plugin');
 
 module.exports = {
   stats: {
@@ -14,7 +14,7 @@ module.exports = {
   },
 
   entry: {
-    index: 'src/includes/template/index.pug',
+    index: 'src/template/index.pug',
   },
 
   plugins: [new PugPlugin()],

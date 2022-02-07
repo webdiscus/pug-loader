@@ -138,7 +138,7 @@ const compilePugContent = function (content, callback) {
 
   const locals = merge(loaderOptions.data || {}, htmlWebpackPluginOptions, resourceParams),
     funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body,
-    result = loaderMethod.run(loaderContext.resourcePath, funcBody, locals, esModule);
+    result = loaderMethod.export(loaderContext.resourcePath, funcBody, locals, esModule);
 
   callback(null, result);
 };

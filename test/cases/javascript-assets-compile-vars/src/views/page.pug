@@ -1,0 +1,28 @@
+doctype html
+html(lang='en')
+  head
+    title=title
+
+mixin test(data)
+  - const [func, val] = data.items;
+  b.val= val
+  b.func-res= func(val)
+
+body
+  - const filename = 'image.jpeg';
+  - const value1 = _OBJ_.item1;
+  - const value2 = _OBJ_[_KEY_];
+  - const alias = _OBJ_;
+  - const value3 = alias.item1;
+  - const func = testItems[dataId].items[0];
+  - const val = testItems[dataId].items[1];
+  - const value4 = func(val);
+
+  img(src=require('./' + filename))
+  div key: #{_KEY_}
+  div.value1 #{value1}
+  div.value2= value2
+  div.value3(class=value3)
+  div.value4= value4
+
+  +test(testItems[dataId])

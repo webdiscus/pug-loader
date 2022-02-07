@@ -1,5 +1,6 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../pug-plugin');
+
 const basePath = path.resolve(__dirname);
 const webRootPath = path.join(__dirname, 'public/');
 
@@ -29,7 +30,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          method: 'compile',
         },
       },
     ],

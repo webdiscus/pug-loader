@@ -494,19 +494,77 @@ each item in myData
 <a id="usage-embedded-resources" name="usage-embedded-resources" href="#usage-embedded-resources"></a>
 ## Usage embedded resources
 
-For processing image resources in templates with webpack use the `require()` function:
+To handle resources in pug with webpack use the `require()` function:
 
 ```pug
 img(src=require('./path/to/image.jpeg'))
 ```
 
-To handles embedded resources in pug add the webpack module `asset/resource`:
+<a id="resolve_resources" name="resolve_resources" href="#resolve_resources"></a>
+>### 💡 Resolve resources
+>  - the file in the current directory `MUST` start with `./`:
+>    ```pug
+>    img(src=require('./image.jpeg'))
+>    img(src=require('./sub/path/to/image.jpeg'))
+>    ```
+>  - the file in the parent directory `MUST` start with `../`:
+>    ```pug 
+>    img(src=require('../images/image.jpeg'))
+>     ```
+>  - the file in the directory defined in `option.base` `MUST` start with `/`:
+>    ```pug
+>    img(src=require('/src/assets/images/image.jpeg'))
+>    ```
+>  - the file in the directory defined by `webpack aliase` `MAY` start with `~` or `@`, e.g. with the alias `Images: path.join(__dirname, 'src/assets/images/')`:
+>    ```pug
+>    img(src=require('Images/image.jpeg'))
+>    img(src=require('~Images/image.jpeg'))
+>    img(src=require('@Images/image.jpeg'))
+>    ```
+>  - ⚠️ using a variable with the `compile` method has the limitation - the variable `MUST NOT` contain a path, only a filename, because is interpolated at compile time:
+>    ```pug
+>    - const file = 'image.jpeg'
+>    img(src=require('./path/to/' + file))  // sub directory
+>    img(src=require('../path/to/' + file)) // parent directory
+>    img(src=require('/path/to/' + file))   // option.base directory
+>    img(src=require('~Images/' + file))    // webpack alias
+>    ```
+>    but in current directory, the filename `MUST` start with `./`:
+>    ```pug
+>    - const file = './image.jpeg'
+>    img(src=require(file))
+>    ```
+>  - ⚠️ using an alias from the `paths` defined in `tsconfig.json` with the `compile` method has the limitation - the required argument `MUST` be a string only, the webpack not supports an expression with alias:\
+>    tsconfig.json
+>    ```js 
+>    {
+>      "compilerOptions": {
+>      "paths": {
+>         "@Images/*": ["assets/images/*"]
+>       }
+>      }
+>    }
+>    ```
+>    ```pug
+>    - const file = './image.jpeg'
+>    img(src=require('@Images/image.jpeg')) // webpack alias resolved via `resolve.plugiins` from `tsconfig.json`
+>    img(src=require('@Images/' + file))    // ERROR: Can't resolve '@Images' in require expression.
+>    ```
+>  - using a variable with `render` and `html` methods has no limitation - the variable `MAY` contain a path, because is resolved at runtime:
+>    ```pug
+>    - const file = '../parent/path/to/image.jpeg'
+>    img(src=require(file))
+>    img(src=require('~Images/' + file))
+>    img(src=require('@Images/' + file))
+>    ```
+
+To handles images in pug add the webpack module `asset/resource`:
 ```js
 module.exports = {
   module: {
     rules: [
       {
-        test: /\.(png|jpg|jpeg)/,
+        test: /\.(png|jpg|jpeg|svg|ico)/,
         type: 'asset/resource',
         generator: {
           filename: 'assets/images/[name].[hash:8][ext]',
@@ -516,13 +574,31 @@ module.exports = {
   },
 };
 ```
+
+To handles fonts in pug add the webpack module `asset/resource`:
+```js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.(eot|ttf|woff|woff2)/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/fonts/[name][ext]',
+        },
+      },
+    ]
+  },
+};
+```
+
 More information about asset-modules [see here](https://webpack.js.org/guides/asset-modules/).
 
 The example of dynamically generating embedded resources in template:
 ```pug
 - files = ['image1.jpeg', 'image2.jpeg', 'image3.jpeg']
 each file in files
-  img(src=require(file))
+  img(src=require(`./path/to/${file})`)
 ```
 
 ### File resolving examples
@@ -531,24 +607,24 @@ The example of webpack alias used in the table below:
 ```
 resolve: {
   alias: {
-    Images: path.join(__dirname, 'src/images/'),
+    Images: path.join(__dirname, 'src/assets/images/'),
   },
 }
 ```
 
-| Code                                                                                                                                         | @webdiscus/<br>pug-loader               | pugjs/<br>pug-loader                        |
-|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|-----------------------------------------|
-| `img(src=require('image.jpeg'))`                                                                                                             | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
-| `img(src=require('./image.jpeg'))`                                                                                                           | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `img(src=require('../images/image.jpeg'))`                                                                                                   | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `img(src=require('Images/image.jpeg'))`                                                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `- var file = 'image.jpeg'`<br>``img(src=require(`Images/${file}`))``                                                                        | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `- var file = './image.jpeg'`<br>`img(src=require(file))`                                                                                    | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
-| `- var file = 'images/image.jpeg'`<br>`img(src=require(file))`                                                                               | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
-| `- var file = '../images/image.jpeg'`<br>`img(src=require(file))`                                                                            | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
-| `- var file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``                                                                      | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| `- var file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`                                                                       | <span style="color:green">**OK**</span> | <span style="color:green">**OK**</span> |
-| the `pugjs/pug-loader` can't resolve when used a mixin and require on same file: <br> `include mixins`<br>`img(src=require('./image.jpeg'))` | <span style="color:green">**OK**</span> | <span style="color:red">fail</span>     |
+| Example in pug template                                                                                                                                      | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader  |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------|-----------------------|
+| `img(src=require('image.jpeg'))`                                                                                                                       | ✅ but not recomended                                   | ❌                                             | ❌                     |
+| `img(src=require('./image.jpeg'))`                                                                                                                     | ✅                                                      | ✅                                             | ✅                     |
+| `img(src=require('../images/image.jpeg'))`                                                                                                             | ✅                                                      | ✅                                             | ✅                     |
+| `img(src=require('~Images/image.jpeg'))`                                                                                                               | ✅                                                      | ✅                                             | ✅                     |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                      | ✅                                             | ✅                     |
+| `- var file = './image.jpeg'`<br>`img(src=require(file))`                                                                                              | ✅                                                      | ✅                                             | ❌                     |
+| `- var file = './images/image.jpeg'`<br>`img(src=require(file))`                                                                                       | ✅                                                      | ❌                                             | ❌                     |
+| `- var file = '../images/image.jpeg'`<br>`img(src=require(file))`                                                                                      | ✅                                                      | ❌                                             | ❌                     |
+| `- var file = 'image.jpeg'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                                      | ✅                                             | ✅                     |
+| `- var file = 'image.jpeg'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                      | ✅                                             | ✅                     |
+| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./image.jpeg'))` | ✅                                                      | ✅                                             | ❌                     |
 
 
 <a id="usage-with-angular-component" name="usage-with-angular-component" href="#usage-with-angular-component"></a>

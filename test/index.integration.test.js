@@ -75,8 +75,13 @@ describe('extend / include / raw include', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  test('include alias from resolve.plugin', (done) => {
-    const relTestCasePath = 'include-alias-resolve.plugins';
+  test('include alias from resolve.plugin-compile', (done) => {
+    const relTestCasePath = 'include-alias-resolve.plugins-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('include alias from resolve.plugin-render', (done) => {
+    const relTestCasePath = 'include-alias-resolve.plugins-render';
     compareContent(PATHS, relTestCasePath, done);
   });
 
@@ -139,8 +144,13 @@ describe('require resource', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  test('require-include-mixin', (done) => {
-    const relTestCasePath = 'require-resource-include-mixin';
+  test('require-include-mixin-compile', (done) => {
+    const relTestCasePath = 'require-resource-include-mixin-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-include-mixin-render', (done) => {
+    const relTestCasePath = 'require-resource-include-mixin-render';
     compareContent(PATHS, relTestCasePath, done);
   });
 
@@ -206,7 +216,7 @@ describe('require pug in javascript', () => {
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  test(`options.data for render`, (done) => {
+  test(`options.data, method render`, (done) => {
     const relTestCasePath = 'javascript-option-data-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
@@ -221,23 +231,28 @@ describe('require pug in javascript', () => {
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  test(`javascript assets render`, (done) => {
+  test(`javascript assets compile with variables`, (done) => {
+    const relTestCasePath = 'javascript-assets-compile-vars';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`javascript assets, method render`, (done) => {
     const relTestCasePath = 'javascript-assets-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  test(`javascript assets html`, (done) => {
+  test(`javascript assets, method html`, (done) => {
     const relTestCasePath = 'javascript-assets-html';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  test(`javascript esModule=false require`, (done) => {
-    const relTestCasePath = 'javascript-esmodule-false-require';
+  test(`javascript esModule=false require, method render`, (done) => {
+    const relTestCasePath = 'javascript-esmodule-false-require-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
-  test(`javascript esModule=true import`, (done) => {
-    const relTestCasePath = 'javascript-esmodule-true-import';
+  test(`javascript esModule=true import, method render`, (done) => {
+    const relTestCasePath = 'javascript-esmodule-true-import-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 });
@@ -249,7 +264,7 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  test('exception: execute template function', (done) => {
+  test('exception: evaluate template function', (done) => {
     const relTestCasePath = 'exception-evaluate-template';
     const containString = `Failed to execute template function`;
     exceptionContain(PATHS, relTestCasePath, containString, done);

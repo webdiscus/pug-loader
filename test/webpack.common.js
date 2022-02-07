@@ -1,5 +1,4 @@
 const path = require('path');
-const basePath = path.resolve(__dirname);
 
 module.exports = {
   output: {
@@ -8,7 +7,7 @@ module.exports = {
 
   resolveLoader: {
     alias: {
-      'pug-loader': path.join(basePath, '../'),
+      'pug-loader': path.join(__dirname, '../'),
     },
   },
 
@@ -19,9 +18,9 @@ module.exports = {
   },
 
   optimization: {
-    removeEmptyChunks: true,
-    mergeDuplicateChunks: true,
-    usedExports: true,
-    concatenateModules: true,
+    // removeEmptyChunks: true,
+    // mergeDuplicateChunks: true,
+    // usedExports: true,
+    // concatenateModules: true,
   },
 };

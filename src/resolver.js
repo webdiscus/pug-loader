@@ -13,31 +13,6 @@ const { resolveException } = require('./exeptions');
 const aliasRegexp = (match) => `^[~@]?(${match})(?=\\/)`;
 
 /**
- * Resolve an alias in the argument of require() function.
- *
- * @param {string} value The value of extends/include/require().
- * @param {{}} aliases The `resolve.alias` of webpack config.
- * @return {string | false} If found an alias return resolved normalized path otherwise return false.
- */
-const resolveAlias = (value, aliases) => {
-  if (!aliases) return false;
-
-  const patternAliases = Object.keys(aliases).join('|');
-
-  // webpack.alias is empty
-  if (!patternAliases) return false;
-
-  const [, alias] = new RegExp(aliasRegexp(patternAliases)).exec(value) || [];
-
-  // path contains no alias
-  if (!alias) return false;
-
-  let resolvedFile = value.replace(new RegExp(aliasRegexp(alias)), aliases[alias]);
-
-  return path.join(resolvedFile);
-};
-
-/**
  * @param {string} path The start path to resolve.
  * @param {{}} options The enhanced-resolve options.
  * @returns {function(context:string, request:string): string | false}
@@ -65,28 +40,32 @@ const getFileResolverSync = (path, options) => {
 
 /**
  * @typedef {Object} LoaderResolver
+ * @property {string} [basedir = '/']
+ * @property {Object} [aliases = {}]
  * @property {function(basedir:string, path:string, options:{})} init
- * @property {(function(context:string, file:string): string)} resolve
+ * @property {(function(file:string, context:string): string)} resolve
+ * @property {(function(file:string, context:string): string)} interpolate
+ * @property {(function(value:string, aliases:{}=): string)} resolveAlias
  * @property {function(templateFile:string, value:string, dependencies:string[]): string} resolveRequireCode
  * @property {function(templateFile:string, value:string, method:LoaderMethod): string} resolveRequireResource
  */
 
-let pugLoaderBasedir = '/';
-let aliases = null;
 let resolveFile = null;
 
 /**
  * @type LoaderResolver
  */
 const resolver = {
+  basedir: '/',
+
   /**
    * @param {string} basedir The the root directory of all absolute inclusion.
    * @param {string} path The root context path.
    * @param {{}} options The webpack `resolve` configuration.
    */
   init: (basedir, path, options) => {
-    pugLoaderBasedir = basedir;
-    aliases = options.alias;
+    resolver.basedir = basedir;
+    resolver.aliases = options.alias;
     resolveFile = getFileResolverSync(path, options);
   },
 
@@ -99,25 +78,25 @@ const resolver = {
    */
   resolve: (file, templateFile) => {
     const context = path.dirname(templateFile);
-    let resolvedPath;
+    let resolvedPath = null;
 
     // resolve an absolute path by prepending options.basedir
     if (file[0] === '/') {
-      resolvedPath = path.join(pugLoaderBasedir, file);
+      resolvedPath = path.join(resolver.basedir, file);
     }
 
     // resolve a relative file
-    if (!resolvedPath && file[0] === '.') {
+    if (resolvedPath == null && file[0] === '.') {
       resolvedPath = path.join(context, file);
     }
 
     // resolve a file by webpack `resolve.alias`
-    if (!resolvedPath) {
-      resolvedPath = resolveAlias(file, aliases);
+    if (resolvedPath == null) {
+      resolvedPath = resolver.resolveAlias(file, resolver.aliases);
     }
 
     // fallback to enhanced resolver
-    if (!resolvedPath) {
+    if (resolvedPath == null) {
       try {
         resolvedPath = resolveFile(context, file);
       } catch (error) {
@@ -128,6 +107,84 @@ const resolver = {
     if (isWin) resolvedPath = pathToPosix(resolvedPath);
 
     return resolvedPath;
+  },
+
+  /**
+   * Interpolate filename for `compile` method.
+   *
+   * @note: the file is the argument of require() and can be any expression, like require('./' + file + '.jpg').
+   * See https://webpack.js.org/guides/dependency-management/#require-with-expression.
+   *
+   * @param {string} file The file to resolve.
+   * @param {string} templateFile The template file.
+   * @return {string}
+   */
+  interpolate: (file, templateFile) => {
+    file = file.trim();
+    const quote = file[0];
+    let resolvedPath = null;
+
+    // the argument begin with a string quote
+    if ('\'"`'.indexOf(quote) >= 0) {
+      const context = path.dirname(templateFile) + '/';
+
+      // resolve an absolute path by prepending options.basedir
+      if (file[1] === '/') {
+        resolvedPath = file[0] + resolver.basedir + file.substring(2);
+      }
+
+      // resolve a relative file
+      // fix the issue when the required file has a relative path (`./` or `../`) and is in an included file
+      if (resolvedPath == null && file.substring(1, 4) === '../') {
+        resolvedPath = file[0] + context + file.substring(1);
+      }
+
+      // resolve a relative file
+      if (resolvedPath == null && file.substring(1, 3) === './') {
+        resolvedPath = file[0] + context + file.substring(3);
+      }
+
+      // resolve a webpack `resolve.alias`
+      if (resolvedPath == null) {
+        resolvedPath = resolver.resolveAlias(file.substring(1));
+        if (resolvedPath) resolvedPath = file[0] + resolvedPath;
+      }
+
+      if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
+    } else {
+      // fix webpack require issue `Cannot find module` for the case:
+      // - var file = './image.jpeg';
+      // require(file) <- error
+      // require(file + '') <- solution
+      file += " + ''";
+    }
+
+    return resolvedPath || file;
+  },
+
+  /**
+   * Resolve an alias in the argument of require() function.
+   *
+   * @param {string} value The value of extends/include/require().
+   * @param {{}} [aliases = resolver.aliases] The `resolve.alias` of webpack config.
+   * @return {string | null} If found an alias return resolved normalized path otherwise return false.
+   */
+  resolveAlias: (value, aliases = resolver.aliases) => {
+    if (!aliases) return null;
+
+    const patternAliases = Object.keys(aliases).join('|');
+
+    // webpack.alias is empty
+    if (!patternAliases) return null;
+
+    const [, alias] = new RegExp(aliasRegexp(patternAliases)).exec(value) || [];
+
+    // path contains no alias
+    if (!alias) return null;
+
+    let resolvedFile = value.replace(new RegExp(aliasRegexp(alias)), aliases[alias]);
+
+    return path.join(resolvedFile);
   },
 
   /**

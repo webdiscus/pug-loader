@@ -1,15 +1,44 @@
-h1 Hello!
+- var name = 'image';
+- var file = name + '.jpeg';
+- var file2 = './image.jpeg';
+- var file3 = './subdir/image.jpeg';
+
+//- the limitation, following not works with the `compile` method:
+  - var file4 = '../images/image.jpeg';
+
+h1 Hello World!
 
 //- test resolve of embedded resources
-- file2 = 'image2.jpeg'
-p= '../images/image.jpeg'
-img(src=require('../images/image.jpeg'))
-p= 'Images/image.jpeg'
-img(src=require('Images/image.jpeg'))
-p= '"Images/" + file2'
-img(src=require('Images/' + file2))
-p= '`Images/${file2}`'
-img(src=require(`Images/${file2}`))
+
+//- required files that should resolve in the current directory need to start with './'
+img.a1(src=require('./image.jpeg'))
+img.a2(src=require('./' + file))
+img.a3(src=require(`${file2}`))
+img.a3(src=require(file2))
+img.a4(src=require(file3))
+
+img.b1(src=require('./subdir/image.jpeg'))
+img.b2(src=require('./subdir/' + file))
+img.c1(src=require('../assets/images/image.jpeg'))
+img.c2(src=require('../assets/images/' + file))
+
+img.d1(src=require('Images/image.jpeg'))
+img.d2(src=require("~Images/" + file))
+img.d3(src=require(`@Images/${file}`))
+img.d4(src=require(`@Images/image.jpeg`))
+
+//- alias defined in tsconfig.json using the webpack resolve.plugins
+img.e1(src=require(`@TSImages/image.jpeg`))
+
+//- Webpack Error: Can't resolve '@TSImages' in require expression.
+    This is the limitation of the webpack resolve.plugins, no solution.
+    img.e2(src=require(`@TSImages/` + file))
+
+//- test option `basedir` and trim() of argument
+img.e1(src=require( '/assets/images/' + file))
+
+div.a= data.items.a
+div.b= data.items.b
 
 //- test require of a function
 -

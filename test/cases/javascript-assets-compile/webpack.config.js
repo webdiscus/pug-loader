@@ -1,4 +1,6 @@
 const path = require('path');
+const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+
 const basePath = path.resolve(__dirname);
 
 module.exports = {
@@ -14,9 +16,10 @@ module.exports = {
   },
 
   resolve: {
+    plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
     alias: {
+      Images: path.join(basePath, 'src/assets/images/'),
       Includes: path.join(basePath, 'src/includes/'),
-      Images: path.join(basePath, 'src/images/'),
       Template: path.join(basePath, 'src/template/'),
     },
   },
@@ -30,6 +33,7 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'compile',
+          basedir: path.join(__dirname, 'src/'),
           data: {
             globalVar: 'Global Title!',
             a: 7,

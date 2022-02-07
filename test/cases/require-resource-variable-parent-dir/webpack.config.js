@@ -1,5 +1,6 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../pug-plugin');
+
 const basePath = path.resolve(__dirname);
 
 module.exports = {
@@ -12,8 +13,7 @@ module.exports = {
   resolve: {
     alias: {
       Source: path.join(basePath, 'src/'),
-      Includes: path.join(basePath, 'src/includes/'),
-      IncludesParentDir: path.join(basePath, 'src/includes/template/'),
+      IncludesParentDir: path.join(basePath, 'src/template/'),
       SourceImages: path.join(basePath, 'src/images/'),
     },
   },
@@ -24,7 +24,7 @@ module.exports = {
   },
 
   entry: {
-    index: 'src/includes/template/index.pug',
+    index: 'src/template/index.pug',
   },
 
   plugins: [new PugPlugin()],

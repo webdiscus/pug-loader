@@ -8,29 +8,65 @@
 
 const { executeTemplateFunctionException } = require('./exeptions');
 
-/**
- * @type {LoaderResolver}
- */
-let loaderResolver;
+const loader = {
+  /**
+   * @type {LoaderResolver}
+   */
+  resolver: {},
 
-/**
- * Array of required files with method compile.
- * @type {string[]}
- */
-let assetFiles = [];
+  /**
+   * @param {LoaderResolver} resolver
+   */
+  setResolver: (resolver) => {
+    loader.resolver = resolver;
+  },
 
-/**
- * Normalize filename in require() function for method `compile`.
- *
- * @param {string} file The resource file.
- * @param {string} templateFile The template file.
- * @returns {string}
- */
-const compileRequire = (file, templateFile) => {
-  const resolvedFile = loaderResolver.resolve(file, templateFile);
-  assetFiles.push(resolvedFile);
+  /**
+   * Loader methods for returning a result.
+   * @type {LoaderMethod[]}
+   */
+  methods: [
+    {
+      // compile into template function and export a JS module
+      method: 'compile',
+      queryParam: 'pug-compile',
 
-  return `require('${resolvedFile}')`;
+      requireResource: (file, templateFile) => {
+        const resolvedFile = loader.resolver.interpolate(file, templateFile);
+        return `require(${resolvedFile})`;
+      },
+
+      export: (templateFile, funcBody, locals, esModule) => {
+        return funcBody + ';' + getExportCode(esModule) + 'template;';
+      },
+    },
+
+    {
+      // render into HTML and export a JS module
+      method: 'render',
+      queryParam: 'pug-render',
+      requireResource: (file, templateFile) => `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`,
+      export: (templateFile, funcBody, locals, esModule) => {
+        let result = runTemplateFunction(funcBody, locals, renderRequire, templateFile)
+          .replace(/\n/g, '\\n')
+          .replace(/'/g, "\\'")
+          .replace(/\\u0027/g, "'");
+
+        return getExportCode(esModule) + "'" + result + "';";
+      },
+    },
+
+    {
+      // render into HTML and return the pure string
+      // notes:
+      //   - this method require an additional loader, like `html-loader`, to handle HTML string
+      //   - the require() function for embedded resources must be removed to allow handle the `src` in `html-loader`
+      method: 'html',
+      queryParam: null,
+      requireResource: (file, templateFile) => `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`,
+      export: (templateFile, funcBody, locals) => runTemplateFunction(funcBody, locals, htmlRequire, templateFile),
+    },
+  ],
 };
 
 /**
@@ -42,7 +78,7 @@ const compileRequire = (file, templateFile) => {
  * @returns {string}
  */
 const renderRequire = (file, templateFile) => {
-  let resolvedFile = loaderResolver.resolve(file, templateFile);
+  const resolvedFile = loader.resolver.resolve(file, templateFile);
 
   return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
 };
@@ -54,7 +90,7 @@ const renderRequire = (file, templateFile) => {
  * @param {string} templateFile The template file.
  * @returns {string}
  */
-const htmlRequire = (file, templateFile) => loaderResolver.resolve(file, templateFile);
+const htmlRequire = (file, templateFile) => loader.resolver.resolve(file, templateFile);
 
 /**
  * @param {boolean} esModule
@@ -82,69 +118,6 @@ const runTemplateFunction = (funcBody, locals, methodRequire, templateFile) => {
   }
 
   return result;
-};
-
-const loader = {
-  /**
-   * @param {LoaderResolver} resolver
-   */
-  setResolver: (resolver) => {
-    loaderResolver = resolver;
-  },
-
-  /**
-   * Loader methods for returning a result.
-   * @type {LoaderMethod[]}
-   */
-  methods: [
-    {
-      // compile into template function and export a JS module
-      method: 'compile',
-      queryParam: 'pug-compile',
-      requireResource: (file, templateFile) => `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`,
-      run: (templateFile, funcBody, locals, esModule) => {
-        if (~funcBody.indexOf('__PUG_LOADER_REQUIRE__(')) {
-          let index = 0;
-          assetFiles = [];
-
-          // execute the code to evaluate required path with variables
-          // and save resolved filenames in the cache for replacing in the template function
-          runTemplateFunction(funcBody, locals, compileRequire, templateFile);
-
-          // replace the required variable filename with resolved file
-          funcBody = funcBody.replaceAll(/__PUG_LOADER_REQUIRE__\(.+?\)/g, () => `require('${assetFiles[index++]}')`);
-        }
-
-        return funcBody + ';' + getExportCode(esModule) + 'template;';
-      },
-    },
-
-    {
-      // render into HTML and export a JS module
-      method: 'render',
-      queryParam: 'pug-render',
-      requireResource: (file, templateFile) => `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`,
-      run: (templateFile, funcBody, locals, esModule) => {
-        let result = runTemplateFunction(funcBody, locals, renderRequire, templateFile)
-          .replace(/\n/g, '\\n')
-          .replace(/'/g, "\\'")
-          .replace(/\\u0027/g, "'");
-
-        return getExportCode(esModule) + "'" + result + "';";
-      },
-    },
-
-    {
-      // render into HTML and return the pure string
-      // notes:
-      //   - this method require an additional loader, like `html-loader`, to handle HTML string
-      //   - the require() function for embedded resources must be removed to allow handle the `src` in `html-loader`
-      method: 'html',
-      queryParam: null,
-      requireResource: (file, templateFile) => `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`,
-      run: (templateFile, funcBody, locals) => runTemplateFunction(funcBody, locals, htmlRequire, templateFile),
-    },
-  ],
 };
 
 module.exports = loader;

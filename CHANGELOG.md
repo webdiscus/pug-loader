@@ -1,5 +1,13 @@
 # Change log
 
+## 1.7.0 (2022-02-07)
+- possible BREAKING CHANGE (low probability): limiting for the method `compile` by resolving a variable in the argument of require() used in pug, see [resolve resources](https://github.com/webdiscus/pug-loader#resolve_resources) .\
+  The methods `render` and `html` are not affected.
+- change the evaluation to interpolation of required files for `compile` method to fix issue `undefined variable`
+- fix issue `undefined variable` for method `compile` by use the variables in pug w/o optional chaining
+- added tests for the `compile` and `render` methods
+- update packages
+
 ## 1.6.4 (2022-01-31)
 - added supports the `htmlWebpackPlugin.options` in pug template, #8
 - added test case for require fonts in pug template

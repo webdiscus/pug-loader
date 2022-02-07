@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../pug-plugin');
 
 const webRootPath = path.join(__dirname, 'public/');
 
