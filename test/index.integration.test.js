@@ -75,6 +75,11 @@ describe('extend / include / raw include', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
+  test('include alias from resolve.plugins', (done) => {
+    const relTestCasePath = 'include-alias-resolve.plugins';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('include alias from resolve.plugin-compile', (done) => {
     const relTestCasePath = 'include-alias-resolve.plugins-compile';
     compareContent(PATHS, relTestCasePath, done);
@@ -124,6 +129,16 @@ describe('require code', () => {
 });
 
 describe('require resource', () => {
+  test('require-alias-array-compile', (done) => {
+    const relTestCasePath = 'require-alias-array-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-alias-array-render', (done) => {
+    const relTestCasePath = 'require-alias-array-render';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-fonts', (done) => {
     const relTestCasePath = 'require-fonts';
     compareContent(PATHS, relTestCasePath, done);

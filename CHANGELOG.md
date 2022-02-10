@@ -1,5 +1,9 @@
 # Change log
 
+## 1.7.1 (2022-02-10)
+- added support for webpack alias an array of paths, [#10](https://github.com/webdiscus/pug-loader/issues/10)
+- fix optional prefix of alias in request when an alias name self contains the prefix
+
 ## 1.7.0 (2022-02-07)
 - possible BREAKING CHANGE (low probability): limiting for the method `compile` by resolving a variable in the argument of require() used in pug, see [resolve resources](https://github.com/webdiscus/pug-loader#resolve_resources) .\
   The methods `render` and `html` are not affected.

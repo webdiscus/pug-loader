@@ -4,13 +4,25 @@ const path = require('path');
 const { isWin, pathToPosix } = require('./utils');
 const { resolveException } = require('./exeptions');
 
+const aliasRegexp = /^([~@])?(.*?)(?=\/)/;
+
 /**
- * Create regexp to match alias.
- *
- * @param {string} match The matched alias.
- * @return {string} The regexp pattern with matched aliases.
+ * @param {string} request
+ * @returns {{aliasName: string, ignorePrefix: boolean, targetPath: string || array || null}}
  */
-const aliasRegexp = (match) => `^[~@]?(${match})(?=\\/)`;
+const parseAliasInRequest = (request) => {
+  const [, prefix, alias] = aliasRegexp.exec(request) || [];
+  const aliasName = (prefix || '') + (alias || '');
+  const targetPath = resolver.aliases[aliasName];
+  const ignorePrefix = prefix != null && alias != null && targetPath == null;
+
+  return {
+    // whether a prefix should be ignored to try resolve alias w/o prefix
+    ignorePrefix,
+    aliasName,
+    targetPath,
+  };
+};
 
 /**
  * @param {string} path The start path to resolve.
@@ -42,10 +54,12 @@ const getFileResolverSync = (path, options) => {
  * @typedef {Object} LoaderResolver
  * @property {string} [basedir = '/']
  * @property {Object} [aliases = {}]
+ * @property {boolean} hasAlias
+ * @property {boolean} hasPlugins
  * @property {function(basedir:string, path:string, options:{})} init
  * @property {(function(file:string, context:string): string)} resolve
  * @property {(function(file:string, context:string): string)} interpolate
- * @property {(function(value:string, aliases:{}=): string)} resolveAlias
+ * @property {(function(value:string): string)} resolveAlias
  * @property {function(templateFile:string, value:string, dependencies:string[]): string} resolveRequireCode
  * @property {function(templateFile:string, value:string, method:LoaderMethod): string} resolveRequireResource
  */
@@ -57,6 +71,8 @@ let resolveFile = null;
  */
 const resolver = {
   basedir: '/',
+  hasAlias: false,
+  hasPlugins: false,
 
   /**
    * @param {string} basedir The the root directory of all absolute inclusion.
@@ -65,7 +81,10 @@ const resolver = {
    */
   init: (basedir, path, options) => {
     resolver.basedir = basedir;
-    resolver.aliases = options.alias;
+    resolver.aliases = options.alias || {};
+    resolver.hasAlias = Object.keys(resolver.aliases).length > 0;
+    resolver.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
+
     resolveFile = getFileResolverSync(path, options);
   },
 
@@ -92,13 +111,19 @@ const resolver = {
 
     // resolve a file by webpack `resolve.alias`
     if (resolvedPath == null) {
-      resolvedPath = resolver.resolveAlias(file, resolver.aliases);
+      resolvedPath = resolver.resolveAlias(file);
     }
 
     // fallback to enhanced resolver
-    if (resolvedPath == null) {
+    if (resolvedPath == null || Array.isArray(resolvedPath)) {
       try {
-        resolvedPath = resolveFile(context, file);
+        let request = file;
+        if (Array.isArray(resolvedPath)) {
+          // remove optional prefix in request for enhanced resolver
+          const { ignorePrefix } = parseAliasInRequest(request);
+          if (ignorePrefix) request = request.substring(1);
+        }
+        resolvedPath = resolveFile(context, request);
       } catch (error) {
         resolveException(error, file, templateFile);
       }
@@ -147,7 +172,16 @@ const resolver = {
       // resolve a webpack `resolve.alias`
       if (resolvedPath == null) {
         resolvedPath = resolver.resolveAlias(file.substring(1));
-        if (resolvedPath) resolvedPath = file[0] + resolvedPath;
+
+        if (typeof resolvedPath === 'string') {
+          resolvedPath = file[0] + resolvedPath;
+        } else if (Array.isArray(resolvedPath)) {
+          // try to resolve via enhanced resolver by webpack self at compilation time
+          resolvedPath = file;
+          // remove optional prefix in request for enhanced resolver
+          const { ignorePrefix } = parseAliasInRequest(file.substring(1));
+          if (ignorePrefix) resolvedPath = file[0] + file.substring(2);
+        }
       }
 
       if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
@@ -165,26 +199,18 @@ const resolver = {
   /**
    * Resolve an alias in the argument of require() function.
    *
-   * @param {string} value The value of extends/include/require().
-   * @param {{}} [aliases = resolver.aliases] The `resolve.alias` of webpack config.
+   * @param {string} request The value of extends/include/require().
    * @return {string | null} If found an alias return resolved normalized path otherwise return false.
    */
-  resolveAlias: (value, aliases = resolver.aliases) => {
-    if (!aliases) return null;
+  resolveAlias: (request) => {
+    if (resolver.hasAlias === false) return null;
 
-    const patternAliases = Object.keys(aliases).join('|');
+    let { ignorePrefix, aliasName, targetPath } = parseAliasInRequest(request);
+    // try resolve alias w/o prefix
+    if (ignorePrefix === true) targetPath = resolver.aliases[aliasName.substring(1)];
 
-    // webpack.alias is empty
-    if (!patternAliases) return null;
-
-    const [, alias] = new RegExp(aliasRegexp(patternAliases)).exec(value) || [];
-
-    // path contains no alias
-    if (!alias) return null;
-
-    let resolvedFile = value.replace(new RegExp(aliasRegexp(alias)), aliases[alias]);
-
-    return path.join(resolvedFile);
+    return typeof targetPath === 'string' ? path.join(targetPath + request.substring(aliasName.length)) : targetPath;
+    //return typeof targetPath === 'string' ? targetPath + request.substring(aliasName.length) : null;
   },
 
   /**

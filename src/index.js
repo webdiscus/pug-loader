@@ -73,7 +73,9 @@ const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.va
 const compilePugContent = function (content, callback) {
   let pugResult = {};
   const loaderContext = this,
-    webpackOptionsResolve = getWebpackOptionsResolve(loaderContext),
+    webpackOptionsResolve = loaderContext.hasOwnProperty('_compiler')
+      ? loaderContext._compiler.options.resolve || {}
+      : {},
     loaderOptions = loaderContext.getOptions() || {},
     esModule = loaderOptions.esModule === true,
     resourceParams = getResourceParams(loaderContext.resourceQuery),
@@ -164,19 +166,6 @@ const getHtmlWebpackPluginOptions = (loaderContext) => {
     if (obj && obj.hasOwnProperty('userOptions')) {
       options.htmlWebpackPlugin.options = obj.userOptions;
     }
-  }
-
-  return options;
-};
-
-/**
- * @param {Object} loaderContext The context object of webpack loader.
- * @returns {{}}
- */
-const getWebpackOptionsResolve = (loaderContext) => {
-  let options = {};
-  if (loaderContext.hasOwnProperty('_compiler')) {
-    options = loaderContext._compiler.options.resolve || {};
   }
 
   return options;

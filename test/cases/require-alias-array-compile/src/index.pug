@@ -1,0 +1,43 @@
+img(src=require('./image.jpeg'))
+
+- var basename = 'logo';
+
+//- test the prefix only as alias
+img.prefix(src=require('@/images/logo.jpeg'))
+
+//- test the single char as alias
+img.char(src=require('&/images/logo.jpeg'))
+
+//- note: if alias value is a string, the variable can be used
+
+//- test alias value as string
+img.a1(src=require('ImagesA/' + basename + '-a1.jpeg'))
+img.a2(src=require('~ImagesA/' + basename + '-a2.jpeg'))
+img.a3(src=require('@ImagesA/' + basename + '-a3.jpeg'))
+
+//- test alias value as string contained a prefix in name
+-
+  var logos = {
+    b1: require('ImagesB/logo-b1.jpeg'),
+    b2: require('~ImagesB/logo-b2.jpeg'),
+    b3: require('@ImagesB/logo-b3.jpeg'),
+  };
+each val, key in logos
+  img(src=val class=key)
+
+//- this works too
+  img.b1(src=require('ImagesB/logo-b1.jpeg'))
+  img.b2(src=require('~ImagesB/logo-b2.jpeg'))
+  img.b3(src=require('@ImagesB/logo-b3.jpeg'))
+
+//- test alias value as array
+//- LIMITATION: in this case webpack can't resolve the asset request with a variable (compile method only)
+  img.c1(src=require('ImagesC/' + basename + '-c1.jpeg'))
+img.c1(src=require('ImagesC/logo-c1.jpeg'))
+img.c2(src=require('~ImagesC/logo-c2.jpeg'))
+img.c3(src=require('@ImagesC/logo-c3.jpeg'))
+
+//- test alias value as array contained a prefix in name
+img.d1(src=require('ImagesD/logo-d1.jpeg'))
+img.d2(src=require('~ImagesD/logo-d2.jpeg'))
+img.d3(src=require('@ImagesD/logo-d3.jpeg'))
