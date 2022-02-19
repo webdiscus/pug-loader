@@ -36,7 +36,11 @@ module.exports = {
     // extract HTML from pug files defined by webpack entry
     new PugPlugin({
       // extract CSS from required styles in pug and from webpack entry
-      modules: [PugPlugin.extractCss()],
+      modules: [
+        PugPlugin.extractCss({
+          filename: 'assets/css/[name].[contenthash:8].css',
+        }),
+      ],
     }),
   ],
 
@@ -62,10 +66,6 @@ module.exports = {
       // styles processing
       {
         test: /\.(css)/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/css/[name].[hash][ext]',
-        },
         use: ['css-loader'],
       },
     ],

@@ -16,7 +16,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [PugPlugin.extractCss()],
+      modules: [
+        PugPlugin.extractCss({
+          filename: 'assets/css/[name].[contenthash:8].css',
+        }),
+      ],
     }),
   ],
 
@@ -53,10 +57,6 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // process required scss/css in pug
-        generator: {
-          filename: 'assets/css/[name].[contenthash:8].css',
-        },
         use: [
           {
             loader: 'css-loader',

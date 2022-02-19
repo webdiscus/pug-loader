@@ -134,6 +134,7 @@ describe('require resource', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
+  // TODO: fix Cannot read properties of null (reading 'source')
   test('require-alias-array-render', (done) => {
     const relTestCasePath = 'require-alias-array-render';
     compareContent(PATHS, relTestCasePath, done);

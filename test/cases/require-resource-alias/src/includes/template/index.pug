@@ -1,22 +1,12 @@
-p require-alias
-
 - var file = './image.jpeg'
 
-p 1
-  img(src=require('SourceImages/image.jpeg'))
-p 2
-  img(src=require("SourceImages/image.jpeg"))
-p 3
-  img(src=require(`SourceImages/image.jpeg`))
+img.a1(src=require('SourceImages/image.jpeg'))
+img.a2(src=require("SourceImages/image.jpeg"))
+img.a3(src=require(`SourceImages/image.jpeg`))
 
-p 4
-  img(src=require('~SourceImages/image.jpeg'))
-p 5
-  img(src=require('@SourceImages/image.jpeg'))
+img.b1(src=require('~SourceImages/image.jpeg'))
+img.b2(src=require('@SourceImages/image.jpeg'))
 
-p 6
-  img(src=require('SourceImages/' + file))
-p 7
-  img(src=require("SourceImages/" + file))
-p 8
-  img(src=require(`Source/images/${file}`))
+img.c1(src=require('SourceImages/' + file))
+img.c2(src=require("SourceImages/" + file))
+img.c3(src=require(`Source/images/${file}`))

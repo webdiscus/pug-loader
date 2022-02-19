@@ -1,5 +1,9 @@
 # Change log
 
+## 1.7.2 (2022-02-19)
+- fix path error in Windows when watching dependencies
+- update packages
+
 ## 1.7.1 (2022-02-10)
 - added support for webpack alias an array of paths, [#10](https://github.com/webdiscus/pug-loader/issues/10)
 - fix optional prefix of alias in request when an alias name self contains the prefix

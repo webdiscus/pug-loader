@@ -5,7 +5,7 @@ const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
 const { merge } = require('webpack-merge');
-const { getResourceParams, injectExternalVariables } = require('./utils');
+const { getResourceParams, injectExternalVariables, isWin } = require('./utils');
 const resolver = require('./resolver');
 const loader = require('./loader');
 const { getPugCompileErrorMessage } = require('./exeptions');
@@ -129,8 +129,13 @@ const compilePugContent = function (content, callback) {
   }
 
   // add dependency files to watch changes
-  pugResult.dependencies.forEach(loaderContext.addDependency);
-  codeDependencies.forEach(loaderContext.addDependency);
+  const dependencies = [...pugResult.dependencies, ...codeDependencies];
+  if (isWin) {
+    dependencies.forEach((file, index, files) => {
+      files[index] = path.normalize(file);
+    });
+  }
+  dependencies.forEach(loaderContext.addDependency);
 
   // remove pug method from query data to pass only clean data w/o options
   delete resourceParams[loaderMethod.queryParam];

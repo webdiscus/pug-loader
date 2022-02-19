@@ -52,11 +52,11 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 
 <a id="features" name="features" href="#features"></a>
 ## Features
- - rendereing pug into pure `HTML string` to save it as static HTML file
+ - rendereing pug into pure `HTML string` to save it in separate file
  - compiling pug into `template function` for usage in JavaScript
- - generates template function with `CommonJS` or `ESM` syntax
- - resolves aliases from webpack `resolve.alias` and `resolve.plugins` 
- - resolves paths from `tsconfig.json` using [`tsconfig-paths-webpack-plugin`](https://github.com/dividab/tsconfig-paths-webpack-plugin)
+ - generates a template function with both `CommonJS` and `ESM` syntax
+ - resolves alias from webpack `resolve.alias`
+ - resolves alias from `compilerOptions.paths` defined in `tsconfig.json` using [`tsconfig-paths-webpack-plugin`](https://github.com/dividab/tsconfig-paths-webpack-plugin)
  - resolves required images in the attribute `srcset` of `img` tag
  - resolves required JavaScript modules or JSON in pug
  - ignore the prefixes `~` `@` for webpack `resolve.alias`
@@ -752,7 +752,7 @@ h1 #{sayHello('pug')}
 ## Also See
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
-- [`ansis`][ansis] - color styling for ANSI terminals
+- [`ansis`][ansis] - ANSI color styling of text in terminal
 - [`pug GitHub`][pug]
 - [`pug API Reference`][pug-api]
 - [`pug-plugin`][pug-plugin]
