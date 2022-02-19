@@ -141,11 +141,10 @@ const compilePugContent = function (content, callback) {
   delete resourceParams[loaderMethod.queryParam];
 
   // custom options from HtmlWebpackPlugin can be used in pug
-  let htmlWebpackPluginOptions = getHtmlWebpackPluginOptions(loaderContext);
-
-  const locals = merge(loaderOptions.data || {}, htmlWebpackPluginOptions, resourceParams),
-    funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body,
-    result = loaderMethod.export(loaderContext.resourcePath, funcBody, locals, esModule);
+  const htmlWebpackPluginOptions = getHtmlWebpackPluginOptions(loaderContext);
+  const locals = merge(loaderOptions.data || {}, htmlWebpackPluginOptions, resourceParams);
+  const funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body;
+  const result = loaderMethod.export(loaderContext.resourcePath, funcBody, locals, esModule);
 
   callback(null, result);
 };

@@ -1,5 +1,8 @@
 # Change log
 
+## 1.7.3 (2022-02-19)
+- fix collision with local variables passed in template function for compile method
+
 ## 1.7.2 (2022-02-19)
 - fix path error in Windows when watching dependencies
 - update packages

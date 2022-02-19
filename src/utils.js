@@ -46,7 +46,7 @@ const parseResourceData = function (query) {
  */
 const getResourceParams = function (str) {
   if (str[0] !== '?') return {};
-  const query = str.substr(1);
+  const query = str.substring(1);
 
   return parseResourceData(query);
 };
@@ -76,7 +76,10 @@ const injectExternalVariables = (funcBody, locals) =>
   'var __external_locals__ = ' +
   JSON.stringify(locals) +
   `;\n` +
-  funcBody.replace(/(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/, 'Object.assign(__external_locals__, locals)');
+  funcBody.replace(
+    /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
+    'Object.assign({}, __external_locals__, locals || {})'
+  );
 
 module.exports = {
   loaderName,

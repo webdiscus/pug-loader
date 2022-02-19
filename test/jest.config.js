@@ -27,7 +27,7 @@ module.exports = {
   // coverageDirectory: null,
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', './utils/'],
+  coveragePathIgnorePatterns: ['/node_modules/', './utils/', './output/'],
 
   // Indicates which provider should be used to instrument code for coverage.
   // Allowed values are babel (default) or v8.
