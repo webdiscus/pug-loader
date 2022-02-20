@@ -342,7 +342,7 @@ In webpack config add to `module.rules`:
      { 
        loader: 'html-loader',
        options: {
-         esModule: false, // allow to use the require() for load a templqte in JavaScript
+         esModule: false, // allow to use the require() for load a template in JavaScript
        },
      },
      {
@@ -499,65 +499,7 @@ To handle resources in pug with webpack use the `require()` function:
 img(src=require('./path/to/image.jpeg'))
 ```
 
-<a id="resolve_resources" name="resolve_resources" href="#resolve_resources"></a>
->### 💡 Resolve resources
->  - the file in the current directory `MUST` start with `./`:
->    ```pug
->    img(src=require('./image.jpeg'))
->    img(src=require('./sub/path/to/image.jpeg'))
->    ```
->  - the file in the parent directory `MUST` start with `../`:
->    ```pug 
->    img(src=require('../images/image.jpeg'))
->     ```
->  - the file in the directory defined in `option.base` `MUST` start with `/`:
->    ```pug
->    img(src=require('/src/assets/images/image.jpeg'))
->    ```
->  - the file in the directory defined by `webpack aliase` `MAY` start with `~` or `@`, e.g. with the alias `Images: path.join(__dirname, 'src/assets/images/')`:
->    ```pug
->    img(src=require('Images/image.jpeg'))
->    img(src=require('~Images/image.jpeg'))
->    img(src=require('@Images/image.jpeg'))
->    ```
->  - ⚠️ using a variable with the `compile` method has the limitation - the variable `MUST NOT` contain a path, only a filename, because is interpolated at compile time:
->    ```pug
->    - const file = 'image.jpeg'
->    img(src=require('./path/to/' + file))  // sub directory
->    img(src=require('../path/to/' + file)) // parent directory
->    img(src=require('/path/to/' + file))   // option.base directory
->    img(src=require('~Images/' + file))    // webpack alias
->    ```
->    but in current directory, the filename `MUST` start with `./`:
->    ```pug
->    - const file = './image.jpeg'
->    img(src=require(file))
->    ```
->  - ⚠️ using an alias from the `paths` defined in `tsconfig.json` with the `compile` method has the limitation - the required argument `MUST` be a string only, the webpack not supports an expression with alias:\
->    tsconfig.json
->    ```js 
->    {
->      "compilerOptions": {
->      "paths": {
->         "@Images/*": ["assets/images/*"]
->       }
->      }
->    }
->    ```
->    ```pug
->    - const file = './image.jpeg'
->    img(src=require('@Images/image.jpeg')) // webpack alias resolved via `resolve.plugiins` from `tsconfig.json`
->    img(src=require('@Images/' + file))    // ERROR: Can't resolve '@Images' in require expression.
->    ```
->  - using a variable with `render` and `html` methods has no limitation - the variable `MAY` contain a path, because is resolved at runtime:
->    ```pug
->    - const file = '../parent/path/to/image.jpeg'
->    img(src=require(file))
->    img(src=require('~Images/' + file))
->    img(src=require('@Images/' + file))
->    ```
-
-To handles images in pug add the webpack module `asset/resource`:
+For images, add the following rule to the webpack module:
 ```js
 module.exports = {
   module: {
@@ -574,13 +516,13 @@ module.exports = {
 };
 ```
 
-To handles fonts in pug add the webpack module `asset/resource`:
+For fonts, add the following rule to the webpack module:
 ```js
 module.exports = {
   module: {
     rules: [
       {
-        test: /\.(eot|ttf|woff|woff2)/,
+        test: /\.(woff2|woff|ttf|svg|eot)/,
         type: 'asset/resource',
         generator: {
           filename: 'assets/fonts/[name][ext]',
@@ -593,14 +535,81 @@ module.exports = {
 
 More information about asset-modules [see here](https://webpack.js.org/guides/asset-modules/).
 
-The example of dynamically generating embedded resources in template:
+Example of dynamic interpolation of image src in pug:
 ```pug
 - files = ['image1.jpeg', 'image2.jpeg', 'image3.jpeg']
 each file in files
   img(src=require(`./path/to/${file})`)
 ```
 
-### File resolving examples
+<a id="resolve_resources" name="resolve_resources" href="#resolve_resources"></a>
+### 💡 Resolve resources
+The file in the current directory `MUST` start with `./`:
+```pug
+img(src=require('./image.jpeg'))
+img(src=require('./sub/path/to/image.jpeg'))
+```
+The file in the parent directory `MUST` start with `../`:
+```pug 
+img(src=require('../images/image.jpeg'))
+ ```
+The relative path from loader option `basedir` `MUST` start with `/`:
+```js
+loader: '@webdiscus/pug-loader',
+options: {
+  basedir: path.resolve(__dirname, './src')
+}
+```
+```pug
+img(src=require('/assets/images/image.jpeg')) <-- relative path from the basedir
+```
+The file in the directory defined by `webpack aliase` `MAY` start with `~` or `@`, e.g. with the alias `Images: path.join(__dirname, 'src/assets/images/')`:
+```pug
+img(src=require('Images/image.jpeg'))
+img(src=require('~Images/image.jpeg'))
+img(src=require('@Images/image.jpeg'))
+```
+
+⚠️ Using a variable with the `compile` method has the limitation - the variable `MUST NOT` contain a path, only a filename, because is interpolated at compile time:
+```pug
+- const file = 'image.jpeg'
+img(src=require('./path/to/' + file))  // sub directory
+img(src=require('../path/to/' + file)) // parent directory
+img(src=require('/path/to/' + file))   // option.base directory
+img(src=require('~Images/' + file))    // webpack alias
+```
+but in current directory, the filename `MUST` start with `./`:
+```pug
+- const file = './image.jpeg'
+img(src=require(file))
+```
+
+⚠️ Using an alias from the `paths` defined in `tsconfig.json` with the `compile` method has the limitation - the required argument `MUST` be a string only, the webpack not supports an expression with alias:\
+**tsconfig.json**
+```js 
+{
+  "compilerOptions": {
+  "paths": {
+     "@Images/*": ["assets/images/*"]
+   }
+  }
+}
+```
+```pug
+- const file = './image.jpeg'
+img(src=require('@Images/image.jpeg')) // webpack alias resolved via `resolve.plugiins` from `tsconfig.json`
+img(src=require('@Images/' + file))    // ERROR: Can't resolve '@Images' in require expression.
+```
+
+Using a variable with `render` and `html` methods has no limitation - the variable `MAY` contain a path, because is resolved at runtime:
+```pug
+- const file = '../parent/path/to/image.jpeg'
+img(src=require(file))
+img(src=require('~Images/' + file))
+img(src=require('@Images/' + file))
+```
+
+### Examples of file resolving
 
 The example of webpack alias used in the table below:
 ```

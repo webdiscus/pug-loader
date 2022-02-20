@@ -4,32 +4,12 @@ const path = require('path');
 const { isWin, pathToPosix } = require('./utils');
 const { resolveException } = require('./exeptions');
 
-const aliasRegexp = /^([~@])?(.*?)(?=\/)/;
-
-/**
- * @param {string} request
- * @returns {{aliasName: string, ignorePrefix: boolean, targetPath: string || array || null}}
- */
-const parseAliasInRequest = (request) => {
-  const [, prefix, alias] = aliasRegexp.exec(request) || [];
-  const aliasName = (prefix || '') + (alias || '');
-  const targetPath = resolver.aliases[aliasName];
-  const ignorePrefix = prefix != null && alias != null && targetPath == null;
-
-  return {
-    // whether a prefix should be ignored to try resolve alias w/o prefix
-    ignorePrefix,
-    aliasName,
-    targetPath,
-  };
-};
-
 /**
  * @param {string} path The start path to resolve.
  * @param {{}} options The enhanced-resolve options.
  * @returns {function(context:string, request:string): string | false}
  */
-const getFileResolverSync = (path, options) => {
+const fileResolverSyncFactory = (path, options) => {
   const resolve = ResolverFactory.create.sync({
     ...options,
     aliasFields: [],
@@ -60,32 +40,49 @@ const getFileResolverSync = (path, options) => {
  * @property {(function(file:string, context:string): string)} resolve
  * @property {(function(file:string, context:string): string)} interpolate
  * @property {(function(value:string): string)} resolveAlias
- * @property {function(templateFile:string, value:string, dependencies:string[]): string} resolveRequireCode
- * @property {function(templateFile:string, value:string, method:LoaderMethod): string} resolveRequireResource
+ * @property {function(context:string, request:string): string|null} resolveFile
+ * @property {function(templateFile:string, value:string): string} resolveCodeFile
+ * @property {function(templateFile:string, value:string): string} resolveResource
  */
-
-let resolveFile = null;
 
 /**
  * @type LoaderResolver
  */
 const resolver = {
   basedir: '/',
+  aliasRegexp: /^([~@])?(.*?)(?=\/)/,
   hasAlias: false,
   hasPlugins: false,
+  resolveFile: null,
+  loader: null,
+  // the resolved files
+  resolvedFiles: [],
 
   /**
+   * @param {string} context The root context path.
    * @param {string} basedir The the root directory of all absolute inclusion.
-   * @param {string} path The root context path.
-   * @param {{}} options The webpack `resolve` configuration.
+   * @param {{}} options The webpack `resolve` options.
    */
-  init: (basedir, path, options) => {
-    resolver.basedir = basedir;
-    resolver.aliases = options.alias || {};
-    resolver.hasAlias = Object.keys(resolver.aliases).length > 0;
-    resolver.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
+  init({ context, basedir, options }) {
+    this.basedir = basedir;
+    this.aliases = options.alias || {};
+    this.hasAlias = Object.keys(this.aliases).length > 0;
+    this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
+    this.resolveFile = fileResolverSyncFactory(context, options);
+  },
 
-    resolveFile = getFileResolverSync(path, options);
+  /**
+   * @param {Loader} loader
+   */
+  setLoader(loader) {
+    this.loader = loader;
+  },
+
+  /**
+   * @return {Array<string>}
+   */
+  getResolvedFiles() {
+    return this.resolvedFiles;
   },
 
   /**
@@ -95,13 +92,13 @@ const resolver = {
    * @param {string} templateFile The template file.
    * @return {string}
    */
-  resolve: (file, templateFile) => {
+  resolve(file, templateFile) {
     const context = path.dirname(templateFile);
     let resolvedPath = null;
 
     // resolve an absolute path by prepending options.basedir
     if (file[0] === '/') {
-      resolvedPath = path.join(resolver.basedir, file);
+      resolvedPath = path.join(this.basedir, file);
     }
 
     // resolve a relative file
@@ -111,7 +108,7 @@ const resolver = {
 
     // resolve a file by webpack `resolve.alias`
     if (resolvedPath == null) {
-      resolvedPath = resolver.resolveAlias(file);
+      resolvedPath = this.resolveAlias(file);
     }
 
     // fallback to enhanced resolver
@@ -120,10 +117,10 @@ const resolver = {
         let request = file;
         if (Array.isArray(resolvedPath)) {
           // remove optional prefix in request for enhanced resolver
-          const { ignorePrefix } = parseAliasInRequest(request);
+          const { ignorePrefix } = this.parseAliasInRequest(request);
           if (ignorePrefix) request = request.substring(1);
         }
-        resolvedPath = resolveFile(context, request);
+        resolvedPath = this.resolveFile(context, request);
       } catch (error) {
         resolveException(error, file, templateFile);
       }
@@ -144,7 +141,7 @@ const resolver = {
    * @param {string} templateFile The template file.
    * @return {string}
    */
-  interpolate: (file, templateFile) => {
+  interpolate(file, templateFile) {
     file = file.trim();
     const quote = file[0];
     let resolvedPath = null;
@@ -155,7 +152,7 @@ const resolver = {
 
       // resolve an absolute path by prepending options.basedir
       if (file[1] === '/') {
-        resolvedPath = file[0] + resolver.basedir + file.substring(2);
+        resolvedPath = file[0] + this.basedir + file.substring(2);
       }
 
       // resolve a relative file
@@ -171,7 +168,7 @@ const resolver = {
 
       // resolve a webpack `resolve.alias`
       if (resolvedPath == null) {
-        resolvedPath = resolver.resolveAlias(file.substring(1));
+        resolvedPath = this.resolveAlias(file.substring(1));
 
         if (typeof resolvedPath === 'string') {
           resolvedPath = file[0] + resolvedPath;
@@ -179,7 +176,7 @@ const resolver = {
           // try to resolve via enhanced resolver by webpack self at compilation time
           resolvedPath = file;
           // remove optional prefix in request for enhanced resolver
-          const { ignorePrefix } = parseAliasInRequest(file.substring(1));
+          const { ignorePrefix } = this.parseAliasInRequest(file.substring(1));
           if (ignorePrefix) resolvedPath = file[0] + file.substring(2);
         }
       }
@@ -197,59 +194,80 @@ const resolver = {
   },
 
   /**
-   * Resolve an alias in the argument of require() function.
-   *
-   * @param {string} request The value of extends/include/require().
-   * @return {string | null} If found an alias return resolved normalized path otherwise return false.
-   */
-  resolveAlias: (request) => {
-    if (resolver.hasAlias === false) return null;
-
-    let { ignorePrefix, aliasName, targetPath } = parseAliasInRequest(request);
-    // try resolve alias w/o prefix
-    if (ignorePrefix === true) targetPath = resolver.aliases[aliasName.substring(1)];
-
-    return typeof targetPath === 'string' ? path.join(targetPath + request.substring(aliasName.length)) : targetPath;
-    //return typeof targetPath === 'string' ? targetPath + request.substring(aliasName.length) : null;
-  },
-
-  /**
-   * Resolve the source path in require().
+   * Resolve the path of source file in require().
    *
    * @param {string} templateFile The filename of the template where resolves the resource.
    * @param {string} value The resource value include require().
-   * @param {string[]} dependencies The list of dependencies for watching.
    * @return {string}
    */
-  resolveRequireCode: (templateFile, value, dependencies) =>
-    value.replaceAll(/(require\(.+?\))/g, (value) => {
+  resolveSource(templateFile, value) {
+    const self = this;
+    return value.replaceAll(/(require\(.+?\))/g, (value) => {
       const [, file] = /(?<=require\("|'|`)(.+)(?=`|'|"\))/.exec(value) || [];
-      const resolvedPath = resolver.resolve(file, templateFile);
-      const dependencyFile = isWin ? path.normalize(resolvedPath) : resolvedPath;
+      let resolvedFile = self.resolve(file, templateFile);
+      const dependencyFile = isWin ? path.normalize(resolvedFile) : resolvedFile;
 
       // Important: delete the file from require.cache to allow reloading cached files after changes by watch.
       delete require.cache[dependencyFile];
-      dependencies.push(dependencyFile);
+      self.resolvedFiles.push(dependencyFile);
 
-      return `require('${resolvedPath}')`;
-    }),
+      return `require('${resolvedFile}')`;
+    });
+  },
 
   /**
-   * Resolve the required source paths in the tag attribute.
+   * Resolve the paths of asset in require() used in a tag attribute.
    * For example, see test case `require-img-srcset`.
    *
    * @param {string} templateFile The filename of the template where resolves the resource.
    * @param {string} value The resource value include require().
-   * @param {LoaderMethod} method The object of the current method.
    * @return {string}
    */
-  resolveRequireResource: (templateFile, value, method) => {
+  resolveResource(templateFile, value) {
+    const self = this;
     if (isWin) templateFile = pathToPosix(templateFile);
 
     return value.replaceAll(/require\(.+?\)/g, (value) => {
       const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
-      return method.requireResource(file, templateFile);
+      return self.loader.require(file, templateFile);
     });
+  },
+
+  /**
+   * Resolve an alias in the argument of require() function.
+   *
+   * @param {string} request The value of extends/include/require().
+   * @return {string | null} If found an alias return resolved normalized path otherwise return false.
+   * @private
+   */
+  resolveAlias(request) {
+    if (this.hasAlias === false) return null;
+
+    let { ignorePrefix, aliasName, targetPath } = this.parseAliasInRequest(request);
+
+    // try resolve alias w/o prefix
+    if (ignorePrefix === true) targetPath = this.aliases[aliasName.substring(1)];
+
+    return typeof targetPath === 'string' ? path.join(targetPath + request.substring(aliasName.length)) : targetPath;
+  },
+
+  /**
+   * @param {string} request
+   * @returns {{aliasName: string, ignorePrefix: boolean, targetPath: string || array || null}}
+   * @private
+   */
+  parseAliasInRequest(request) {
+    const [, prefix, alias] = this.aliasRegexp.exec(request) || [];
+    const aliasName = (prefix || '') + (alias || '');
+    const targetPath = this.aliases[aliasName];
+    const ignorePrefix = prefix != null && alias != null && targetPath == null;
+
+    return {
+      // whether a prefix should be ignored to try resolve alias w/o prefix
+      ignorePrefix,
+      aliasName,
+      targetPath,
+    };
   },
 };
 

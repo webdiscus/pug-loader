@@ -1,5 +1,9 @@
 # Change log
 
+## 1.7.4 (2022-02-20)
+- code refactoring and internal optimization
+- update readme
+
 ## 1.7.3 (2022-02-19)
 - fix collision with local variables passed in template function for compile method
 

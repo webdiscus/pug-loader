@@ -1,13 +1,14 @@
 const path = require('path');
 const PugPlugin = require('pug-plugin');
+//const PugPlugin = require('../../../pug-plugin'); // for local development only
 
 module.exports = {
   mode: 'production',
 
   resolveLoader: {
     alias: {
-      //'pug-loader': '@webdiscus/pug-loader',
-      'pug-loader': path.join(__dirname, '../../'), // use it only for local development
+      //'pug-loader': PugPlugin.loader, // the pug-loader is already included in the PugPlugin
+      'pug-loader': path.join(__dirname, '../../'), // for local development only
     },
   },
 
@@ -49,7 +50,6 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: 'pug-loader',
-        //loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
         options: {
           method: 'render',
           esModule: true,

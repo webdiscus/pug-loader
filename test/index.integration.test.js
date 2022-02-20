@@ -134,7 +134,6 @@ describe('require resource', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
-  // TODO: fix Cannot read properties of null (reading 'source')
   test('require-alias-array-render', (done) => {
     const relTestCasePath = 'require-alias-array-render';
     compareContent(PATHS, relTestCasePath, done);
@@ -229,6 +228,11 @@ describe('require pug in javascript', () => {
 
   test(`query methods compile and render`, (done) => {
     const relTestCasePath = 'javascript-query-method-all';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data, method compile`, (done) => {
+    const relTestCasePath = 'javascript-option-data-compile';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 

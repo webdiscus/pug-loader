@@ -18,6 +18,6 @@ img.d2(src=require('AliasImages/' + file))
 //-img.d3(src=require('@images/' + file)) TODO: fix for compile is ultra complex
 
 - var colors = require('@data/colors.json')
- .colors
-   each color in colors
-     div(style=`color:${color.hex};`)= color.name
+.colors
+  each color in colors
+    div(style=`color:${color.hex};`)= color.name

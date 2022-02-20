@@ -1,11 +1,10 @@
 const path = require('path');
-const basePath = path.resolve(__dirname);
 
 module.exports = {
   resolveLoader: {
     alias: {
       'pug-loader': '@webdiscus/pug-loader',
-      //'pug-loader': path.join(basePath, '../../'), // use it only for local development
+      //'pug-loader': path.join(__dirname, '../../'), // for local development only
     },
   },
 

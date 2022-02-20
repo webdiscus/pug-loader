@@ -4,16 +4,10 @@ require('./polyfills/string.replaceAll');
 const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
-const { merge } = require('webpack-merge');
-const { getResourceParams, injectExternalVariables, isWin } = require('./utils');
+const { isWin } = require('./utils');
 const resolver = require('./resolver');
 const loader = require('./loader');
 const { getPugCompileErrorMessage } = require('./exeptions');
-
-// the variables with global scope for the resolvePlugin
-let loaderMethod = null,
-  codeDependencies = [],
-  loaderContext = null;
 
 /**
  * The pug plugin to resolve path for include, extends, require.
@@ -42,14 +36,14 @@ const resolvePlugin = {
       if (node.type === 'Code') {
         // resolving for require of a code, e.g.: `- var data = require('./data.js')`
         if (containRequire(node)) {
-          let result = resolver.resolveRequireCode(node.filename, node.val, codeDependencies);
+          const result = resolver.resolveSource(node.filename, node.val);
           if (result && result !== node.val) node.val = result;
         }
       } else if (node.attrs) {
         // resolving for tag attributes, e.g.: img(src=require('./image.jpeg'))
         node.attrs.forEach((attr) => {
           if (containRequire(attr)) {
-            let result = resolver.resolveRequireResource(attr.filename, attr.val, loaderMethod);
+            const result = resolver.resolveResource(attr.filename, attr.val);
             if (result && result !== attr.val) attr.val = result;
           }
         });
@@ -70,57 +64,61 @@ const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.va
  * @param {function(error: string|null, result: string?)?} callback The asynchronous callback function.
  * @return {string|undefined}
  */
-const compilePugContent = function (content, callback) {
-  let pugResult = {};
-  const loaderContext = this,
-    webpackOptionsResolve = loaderContext.hasOwnProperty('_compiler')
-      ? loaderContext._compiler.options.resolve || {}
-      : {},
-    loaderOptions = loaderContext.getOptions() || {},
-    esModule = loaderOptions.esModule === true,
-    resourceParams = getResourceParams(loaderContext.resourceQuery),
-    // the rule: a method defined in the resource query has highest priority over a method defined in the loaderName options
-    // because a method from loaderName options is global but a query method override by local usage a global method
-    methodFromQuery = loader.methods.find((item) => resourceParams.hasOwnProperty(item.queryParam)),
-    methodFromOptions = loader.methods.find((item) => loaderOptions.method === item.method);
+const compile = function (content, callback) {
+  const loaderContext = this;
+  const loaderOptions = loaderContext.getOptions() || {};
+  const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
+  const webpackOptions = webpackCompiler.options;
+  const resolverOptions = webpackOptions.resolve || {};
 
-  // define the `loaderMethod` for global scope in this module
-  loaderMethod = methodFromQuery || methodFromOptions || loader.methods[0];
+  if (!loaderOptions.name) loaderOptions.name = 'template';
 
-  const options = {
-    // used to resolve imports/extends and to improve errors
-    filename: loaderContext.resourcePath,
+  const compileOptions = {
+    // used to resolve import/extends and to improve errors
+    filename,
     // the root directory of all absolute inclusion, defaults is `/`.
     basedir: loaderOptions.basedir || '/',
     doctype: loaderOptions.doctype || 'html',
-    /** @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options */
-    pretty: false,
     filters: loaderOptions.filters,
     self: loaderOptions.self || false,
-    // output compiled function to stdout, must be false
-    debug: false,
-    // include the function source in the compiled template, defaults is false
-    compileDebug: loaderOptions.debug || false,
     globals: ['require', ...(loaderOptions.globals || [])],
+    // add the plugin to resolve include, extends, require
+    plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
+    // the name of template function, defaults `template`
+    name: loaderOptions.name,
     // include inline runtime functions must be true
     inlineRuntimeFunctions: true,
     // for the pure function code w/o exports the module, must be false
     module: false,
-    // default name of template function is `template`
-    name: 'template',
-    // the template without export module syntax, because the export will be determined depending on the method
-    plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
+    // include the function source in the compiled template, defaults is false
+    compileDebug: loaderOptions.debug || false,
+    // output compiled function to stdout, must be false
+    debug: false,
+    /** @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options */
+    pretty: false,
   };
 
-  // initialize the resolver
-  resolver.init(options.basedir, this.rootContext, webpackOptionsResolve);
+  let compileResult;
+
+  resolver.init({
+    context,
+    basedir: compileOptions.basedir,
+    options: resolverOptions,
+  });
+  loader.init({
+    resourceQuery,
+    // in pug can be used external data, e.g. htmlWebpackPlugin.options
+    customData: getHtmlWebpackPluginOptions(webpackOptions, filename),
+    options: loaderOptions,
+  });
+  resolver.setLoader(loader);
   loader.setResolver(resolver);
 
   loaderContext.cacheable && loaderContext.cacheable(true);
 
   try {
     /** @type {{body: string, dependencies: []}} */
-    pugResult = pug.compileClientWithDependenciesTracked(content, options);
+    compileResult = pug.compileClientWithDependenciesTracked(content, compileOptions);
   } catch (error) {
     // watch files in which an error occurred
     if (error.filename) loaderContext.addDependency(path.normalize(error.filename));
@@ -129,7 +127,7 @@ const compilePugContent = function (content, callback) {
   }
 
   // add dependency files to watch changes
-  const dependencies = [...pugResult.dependencies, ...codeDependencies];
+  const dependencies = [...compileResult.dependencies, ...resolver.getResolvedFiles()];
   if (isWin) {
     dependencies.forEach((file, index, files) => {
       files[index] = path.normalize(file);
@@ -137,38 +135,32 @@ const compilePugContent = function (content, callback) {
   }
   dependencies.forEach(loaderContext.addDependency);
 
-  // remove pug method from query data to pass only clean data w/o options
-  delete resourceParams[loaderMethod.queryParam];
-
-  // custom options from HtmlWebpackPlugin can be used in pug
-  const htmlWebpackPluginOptions = getHtmlWebpackPluginOptions(loaderContext);
-  const locals = merge(loaderOptions.data || {}, htmlWebpackPluginOptions, resourceParams);
-  const funcBody = Object.keys(locals).length ? injectExternalVariables(pugResult.body, locals) : pugResult.body;
-  const result = loaderMethod.export(loaderContext.resourcePath, funcBody, locals, esModule);
-
+  const result = loader.export(filename, compileResult.body);
   callback(null, result);
 };
 
 /**
  * Get user options of HtmlWebpackPlugin({}).
  *
- * @param {Object} loaderContext The context object of webpack loader.
+ * @param {Object} webpackOptions The webpack config options.
+ * @param {string} filename The filename of pug template.
  * @returns {{htmlWebpackPlugin: {options: {}}}}
  */
-const getHtmlWebpackPluginOptions = (loaderContext) => {
-  const sourceFile = loaderContext.resourcePath;
-  let options = {
-    htmlWebpackPlugin: { options: {} },
-  };
+const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
+  const plugins = webpackOptions.plugins;
+  let options = {};
 
-  if (loaderContext.hasOwnProperty('_compiler')) {
-    const plugins = loaderContext._compiler.options.plugins || [];
-    const obj = plugins.find(
-      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(sourceFile) >= 0
+  if (plugins) {
+    const pluginData = plugins.find(
+      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0
     );
 
-    if (obj && obj.hasOwnProperty('userOptions')) {
-      options.htmlWebpackPlugin.options = obj.userOptions;
+    if (pluginData) {
+      options = { htmlWebpackPlugin: { options: {} } };
+
+      if (pluginData.hasOwnProperty('userOptions')) {
+        options.htmlWebpackPlugin.options = pluginData.userOptions;
+      }
     }
   }
 
@@ -177,9 +169,8 @@ const getHtmlWebpackPluginOptions = (loaderContext) => {
 
 module.exports = function (content, map, meta) {
   const callback = this.async();
-  loaderContext = this;
 
-  compilePugContent.call(this, content, (err, result) => {
+  compile.call(this, content, (err, result) => {
     if (err) return callback(err);
     callback(null, result, map, meta);
   });

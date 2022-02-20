@@ -8,30 +8,30 @@ const isJSON = (str) => typeof str === 'string' && str.length > 1 && str[0] === 
 const parseValue = (value) => (isJSON(value) ? JSON.parse(value) : value == null ? '' : value);
 
 /**
- * Parse the resourceQuery of the Loader Context.
+ * Parse the url query.
  * See possible resource queries in the test case `parse resource data`.
  *
  * @param {string} query
  * @return {{}}
  */
-const parseResourceData = function (query) {
+const parseQuery = function (query) {
   let params = query.split('&'),
     data = {};
 
   params.forEach((param) => {
     if (isJSON(param)) {
-      const val = JSON.parse(param);
-      data = merge(data, val);
+      const value = JSON.parse(param);
+      data = merge(data, value);
       return;
     }
 
-    let [key, val] = param.split('=');
+    let [key, value] = param.split('=');
     if (key.indexOf('[]') > 0) {
       key = key.replace('[]', '');
       if (!data.hasOwnProperty(key)) data[key] = [];
-      data[key].push(parseValue(val));
+      data[key].push(parseValue(value));
     } else if (key && key.length > 0) {
-      data[key] = parseValue(val);
+      data[key] = parseValue(value);
     }
   });
 
@@ -41,14 +41,13 @@ const parseResourceData = function (query) {
 /**
  * Get data from the resource query.
  *
- * @param {string} str
+ * @param {string} query
  * @return {{}}
  */
-const getResourceParams = function (str) {
-  if (str[0] !== '?') return {};
-  const query = str.substring(1);
+const getQueryData = function (query) {
+  if (query[0] !== '?') return {};
 
-  return parseResourceData(query);
+  return parseQuery(query.substring(1));
 };
 
 /**
@@ -85,6 +84,6 @@ module.exports = {
   loaderName,
   isWin,
   pathToPosix,
-  getResourceParams,
+  getQueryData,
   injectExternalVariables,
 };
