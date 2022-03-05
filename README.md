@@ -281,7 +281,7 @@ In webpack config add to `module.rules`:
   }
 }
 ```
-In JavaScript, the result of require () is a template function. Call the template function with some variables to render it то HTML.
+In JavaScript, the result of require() is a template function. Call the template function with some variables to render it to HTML.
 ```js
 const tmpl = require('template.pug');
 const html = tmpl({ key: 'value' }); // the HTML string
@@ -621,18 +621,18 @@ resolve: {
 ```
 
 | Example in pug template                                                                                                                                | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader  |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------|-----------------------|
-| `img(src=require('logo.png'))`                                                                                                                         | ✅ but not recomended                                   | ❌                                             | ❌                     |
-| `img(src=require('./logo.png'))`                                                                                                                     | ✅                                                      | ✅                                             | ✅                     |
-| `img(src=require('../images/logo.png'))`                                                                                                             | ✅                                                      | ✅                                             | ✅                     |
-| `img(src=require('~Images/logo.png'))`                                                                                                               | ✅                                                      | ✅                                             | ✅                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                      | ✅                                             | ✅                     |
-| `- var file = './logo.png'`<br>`img(src=require(file))`                                                                                              | ✅                                                      | ✅                                             | ❌                     |
-| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                                                                       | ✅                                                      | ❌                                             | ❌                     |
-| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                                                                      | ✅                                                      | ❌                                             | ❌                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                                      | ✅                                             | ✅                     |
-| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                      | ✅                                             | ✅                     |
-| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./logo.png'))` | ✅                                                      | ✅                                             | ❌                     |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------------------|-----------------------|
+| `img(src=require('logo.png'))`                                                                                                                         | ✅ but not recomended                                   | ❌                                            | ❌                     |
+| `img(src=require('./logo.png'))`                                                                                                                     | ✅                                                      | ✅                                            | ✅                     |
+| `img(src=require('../images/logo.png'))`                                                                                                             | ✅                                                      | ✅                                            | ✅                     |
+| `img(src=require('~Images/logo.png'))`                                                                                                               | ✅                                                      | ✅                                            | ✅                     |
+| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                      | ✅                                            | ✅                     |
+| `- var file = './logo.png'`<br>`img(src=require(file))`                                                                                              | ✅                                                      | ✅                                            | ❌                     |
+| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                                                                       | ✅                                                      | ✅                                              | ❌                     |
+| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                                                                      | ✅                                                      | ❌                                            | ❌                     |
+| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                                      | ✅                                            | ✅                     |
+| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                      | ✅                                            | ✅                     |
+| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./logo.png'))` | ✅                                                      | ✅                                            | ❌                     |
 
 
 <a id="usage-with-angular-component" name="usage-with-angular-component" href="#usage-with-angular-component"></a>

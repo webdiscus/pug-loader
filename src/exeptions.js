@@ -1,6 +1,8 @@
 const ansis = require('ansis');
 const { loaderName } = require('./utils');
 
+let lastError = null;
+
 /**
  * @param {string} message
  * @constructor
@@ -13,16 +15,21 @@ const PugLoaderException = function (message) {
 
 /**
  * @param {string} message The error description.
- * @param {PugLoaderException|Error?} error The original error from catch()
+ * @param {PugLoaderException|Error|string?} error The original error from catch()
  * @constructor
  */
-const PugLoaderError = function (message, error) {
+const PugLoaderError = function (message, error = '') {
   if (error && error instanceof PugLoaderException) {
+    if (error.toString() === lastError) {
+      // prevent double output same error
+      throw new PugLoaderException(lastError);
+    }
     // throw original error to avoid output all nested exceptions
-    throw new Error(error.toString());
+    lastError = error.toString();
+    throw new Error(lastError);
   }
-
-  throw new PugLoaderException(message + `\n` + error);
+  lastError = message + `\n` + error;
+  throw new PugLoaderException(lastError);
 };
 
 /**
@@ -38,6 +45,23 @@ const resolveException = (error, file, templateFile) => {
     )} can't be resolved in the pug template:\n` + ansis.cyan(templateFile);
 
   PugLoaderError(message, error);
+};
+
+/**
+ * @param {string} value The value to interpolate.
+ * @param {string} templateFile The template file.
+ * @throws {Error}
+ */
+const unsupportedInterpolationException = (value, templateFile) => {
+  const message =
+    `\n${ansis.black.bgRedBright(`[${loaderName}]`)} the expression ${ansis.yellow(
+      value
+    )} can't be interpolated with the 'compile' method in the pug template: ${ansis.cyan(templateFile)}\n` +
+    `${ansis.yellow(
+      'Possible solution: '
+    )} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias instead of alias from tsconfig.`;
+
+  PugLoaderError(message, '');
 };
 
 /**
@@ -70,6 +94,7 @@ const getPugCompileErrorMessage = (error) => {
 module.exports = {
   PugLoaderError,
   resolveException,
+  unsupportedInterpolationException,
   executeTemplateFunctionException,
   getPugCompileErrorMessage,
 };

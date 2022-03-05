@@ -5,17 +5,17 @@ img.a3(src=require('@images/image.jpeg'))
 - var file = 'image.jpeg'
 img.b1(src=require('../assets/images/' + file))
 img.b2(src=require('AliasImages/' + file))
-//-img.b3(src=require('@images/' + file)) TODO: fix for compile is ultra complex
+//-img.b3(src=require('@images/' + file)) TODO: fix for compile is not possible
 
 - var file = './image.jpeg'
 img.c1(src=require('../assets/images/' + file))
 img.c2(src=require('AliasImages/' + file))
-//-img.c3(src=require('@images/' + file)) TODO: fix for compile is ultra complex
+//-img.c3(src=require('@images/' + file)) TODO: fix for compile is not possible
 
 - var file = '../images/image.jpeg'
 img.d1(src=require('../assets/images/' + file))
 img.d2(src=require('AliasImages/' + file))
-//-img.d3(src=require('@images/' + file)) TODO: fix for compile is ultra complex
+//-img.d3(src=require('@images/' + file)) TODO: fix for compile is not possible
 
 - var colors = require('@data/colors.json')
 .colors

@@ -1,5 +1,19 @@
 # Change log
 
+## 1.8.0 (2022-03-05)
+### Resolving and watching improvements
+- resolve the variable contained a sub directory in the relative path
+  ```pug
+  - var file = './subdir/image.jpg';
+  img(src=require(file))
+  ```
+- resolve a required path in the variable
+  ```pug
+  - var file = require('./subdir/image.jpg');
+  img(src=file)
+  ```
+- watching of required `js` and `json` files in pug
+
 ## 1.7.4 (2022-02-20)
 - code refactoring and internal optimization
 - update readme

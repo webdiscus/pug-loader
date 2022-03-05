@@ -7,9 +7,10 @@
  * @property {function(templateFile:string, funcBody:string, locals:{})} export Generates a result of loader method.
  */
 
+const path = require('path');
+const { merge } = require('webpack-merge');
 const { getQueryData, injectExternalVariables } = require('./utils');
 const { executeTemplateFunctionException } = require('./exeptions');
-const { merge } = require('webpack-merge');
 
 /**
  * @typedef {Object} Loader
@@ -94,6 +95,9 @@ const loader = {
 
       require: (file, templateFile) => {
         const resolvedFile = loader.resolver.interpolate(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
         return `require(${resolvedFile})`;
       },
 
@@ -112,6 +116,13 @@ const loader = {
 
       loaderRequire(file, templateFile) {
         const resolvedFile = loader.resolver.resolve(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
+        if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
+          return require(resolvedFile);
+        }
+
         return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
       },
 
@@ -138,7 +149,15 @@ const loader = {
       queryParam: null,
 
       loaderRequire(file, templateFile) {
-        return loader.resolver.resolve(file, templateFile);
+        const resolvedFile = loader.resolver.resolve(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
+        if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
+          return require(resolvedFile);
+        }
+
+        return resolvedFile;
       },
 
       require(file, templateFile) {

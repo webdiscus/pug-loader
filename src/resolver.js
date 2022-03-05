@@ -2,7 +2,7 @@
 const ResolverFactory = require('enhanced-resolve');
 const path = require('path');
 const { isWin, pathToPosix } = require('./utils');
-const { resolveException } = require('./exeptions');
+const { resolveException, unsupportedInterpolationException } = require('./exeptions');
 
 /**
  * @param {string} path The start path to resolve.
@@ -19,7 +19,7 @@ const fileResolverSyncFactory = (path, options) => {
     mainFields: [],
     modules: [],
     mainFiles: [],
-    extensions: [],
+    extensions: ['.js'],
     preferRelative: true,
   });
 
@@ -55,8 +55,7 @@ const resolver = {
   hasPlugins: false,
   resolveFile: null,
   loader: null,
-  // the resolved files
-  resolvedFiles: [],
+  dependencies: [],
 
   /**
    * @param {string} context The root context path.
@@ -69,6 +68,7 @@ const resolver = {
     this.hasAlias = Object.keys(this.aliases).length > 0;
     this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
     this.resolveFile = fileResolverSyncFactory(context, options);
+    this.dependencies = [];
   },
 
   /**
@@ -81,8 +81,31 @@ const resolver = {
   /**
    * @return {Array<string>}
    */
-  getResolvedFiles() {
-    return this.resolvedFiles;
+  getDependencies() {
+    return this.dependencies;
+  },
+
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
+  isScript(file) {
+    return /\.js[a-z0-9]*$/i.test(file);
+  },
+
+  /**
+   * Add required file for watching.
+   *
+   * @param {string} file
+   */
+  addDependency(file) {
+    if (!/.(js|json)$/i.test(file)) return;
+
+    const dependency = isWin ? path.normalize(file) : file;
+
+    // delete the file from require.cache to allow reloading cached files after changes by watch
+    delete require.cache[dependency];
+    this.dependencies.push(dependency);
   },
 
   /**
@@ -137,82 +160,85 @@ const resolver = {
    * @note: the file is the argument of require() and can be any expression, like require('./' + file + '.jpg').
    * See https://webpack.js.org/guides/dependency-management/#require-with-expression.
    *
-   * @param {string} file The file to resolve.
+   * @param {string} value The expression to resolve.
    * @param {string} templateFile The template file.
    * @return {string}
    */
-  interpolate(file, templateFile) {
-    file = file.trim();
-    const quote = file[0];
+  interpolate(value, templateFile) {
+    value = value.trim();
+
+    const [, quote, file] = /(^"|'|`)(.+?)(?=`|'|")/.exec(value) || [];
     let resolvedPath = null;
+    let tryToResolveFile = file;
 
     // the argument begin with a string quote
-    if ('\'"`'.indexOf(quote) >= 0) {
-      const context = path.dirname(templateFile) + '/';
+    const context = path.dirname(templateFile) + '/';
 
-      // resolve an absolute path by prepending options.basedir
-      if (file[1] === '/') {
-        resolvedPath = file[0] + this.basedir + file.substring(2);
-      }
-
-      // resolve a relative file
-      // fix the issue when the required file has a relative path (`./` or `../`) and is in an included file
-      if (resolvedPath == null && file.substring(1, 4) === '../') {
-        resolvedPath = file[0] + context + file.substring(1);
-      }
-
-      // resolve a relative file
-      if (resolvedPath == null && file.substring(1, 3) === './') {
-        resolvedPath = file[0] + context + file.substring(3);
-      }
-
-      // resolve a webpack `resolve.alias`
-      if (resolvedPath == null) {
-        resolvedPath = this.resolveAlias(file.substring(1));
-
-        if (typeof resolvedPath === 'string') {
-          resolvedPath = file[0] + resolvedPath;
-        } else if (Array.isArray(resolvedPath)) {
-          // try to resolve via enhanced resolver by webpack self at compilation time
-          resolvedPath = file;
-          // remove optional prefix in request for enhanced resolver
-          const { ignorePrefix } = this.parseAliasInRequest(file.substring(1));
-          if (ignorePrefix) resolvedPath = file[0] + file.substring(2);
-        }
-      }
-
-      if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
-    } else {
+    if (!file) {
       // fix webpack require issue `Cannot find module` for the case:
       // - var file = './image.jpeg';
       // require(file) <- error
       // require(file + '') <- solution
-      file += " + ''";
+      return value + ` + ''`;
     }
 
-    return resolvedPath || file;
-  },
+    // resolve an absolute path by prepending options.basedir
+    if (file[0] === '/') {
+      resolvedPath = quote + this.basedir + value.substring(2);
+    }
 
-  /**
-   * Resolve the path of source file in require().
-   *
-   * @param {string} templateFile The filename of the template where resolves the resource.
-   * @param {string} value The resource value include require().
-   * @return {string}
-   */
-  resolveSource(templateFile, value) {
-    const self = this;
-    return value.replaceAll(/(require\(.+?\))/g, (value) => {
-      const [, file] = /(?<=require\("|'|`)(.+)(?=`|'|"\))/.exec(value) || [];
-      let resolvedFile = self.resolve(file, templateFile);
-      const dependencyFile = isWin ? path.normalize(resolvedFile) : resolvedFile;
+    // resolve a file in current directory
+    if (resolvedPath == null && file.substring(0, 2) === './') {
+      resolvedPath = quote + context + value.substring(3);
+    }
 
-      // Important: delete the file from require.cache to allow reloading cached files after changes by watch.
-      delete require.cache[dependencyFile];
-      self.resolvedFiles.push(dependencyFile);
+    // resolve a file in parent directory
+    if (resolvedPath == null && file.substring(0, 3) === '../') {
+      resolvedPath = quote + context + value.substring(1);
+    }
 
-      return `require('${resolvedFile}')`;
-    });
+    // resolve a webpack `resolve.alias`
+    if (resolvedPath == null) {
+      resolvedPath = this.resolveAlias(value.substring(1));
+
+      if (typeof resolvedPath === 'string') {
+        resolvedPath = quote + resolvedPath;
+      } else if (Array.isArray(resolvedPath)) {
+        resolvedPath = null;
+        const { ignorePrefix } = this.parseAliasInRequest(file);
+        if (ignorePrefix) tryToResolveFile = file.substring(1);
+      }
+    }
+
+    // try the enhanced resolver for alias from tsconfig or for alias as array of paths
+    // the following examples work:
+    // '@data/path/script'
+    // '@data/path/script.js'
+    // '@images/logo.jpg'
+    // `${file}`
+    if (resolvedPath == null) {
+      if (file.indexOf('{') < 0 && !file.endsWith('/')) {
+        try {
+          const resolvedFile = this.resolveFile(context, tryToResolveFile);
+          resolvedPath = value.replace(file, resolvedFile);
+        } catch (error) {
+          resolveException(error, value, templateFile);
+        }
+      } else if (~file.indexOf('/')) {
+        // @note: resolve of alias from tsconfig in interpolating string is not supported for `compile` method,
+        // the following examples not work:
+        // `@data/${pathname}/script`
+        // `@data/${pathname}/script.js`
+        // `@data/path/${filename}`
+        // '@data/path/' + filename
+        unsupportedInterpolationException(value, templateFile);
+      }
+    }
+
+    if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
+    if (!resolvedPath) resolvedPath = value;
+
+    return resolvedPath;
   },
 
   /**
@@ -237,7 +263,7 @@ const resolver = {
    * Resolve an alias in the argument of require() function.
    *
    * @param {string} request The value of extends/include/require().
-   * @return {string | null} If found an alias return resolved normalized path otherwise return false.
+   * @return {string | [] | null} If found an alias return resolved normalized path otherwise return false.
    * @private
    */
   resolveAlias(request) {

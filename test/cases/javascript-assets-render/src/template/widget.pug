@@ -1,26 +1,70 @@
-h1 Hello!
+//- The limitations:
+  // following not works with the `compile` method:
+  - var file = '../images/image.jpeg';
+  img(src=require(file))
+
+  // resolve of alias from tsconfig in interpolating string is not supported for `compile` method
+  // alias `@data` from tsconfig
+  -var cat = 'cat-1';
+  -var colorModule = require(`@data/${cat}/color.js`)
+
+//-
+- var name = 'image';
+- var file = name + '.jpeg';
+- var file2 = './image.jpeg';
+- var file3 = './subdir/image.jpeg';
+- var file4 = require(file3);
+
+//- the limitation, following not works with the `compile` method:
+- var file5 = '../assets/images/image.jpeg';
+
+h1 Hello World!
 
 //- test resolve of embedded resources
-- file2 = 'image2.jpeg'
-p= '../images/image.jpeg'
-img(src=require('../images/image.jpeg'))
-p= 'Images/image.jpeg'
-img(src=require('Images/image.jpeg'))
-p= '"Images/" + file2'
-img(src=require('Images/' + file2))
-p= '`Images/${file2}`'
-img(src=require(`Images/${file2}`))
 
-//- test require of a function
+//- required files that should resolve in the current directory need to start with './'
+img.a1(src=require('./image.jpeg'))
+img.a2(src=require('./' + file))
+img.a3(src=require(`${file2}`))
+img.a4(src=require(file2))
+img.a5(src=require(file3))
+img.a6(src=file4)
+img.a7(src=require(file5))
+
+img.b1(src=require('./subdir/image.jpeg'))
+img.b2(src=require('./subdir/' + file))
+img.c1(src=require('../assets/images/image.jpeg'))
+img.c2(src=require('../assets/images/' + file))
+
+img.d1(src=require('Images/image.jpeg'))
+img.d2(src=require("~Images/" + file))
+img.d3(src=require(`@Images/${file}`))
+img.d4(src=require(`@Images/image.jpeg`))
+
+//- alias defined in tsconfig.json using the webpack resolve.plugins
+img.e1(src=require(`@TSImages/image.jpeg`))
+img.e2(src=require(`@TSImages/` + file))
+
+//- test option `basedir` and trim()
+img.f1(src=require( '/assets/images/' + file))
+div.a= data.items.a
+div.b= data.items.b
+
 -
-  var colorModule = require('../includes/color')
-  colorModule.add(require('../includes/colors.json'))
-  var data = colorModule.getData()
+  // test require of a function
+  var colorModule = require('@data/cat-1/color')
 
-p #{ colorModule.getHelloColor('green') }
+  // alias `~Data` from webpack alias
+  var colorModule2 = require('~Data/cat-1/color')
+
+  colorModule.add(require('@data/colors.json'))
+  var colors = colorModule.getData();
+  var str = colorModule.getHelloColor('green');
+
+p #{colorModule.getHelloColor('green')}
 
 //- test single require of a JSON
-- var colors = require('../includes/colors.json')
+- var colors = require('../data/colors.json')
 
 .first
   each color in colors
@@ -31,11 +75,11 @@ p #{ colorModule.getHelloColor('green') }
   var data = [
     {
       name: 'Red Green Blue',
-      colors: require('../includes/colors.json'),
+      colors: require('../data/colors.json'),
     },
     {
       name: 'Rose Violet Azure',
-      colors: require('Includes/colors2.json'),
+      colors: require('~Data/cat-2/colors2.json'),
     }
   ]
 

@@ -295,4 +295,10 @@ describe('exception tests', () => {
     const containString = `can't be resolved`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
+
+  test("exception: file can't be interpolated with the 'compile' method", (done) => {
+    const relTestCasePath = 'exception-interpolation-unsupported-value';
+    const containString = `can't be interpolated with the 'compile' method`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
 });

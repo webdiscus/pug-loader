@@ -4,8 +4,12 @@ const { merge } = require('webpack-merge');
 const loaderName = 'pug-loader';
 
 const isWin = path.sep === '\\';
+
 const isJSON = (str) => typeof str === 'string' && str.length > 1 && str[0] === '{' && str[str.length - 1] === '}';
+
 const parseValue = (value) => (isJSON(value) ? JSON.parse(value) : value == null ? '' : value);
+
+const outToConsole = (...args) => process.stdout.write(args.join(' ') + '\n');
 
 /**
  * Parse the url query.
@@ -85,5 +89,6 @@ module.exports = {
   isWin,
   pathToPosix,
   getQueryData,
+  outToConsole,
   injectExternalVariables,
 };

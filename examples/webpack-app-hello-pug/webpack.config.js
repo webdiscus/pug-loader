@@ -1,6 +1,6 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
-//const PugPlugin = require('../../../pug-plugin'); // for local development only
+//const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../../pug-plugin'); // for local development only
 
 module.exports = {
   mode: 'production',

@@ -1,6 +1,5 @@
 img(src=require('./image.jpeg'))
 
-//-
 - var basename = 'logo';
 
 //- test the prefix only as alias
@@ -8,6 +7,8 @@ img.prefix(src=require('@/images/' + basename + '.jpeg'))
 
 //- test the single char as alias
 img.char(src=require('&/images/' + basename + '.jpeg'))
+
+//- note: if alias value is a string, the variable can be used
 
 //- test alias value as string
 img.a1(src=require('ImagesA/' + basename + '-a1.jpeg'))
@@ -18,6 +19,15 @@ img.a3(src=require('@ImagesA/' + basename + '-a3.jpeg'))
 img.b1(src=require('ImagesB/logo-b1.jpeg'))
 img.b2(src=require('~ImagesB/logo-b2.jpeg'))
 img.b3(src=require('@ImagesB/logo-b3.jpeg'))
+//- this works too
+-
+  var logos = {
+    bc1: require('ImagesB/logo-b1.jpeg'),
+    bc2: require('~ImagesB/logo-b2.jpeg'),
+    bc3: require('@ImagesB/logo-b3.jpeg'),
+  };
+each src, className in logos
+  img(src=src class=className)
 
 //- test alias value as array
 img.c1(src=require('ImagesC/' + basename + '-c1.jpeg'))
@@ -28,3 +38,14 @@ img.c3(src=require('@ImagesC/' + basename + '-c3.jpeg'))
 img.d1(src=require('ImagesD/logo-d1.jpeg'))
 img.d2(src=require('~ImagesD/logo-d2.jpeg'))
 img.d3(src=require('@ImagesD/logo-d3.jpeg'))
+
+//- test resolves a required file into a variable that is used in a tag attribute as a path
+- var file = 'logo-a1.jpeg';
+- var imageSrc = require('ImagesA/' + file);
+img.e1(src=imageSrc)
+
+//- test require a script/data into variable used as data
+- var colors = require('./data/colors.json')
+.colors
+  each color in colors
+    div(style=`color:${color.hex};`)= color.name

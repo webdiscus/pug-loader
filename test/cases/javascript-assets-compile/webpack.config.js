@@ -1,8 +1,6 @@
 const path = require('path');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-const basePath = path.resolve(__dirname);
-
 module.exports = {
   mode: 'production',
 
@@ -16,11 +14,19 @@ module.exports = {
   },
 
   resolve: {
-    plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
+    plugins: [
+      new TsConfigPathsPlugin({
+        configFile: path.join(__dirname, 'tsconfig.json'),
+        // ATTENTIONS
+        // if you require a js file w/o extension via alias from tsconfig, like `var data = require('@data/colors')`
+        // then the omitted extension must be defined in the option:
+        extensions: ['.js'],
+      }),
+    ],
     alias: {
-      Images: path.join(basePath, 'src/assets/images/'),
-      Includes: path.join(basePath, 'src/includes/'),
-      Template: path.join(basePath, 'src/template/'),
+      Images: path.join(__dirname, 'src/assets/images/'),
+      Data: path.join(__dirname, 'src/data/'),
+      Templates: path.join(__dirname, 'src/template/'),
     },
   },
 
@@ -34,11 +40,6 @@ module.exports = {
         options: {
           method: 'compile',
           basedir: path.join(__dirname, 'src/'),
-          data: {
-            globalVar: 'Global Title!',
-            a: 7,
-            b: 'zzz',
-          },
         },
       },
 

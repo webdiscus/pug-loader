@@ -1,24 +1,18 @@
 const path = require('path');
 const PugPlugin = require('../../pug-plugin');
 
-module.exports = {
-  stats: {
-    children: true,
-  },
+const webRootPath = path.join(__dirname, 'public/');
 
+module.exports = {
   mode: 'production',
 
-  resolve: {
-    alias: {},
-  },
-
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: webRootPath,
     publicPath: '',
   },
 
   entry: {
-    index: 'src/template/index.pug',
+    index: 'src/index.pug',
   },
 
   plugins: [new PugPlugin()],
@@ -30,14 +24,6 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'compile',
-        },
-      },
-
-      {
-        test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
     ],

@@ -1,11 +1,9 @@
-doctype html
-html
-    head
-        title= title
-        meta(charset='utf-8')
-        link(rel='icon' href=require('Images/favicon.ico'))
-        link(rel='stylesheet' href=require('Styles/main.css'))
-        script(src='/main.js')
+extends layout
 
-    body
-        #app-root
+append head
+    link(rel='stylesheet' href=require('~Styles/page.css'))
+
+block body
+    #app-root
+    #footer
+        include footer

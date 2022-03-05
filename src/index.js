@@ -36,15 +36,15 @@ const resolvePlugin = {
       if (node.type === 'Code') {
         // resolving for require of a code, e.g.: `- var data = require('./data.js')`
         if (containRequire(node)) {
-          const result = resolver.resolveSource(node.filename, node.val);
-          if (result && result !== node.val) node.val = result;
+          const result = resolver.resolveResource(node.filename, node.val);
+          if (result != null && result !== node.val) node.val = result;
         }
       } else if (node.attrs) {
-        // resolving for tag attributes, e.g.: img(src=require('./image.jpeg'))
+        // resolving for tag attributes, e.g.: `img(src=require('./image.jpeg'))`
         node.attrs.forEach((attr) => {
           if (containRequire(attr)) {
             const result = resolver.resolveResource(attr.filename, attr.val);
-            if (result && result !== attr.val) attr.val = result;
+            if (result != null && result !== attr.val) attr.val = result;
           }
         });
       }
@@ -125,9 +125,10 @@ const compile = function (content, callback) {
     callback(getPugCompileErrorMessage(error));
     return;
   }
+  const result = loader.export(filename, compileResult.body);
 
   // add dependency files to watch changes
-  const dependencies = [...compileResult.dependencies, ...resolver.getResolvedFiles()];
+  const dependencies = [...compileResult.dependencies, ...resolver.getDependencies()];
   if (isWin) {
     dependencies.forEach((file, index, files) => {
       files[index] = path.normalize(file);
@@ -135,7 +136,6 @@ const compile = function (content, callback) {
   }
   dependencies.forEach(loaderContext.addDependency);
 
-  const result = loader.export(filename, compileResult.body);
   callback(null, result);
 };
 

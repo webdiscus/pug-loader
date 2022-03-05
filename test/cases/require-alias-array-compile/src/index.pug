@@ -16,23 +16,24 @@ img.a2(src=require('~ImagesA/' + basename + '-a2.jpeg'))
 img.a3(src=require('@ImagesA/' + basename + '-a3.jpeg'))
 
 //- test alias value as string contained a prefix in name
+img.b1(src=require('ImagesB/logo-b1.jpeg'))
+img.b2(src=require('~ImagesB/logo-b2.jpeg'))
+img.b3(src=require('@ImagesB/logo-b3.jpeg'))
+//- this works too
 -
   var logos = {
-    b1: require('ImagesB/logo-b1.jpeg'),
-    b2: require('~ImagesB/logo-b2.jpeg'),
-    b3: require('@ImagesB/logo-b3.jpeg'),
+    bc1: require('ImagesB/logo-b1.jpeg'),
+    bc2: require('~ImagesB/logo-b2.jpeg'),
+    bc3: require('@ImagesB/logo-b3.jpeg'),
   };
-each val, key in logos
-  img(src=val class=key)
-
-//- this works too
-  img.b1(src=require('ImagesB/logo-b1.jpeg'))
-  img.b2(src=require('~ImagesB/logo-b2.jpeg'))
-  img.b3(src=require('@ImagesB/logo-b3.jpeg'))
+each src, className in logos
+  img(src=src class=className)
 
 //- test alias value as array
-//- LIMITATION: in this case webpack can't resolve the asset request with a variable (compile method only)
-  img.c1(src=require('ImagesC/' + basename + '-c1.jpeg'))
+//- LIMITATION for compile method:
+    If the alias is an array of paths, then only the first path is returned
+    because it is not possible to determine the correct path containing the interpolated filename.
+//-img.c1(src=require('ImagesC/' + basename + '-c1.jpeg'))
 img.c1(src=require('ImagesC/logo-c1.jpeg'))
 img.c2(src=require('~ImagesC/logo-c2.jpeg'))
 img.c3(src=require('@ImagesC/logo-c3.jpeg'))
