@@ -1,5 +1,31 @@
 # Change log
 
+## 2.0.0 (2022-04-01)
+### NEW feature 
+Added supports the require() of the javascript source files directly in pug (works only with [pug-plugin](https://github.com/webdiscus/pug-plugin)). \
+It is no longer necessary to define a js file in webpack entry-point.
+
+For example, using the `pug-plugin` now following is possible:
+```pug
+html
+  head
+    script(src=require('./main.js'))
+  body  
+```
+Output:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/assets/js/main.1234abcd.js"></script>
+  </head>
+  <body></body>
+</html>
+```
+
+### Improving for passing data in pug
+Added supports a function in loader option `data` for `compile` method.
+
 ## 1.8.0 (2022-03-05)
 ### Resolving and watching improvements
 - resolve the variable contained a sub directory in the relative path

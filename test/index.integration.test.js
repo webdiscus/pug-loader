@@ -59,6 +59,18 @@ describe('pug tests', () => {
   });
 });
 
+describe('pass data tests', () => {
+  test('pass-data-method-compile', (done) => {
+    const relTestCasePath = 'pass-data-method-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('pass-data-method-render', (done) => {
+    const relTestCasePath = 'pass-data-method-render';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+});
+
 describe('extend / include / raw include', () => {
   test('extends-alias', (done) => {
     const relTestCasePath = 'extends-alias';
@@ -196,6 +208,21 @@ describe('require resource', () => {
 
   test('require-assets-method-html', (done) => {
     const relTestCasePath = 'require-assets-method-html';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-scripts-compile', (done) => {
+    const relTestCasePath = 'require-scripts-compile';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-scripts-render', (done) => {
+    const relTestCasePath = 'require-scripts-render';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-scripts-html', (done) => {
+    const relTestCasePath = 'require-scripts-html';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });

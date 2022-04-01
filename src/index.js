@@ -43,7 +43,10 @@ const resolvePlugin = {
         // resolving for tag attributes, e.g.: `img(src=require('./image.jpeg'))`
         node.attrs.forEach((attr) => {
           if (containRequire(attr)) {
-            const result = resolver.resolveResource(attr.filename, attr.val);
+            const result =
+              node.name === 'script'
+                ? resolver.resolveScript(attr.filename, attr.val)
+                : resolver.resolveResource(attr.filename, attr.val);
             if (result != null && result !== attr.val) attr.val = result;
           }
         });

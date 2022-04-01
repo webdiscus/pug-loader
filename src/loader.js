@@ -7,10 +7,13 @@
  * @property {function(templateFile:string, funcBody:string, locals:{})} export Generates a result of loader method.
  */
 
+const vm = require('vm');
 const path = require('path');
 const { merge } = require('webpack-merge');
-const { getQueryData, injectExternalVariables } = require('./utils');
+const { getQueryData, injectExternalData } = require('./utils');
 const { executeTemplateFunctionException } = require('./exeptions');
+
+const scriptTagQuery = '?isScript';
 
 /**
  * @typedef {Object} Loader
@@ -74,6 +77,10 @@ const loader = {
     return this.method.require(file, templateFile);
   },
 
+  requireScript(file, templateFile) {
+    return this.method.requireScript(file, templateFile);
+  },
+
   /**
    * @param {string} templateFile
    * @param {string} funcBody
@@ -93,7 +100,7 @@ const loader = {
       method: 'compile',
       queryParam: 'pug-compile',
 
-      require: (file, templateFile) => {
+      require(file, templateFile) {
         const resolvedFile = loader.resolver.interpolate(file, templateFile);
 
         loader.resolver.addDependency(resolvedFile);
@@ -101,9 +108,17 @@ const loader = {
         return `require(${resolvedFile})`;
       },
 
-      export: (templateFile, funcBody, locals) => {
+      requireScript(file, templateFile) {
+        const resolvedFile = loader.resolver.interpolate(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
+        return `require(${resolvedFile} + '${scriptTagQuery}')`;
+      },
+
+      export(templateFile, funcBody, locals) {
         if (Object.keys(locals).length > 0) {
-          funcBody = injectExternalVariables(funcBody, locals);
+          funcBody = injectExternalData(funcBody, locals);
         }
         return funcBody + ';' + loader.getExportCode() + loader.templateName + ';';
       },
@@ -126,12 +141,24 @@ const loader = {
         return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
       },
 
+      loaderRequireScript(file, templateFile) {
+        const resolvedFile = loader.resolver.resolve(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
+        return `\\u0027 + require(\\u0027${resolvedFile}${scriptTagQuery}\\u0027) + \\u0027`;
+      },
+
       require(file, templateFile) {
         return `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`;
       },
 
+      requireScript(file, templateFile) {
+        return `__PUG_LOADER_REQUIRE_SCRIPT__(${file}, '${templateFile}')`;
+      },
+
       export(templateFile, funcBody, locals) {
-        const result = runTemplateFunction(funcBody, locals, this.loaderRequire, templateFile)
+        const result = runTemplateFunction(templateFile, funcBody, locals, this)
           .replace(/\n/g, '\\n')
           .replace(/'/g, "\\'")
           .replace(/\\u0027/g, "'");
@@ -144,7 +171,7 @@ const loader = {
       // render into HTML and return the pure string
       // notes:
       //   - this method require an additional loader, like `html-loader`, to handle HTML string
-      //   - the require() function for embedded resources must be removed to allow handle the `src` in `html-loader`
+      //   - the require() function for resources must be omitted to allow handle the `src` in `html-loader`
       method: 'html',
       queryParam: null,
 
@@ -160,37 +187,55 @@ const loader = {
         return resolvedFile;
       },
 
+      loaderRequireScript(file, templateFile) {
+        const resolvedFile = loader.resolver.resolve(file, templateFile);
+
+        loader.resolver.addDependency(resolvedFile);
+
+        return `${resolvedFile}${scriptTagQuery}`;
+      },
+
       require(file, templateFile) {
         return `__PUG_LOADER_REQUIRE__(${file}, '${templateFile}')`;
       },
 
+      // note: the usage of `<script src=require('./main.js')>` for `html` method is not available
+      requireScript(file, templateFile) {
+        return `__PUG_LOADER_REQUIRE_SCRIPT__(${file}, '${templateFile}')`;
+      },
+
       export(templateFile, funcBody, locals) {
-        return runTemplateFunction(funcBody, locals, this.loaderRequire, templateFile);
+        return runTemplateFunction(templateFile, funcBody, locals, this);
       },
     },
   ],
 };
 
 /**
+ * @param {string} templateFile The path of template file.
  * @param {string} funcBody The function body.
  * @param {Object} locals The local template variables.
- * @param {Function} methodRequire The require function for the method.
- * @param {string} templateFile The path of template file.
- * @returns {string}
+ * @param {Function} loaderRequire The require function for the method.
+ * @param {Function} loaderRequireScript The require script function for the method.
+ * @return {string}
+ * @throws
  */
-const runTemplateFunction = (funcBody, locals, methodRequire, templateFile) => {
-  let result;
-
+const runTemplateFunction = (templateFile, funcBody, locals, { loaderRequire, loaderRequireScript }) => {
   try {
-    result = new Function('require', '__PUG_LOADER_REQUIRE__', funcBody + ';return ' + loader.templateName + ';')(
+    const contextOptions = {
       require,
-      methodRequire
-    )(locals);
+      __PUG_LOADER_REQUIRE__: loaderRequire,
+      __PUG_LOADER_REQUIRE_SCRIPT__: loaderRequireScript,
+    };
+
+    const contextObject = vm.createContext(contextOptions);
+    const script = new vm.Script(funcBody, { filename: templateFile });
+    script.runInContext(contextObject);
+
+    return contextObject[loader.templateName](locals);
   } catch (error) {
     executeTemplateFunctionException(error, templateFile);
   }
-
-  return result;
 };
 
 module.exports = loader;

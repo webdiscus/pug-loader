@@ -1,5 +1,6 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
+const vm = require('vm');
 
 const loaderName = 'pug-loader';
 
@@ -71,18 +72,51 @@ const pathToPosix = (value) => value.replace(/\\/g, '/');
  * Inject external variables from the resource query, from the loader options
  * and merge them variables with the `locals` variable.
  *
+ * @note The quality of source code of a function defined in the locals limited by function.toString().
+ *   See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/toString
+ *   If needed 100% working js function passed via loader option `data`, use loader `render` method.
+ *
  * @param {string} funcBody The function as string.
  * @param {{}} locals The object of template variables.
  * @return {string}
  */
-const injectExternalVariables = (funcBody, locals) =>
-  'var __external_locals__ = ' +
-  JSON.stringify(locals) +
-  `;\n` +
-  funcBody.replace(
-    /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
-    'Object.assign({}, __external_locals__, locals || {})'
+const injectExternalData = (funcBody, locals) => {
+  const quoteMark = '__REMOVE_QUOTE__';
+  let hasQuoteMarks = false;
+
+  let localsString = JSON.stringify(locals, (key, value) => {
+    if (typeof value === 'function') {
+      value = value.toString().replaceAll('\n', '');
+
+      // transform `{ fn() {} }` to `{ fn: () => {} }`
+      const keySize = key.length;
+      if (key === value.slice(0, keySize)) {
+        const pos = value.indexOf(')', keySize + 1) + 1;
+        value = value.slice(keySize, pos) + '=>' + value.slice(pos);
+      }
+
+      value = quoteMark + value + quoteMark;
+      hasQuoteMarks = true;
+    }
+
+    return value;
+  });
+
+  // remove the quotes around the function body
+  if (hasQuoteMarks) {
+    localsString = localsString.replaceAll('"' + quoteMark, '').replaceAll(quoteMark + '"', '');
+  }
+
+  return (
+    'var __external_locals__ = ' +
+    localsString +
+    `;\n` +
+    funcBody.replace(
+      /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
+      'Object.assign({}, __external_locals__, locals || {})'
+    )
   );
+};
 
 module.exports = {
   loaderName,
@@ -90,5 +124,5 @@ module.exports = {
   pathToPosix,
   getQueryData,
   outToConsole,
-  injectExternalVariables,
+  injectExternalData,
 };

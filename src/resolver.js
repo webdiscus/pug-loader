@@ -259,6 +259,14 @@ const resolver = {
     });
   },
 
+  resolveScript(templateFile, value) {
+    if (isWin) templateFile = pathToPosix(templateFile);
+
+    const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+
+    return this.loader.requireScript(file, templateFile);
+  },
+
   /**
    * Resolve an alias in the argument of require() function.
    *

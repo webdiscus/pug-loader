@@ -26,7 +26,8 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 
 > **NEW:** The `pug-loader` is now the part of the [pug-plugin](https://github.com/webdiscus/pug-plugin).
 > This plugin extracts HTML from the `pug` files defined in the webpack entry and save them in the output directory.
-> Now is possible define `pug` files directly in `webpack entry`. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples). 
+> Now is possible define `pug` files directly in `webpack entry`. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples). \
+> 💡 Now is possible require `style` and `javascript` source files directly in pug without necessary to define them in the webpack entry. [See usage examples](https://github.com/webdiscus/pug-plugin#usage-examples).
 
 ## Contents
 
@@ -266,6 +267,9 @@ Values:
 Type: `Object` Default: `{}`<br>
 The custom data will be passed in all pug templates, it can be useful by pass global data.
 
+> ⚠️ Limitation by the `compile` method. \
+> A string representing the source code of the function is limited by the `function.toString()`, see [examples](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/toString#examples). \
+> For native work of the function passed via the `data` loader option, use the `render` method.
 
 <a id="method-compile" name="method-compile" href="#method-compile"></a>
 ## Usage method `compile` (default)
@@ -409,7 +413,7 @@ body
   div UUID: #{myData.options.uuid}
 ```
 
-To pass global data to all pug templates, add the loader options `data` with any object.
+To pass global data to all pug templates, add the loader options `data` as any object.
 ```js
 module.exports = {
   module: {
@@ -418,18 +422,25 @@ module.exports = {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
         options: {
-          data: { "lang": "en-EN" }
+          data: { 
+            htmlLang: 'en-EN',
+            getKeywords: () => {
+              const keywords = ['webpack', 'pug', 'loader'];
+              return keywords.join(',');
+            }
+          }
         }
       },
     ],
   },
 };
 ```
-Use the variable `lang` in pug.
 
+Use the custom data and function in pug.
 ```pug
-html(lang=lang)
+html(lang=htmlLang)
 head
+  meta(name="keywords" content=getKeywords())
 body
 ```
 
