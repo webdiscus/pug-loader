@@ -35,6 +35,9 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'render',
+          embedFilters: {
+            escape: true,
+          },
         },
       },
     ],

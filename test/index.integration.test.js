@@ -304,6 +304,13 @@ describe('require pug in javascript', () => {
   });
 });
 
+describe('embedded filters tests', () => {
+  test(`filter escape, method render`, (done) => {
+    const relTestCasePath = 'filter-escape';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+});
+
 describe('exception tests', () => {
   test('exception: pug compile', (done) => {
     const relTestCasePath = 'exception-pug-compile';
@@ -323,7 +330,13 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  test("exception: file can't be interpolated with the 'compile' method", (done) => {
+  test('exception: filter not found', (done) => {
+    const relTestCasePath = 'exception-filter-not-found';
+    const containString = `The 'embedFilters' option contains unknown filter name`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: file can\'t be interpolated with the \'compile\' method', (done) => {
     const relTestCasePath = 'exception-interpolation-unsupported-value';
     const containString = `can't be interpolated with the 'compile' method`;
     exceptionContain(PATHS, relTestCasePath, containString, done);

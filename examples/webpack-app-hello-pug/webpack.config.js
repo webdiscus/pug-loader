@@ -1,14 +1,14 @@
 const path = require('path');
-//const PugPlugin = require('pug-plugin');
-const PugPlugin = require('../../../pug-plugin'); // for local development only
+const PugPlugin = require('pug-plugin');
+//const PugPlugin = require('../../../pug-plugin'); // for local development only
 
 module.exports = {
   mode: 'production',
 
   resolveLoader: {
     alias: {
-      //'pug-loader': PugPlugin.loader, // the pug-loader is already included in the PugPlugin
-      'pug-loader': path.join(__dirname, '../../'), // for local development only
+      'pug-loader': PugPlugin.loader, // the pug-loader is already included in the PugPlugin
+      //'pug-loader': path.join(__dirname, '../../'), // for local development only
     },
   },
 
@@ -16,21 +16,21 @@ module.exports = {
     // aliases used in the code example
     alias: {
       App: path.join(__dirname, 'src/app/'),
-      Images: path.join(__dirname, 'src/assets/images/'),
+      Scripts: path.join(__dirname, 'src/assets/scripts'),
       Styles: path.join(__dirname, 'src/assets/css/'),
-      Templates: path.join(__dirname, 'src/templates/'),
+      Views: path.join(__dirname, 'src/views/'),
+      Images: path.join(__dirname, 'src/assets/images/'),
     },
   },
 
   output: {
     path: path.join(__dirname, 'public'),
     publicPath: '',
-    filename: '[name].js',
+    filename: '[name].[contenthash:8].js',
   },
 
   entry: {
-    main: './src/main.js',
-    index: 'src/templates/index.pug',
+    index: 'src/views/index.pug',
   },
 
   plugins: [
@@ -75,24 +75,18 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'public'),
     },
-    port: 9000,
+    port: 8080,
     https: false,
-    liveReload: true,
-    hot: true,
-    client: {
-      progress: true,
-    },
     compress: true,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
+
     // open in default browser
     open: true,
-    // open: {
-    //   app: {
-    //     name: 'Firefox',
-    //   },
-    // },
+
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
+      },
+    },
   },
 };

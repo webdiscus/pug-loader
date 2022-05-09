@@ -1,13 +1,17 @@
 // add polyfill for node.js >= 12.0.0 && < 15.0.0
 require('./polyfills/string.replaceAll');
 
+const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
 const { isWin } = require('./utils');
 const resolver = require('./resolver');
 const loader = require('./loader');
-const { getPugCompileErrorMessage } = require('./exeptions');
+const { filterNotFoundException, getPugCompileErrorMessage } = require('./exeptions');
+
+// path of embedded pug-loader filters
+const filtersDir = path.join(__dirname, './filters/');
 
 /**
  * The pug plugin to resolve path for include, extends, require.
@@ -67,7 +71,7 @@ const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.va
  * @param {function(error: string|null, result: string?)?} callback The asynchronous callback function.
  * @return {string|undefined}
  */
-const compile = function (content, callback) {
+const compile = function(content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
   const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
@@ -76,28 +80,63 @@ const compile = function (content, callback) {
 
   if (!loaderOptions.name) loaderOptions.name = 'template';
 
-  const compileOptions = {
+  // embedded pug-loader filters
+  if (loaderOptions.embedFilters) {
+    for (const filterName in loaderOptions.embedFilters) {
+      const filterOptions = loaderOptions.embedFilters[filterName];
+      // TODO: if filterOptions is a object then add it to loaderOptions.filterOptions by filterName
+      if (filterOptions) {
+        let filterPath = path.resolve(filtersDir, filterName + '.js');
+
+        try {
+          pug.filters[filterName] = require(filterPath);
+        } catch (error) {
+          const entries = fs.readdirSync(filtersDir, { withFileTypes: true });
+          const files = entries.filter((file) => !file.isDirectory()).map((file) => path.basename(file.name, '.js'));
+          filterNotFoundException(filterName, files.join(', '));
+        }
+      }
+    }
+  }
+
+  const compilerOptions = {
     // used to resolve import/extends and to improve errors
     filename,
+
     // the root directory of all absolute inclusion, defaults is `/`.
     basedir: loaderOptions.basedir || '/',
+
     doctype: loaderOptions.doctype || 'html',
-    filters: loaderOptions.filters,
     self: loaderOptions.self || false,
     globals: ['require', ...(loaderOptions.globals || [])],
-    // add the plugin to resolve include, extends, require
-    plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
+
     // the name of template function, defaults `template`
     name: loaderOptions.name,
+
+    // filters of rendered content, e.g. markdown-it
+    filters: loaderOptions.filters,
+    filterOptions: loaderOptions.filterOptions,
+    filterAliases: loaderOptions.filterAliases,
+
+    // add the plugin to resolve include, extends, require
+    plugins: [resolvePlugin, ...(loaderOptions.plugins || [])],
+
     // include inline runtime functions must be true
     inlineRuntimeFunctions: true,
+
     // for the pure function code w/o exports the module, must be false
     module: false,
+
     // include the function source in the compiled template, defaults is false
-    compileDebug: loaderOptions.debug || false,
+    compileDebug: loaderOptions.compileDebug === true,
+
     // output compiled function to stdout, must be false
-    debug: false,
-    /** @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options */
+    debug: loaderOptions.debug === true,
+
+    /**
+     * @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options
+     * Use the `pretty` option of the pug-plugin to format generated HTML.
+     **/
     pretty: false,
   };
 
@@ -105,7 +144,7 @@ const compile = function (content, callback) {
 
   resolver.init({
     context,
-    basedir: compileOptions.basedir,
+    basedir: compilerOptions.basedir,
     options: resolverOptions,
   });
   loader.init({
@@ -121,7 +160,8 @@ const compile = function (content, callback) {
 
   try {
     /** @type {{body: string, dependencies: []}} */
-    compileResult = pug.compileClientWithDependenciesTracked(content, compileOptions);
+    compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions);
+
   } catch (error) {
     // watch files in which an error occurred
     if (error.filename) loaderContext.addDependency(path.normalize(error.filename));
@@ -155,7 +195,7 @@ const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
 
   if (plugins) {
     const pluginData = plugins.find(
-      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0
+      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0,
     );
 
     if (pluginData) {
@@ -170,7 +210,7 @@ const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
   return options;
 };
 
-module.exports = function (content, map, meta) {
+module.exports = function(content, map, meta) {
   const callback = this.async();
 
   compile.call(this, content, (err, result) => {

@@ -1,24 +1,23 @@
 const ansis = require('ansis');
 const { loaderName } = require('./utils');
 
+const ansisLoaderName = `\n${ansis.black.bgRedBright(`[${loaderName}]`)}`;
 let lastError = null;
 
-/**
- * @param {string} message
- * @constructor
- */
-const PugLoaderException = function (message) {
-  this.name = 'PugLoaderException';
-  this.message = message;
-  this.toString = () => this.message;
-};
+class PugLoaderException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'PugLoaderException';
+    this.message = message;
+  }
+}
 
 /**
  * @param {string} message The error description.
  * @param {PugLoaderException|Error|string?} error The original error from catch()
  * @constructor
  */
-const PugLoaderError = function (message, error = '') {
+const PugLoaderError = function(message, error = '') {
   if (error && error instanceof PugLoaderException) {
     if (error.toString() === lastError) {
       // prevent double output same error
@@ -40,8 +39,8 @@ const PugLoaderError = function (message, error = '') {
  */
 const resolveException = (error, file, templateFile) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${loaderName}]`)} the file ${ansis.yellow(
-      file
+    `${ansisLoaderName} the file ${ansis.yellow(
+      file,
     )} can't be resolved in the pug template:\n` + ansis.cyan(templateFile);
 
   PugLoaderError(message, error);
@@ -54,14 +53,14 @@ const resolveException = (error, file, templateFile) => {
  */
 const unsupportedInterpolationException = (value, templateFile) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${loaderName}]`)} the expression ${ansis.yellow(
-      value
+    `${ansisLoaderName} the expression ${ansis.yellow(
+      value,
     )} can't be interpolated with the 'compile' method in the pug template: ${ansis.cyan(templateFile)}\n` +
     `${ansis.yellow(
-      'Possible solution: '
+      'Possible solution: ',
     )} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias instead of alias from tsconfig.`;
 
-  PugLoaderError(message, '');
+  PugLoaderError(message);
 };
 
 /**
@@ -71,16 +70,29 @@ const unsupportedInterpolationException = (value, templateFile) => {
  */
 const executeTemplateFunctionException = (error, sourceFile) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${loaderName}]`)} Failed to execute template function.\n` +
+    `${ansisLoaderName} Failed to execute template function.\n` +
     `${ansis.red.bold(`Template file:`)} ${ansis.cyan(sourceFile)}\n` +
     `${ansis.red.bold(`Possible reason:`)} in the template may be used undefined variable.\n` +
     `${ansis.black.bgYellow(`Solution`)} in this case pass a variable into a pug file via the query parameter.\n` +
     `For example, if in pug is used the external variable, like ${ansis.yellow(`title= customData.options.title`)},\n` +
     `then pass it into pug ${ansis.magenta(
-      `'template.pug?customData=' + JSON.stringify({options:{title:'My title'}})`
+      `'template.pug?customData=' + JSON.stringify({options:{title:'My title'}})`,
     )}`;
 
   PugLoaderError(message, error);
+};
+
+/**
+ * @param {string} filterName
+ * @param {string} availableFilters
+ * @throws {Error}
+ */
+const filterNotFoundException = (filterName, availableFilters) => {
+  const message = `${ansisLoaderName} The 'embedFilters' option contains unknown filter name: ${ansis.red(
+      filterName)}.\n` +
+    `Available embedded filters: ${ansis.green(availableFilters)}.`;
+
+  PugLoaderError(message);
 };
 
 /**
@@ -88,7 +100,7 @@ const executeTemplateFunctionException = (error, sourceFile) => {
  * @returns {string}
  */
 const getPugCompileErrorMessage = (error) => {
-  return `\n${ansis.black.bgRedBright(`[${loaderName}]`)} Pug compilation failed.\n` + error.toString();
+  return `${ansisLoaderName} Pug compilation failed.\n` + error.toString();
 };
 
 module.exports = {
@@ -96,5 +108,6 @@ module.exports = {
   resolveException,
   unsupportedInterpolationException,
   executeTemplateFunctionException,
+  filterNotFoundException,
   getPugCompileErrorMessage,
 };

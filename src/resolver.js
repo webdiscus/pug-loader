@@ -254,7 +254,10 @@ const resolver = {
     if (isWin) templateFile = pathToPosix(templateFile);
 
     return value.replaceAll(/require\(.+?\)/g, (value) => {
-      const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+      let [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+      // TODO: replace &amp; in resource query
+      //file = file.replace(/&amp;/g, '&');
+      //console.log('\n *** PUG-LOADER resolveResource: ', file);
       return self.loader.require(file, templateFile);
     });
   },

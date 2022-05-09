@@ -1,20 +1,10 @@
 const path = require('path');
 const PugPlugin = require('../../pug-plugin');
-const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-const basePath = path.resolve(__dirname);
 const webRootPath = path.join(__dirname, 'public/');
 
 module.exports = {
-  stats: {
-    children: true,
-  },
-
   mode: 'production',
-
-  resolve: {
-    plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
-  },
 
   output: {
     path: webRootPath,
@@ -22,7 +12,7 @@ module.exports = {
   },
 
   entry: {
-    index: 'src/template/index.pug',
+    index: 'src/index.pug',
   },
 
   plugins: [new PugPlugin()],
@@ -35,8 +25,16 @@ module.exports = {
         options: {
           method: 'render',
           embedFilters: {
-            escape: true,
+            'unknown-filter': true,
           },
+        },
+      },
+
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
     ],

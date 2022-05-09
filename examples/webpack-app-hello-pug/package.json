@@ -11,11 +11,10 @@
     "watch": "webpack --mode=production --watch --progress"
   },
   "devDependencies": {
-    "@webdiscus/pug-loader": "^1.7.3",
-    "css-loader": "^6.6.0",
-    "pug-plugin": "^1.4.2",
-    "webpack": "^5.69.1",
+    "css-loader": "^6.7.1",
+    "pug-plugin": "^2.3.0",
+    "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.7.4"
+    "webpack-dev-server": "^4.9.0"
   }
 }
