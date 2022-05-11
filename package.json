@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Pug loader resolves paths and webpack aliases in a pug template and compiles it to HTML or into a template function.",
   "keywords": [
     "pug",
@@ -65,7 +65,7 @@
     "webpack": ">=5.32.0"
   },
   "dependencies": {
-    "ansis": "^1.3.4",
+    "ansis": "^1.3.6",
     "pug": ">=3.0.2",
     "webpack-merge": "^5.8.0"
   },
@@ -81,6 +81,6 @@
     "pug-plugin": "^2.3.0",
     "rimraf": "^3.0.2",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
-    "webpack": "^5.72.0"
+    "webpack": "^5.72.1"
   }
 }

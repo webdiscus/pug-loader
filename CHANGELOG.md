@@ -1,10 +1,14 @@
 # Change log
 
-## 2.0.0 (2022-05-08)
+## 2.1.1 (2022-05-11)
+
+- fix: support resolving npm modules in pug template
+
+## 2.1.0 (2022-05-09)
 
 - feat: add the `embedFilter` option to enable using in pug filters embedded in pug-loader
-- feat: add embedded `escape` filter to escape HTML tags
-- test: add test for `escape` filter
+- feat: add embedded `:escape` filter to escape HTML tags
+- test: add test for `:escape` filter
 
 ## 2.0.0 (2022-04-01)
 
@@ -28,10 +32,10 @@ Output:
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <script src='/assets/js/main.1234abcd.js'></script>
-</head>
-<body></body>
+  <head>
+    <script src='/assets/js/main.1234abcd.js'></script>
+  </head>
+  <body></body>
 </html>
 ```
 

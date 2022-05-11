@@ -12,13 +12,9 @@ const { resolveException, unsupportedInterpolationException } = require('./exept
 const fileResolverSyncFactory = (path, options) => {
   const resolve = ResolverFactory.create.sync({
     ...options,
+    // allow resolve node modules
     aliasFields: [],
-    conditionNames: [],
-    descriptionFiles: [],
-    exportsFields: [],
-    mainFields: [],
-    modules: [],
-    mainFiles: [],
+    modules: ['node_modules'],
     extensions: ['.js'],
     preferRelative: true,
   });
@@ -143,6 +139,7 @@ const resolver = {
           const { ignorePrefix } = this.parseAliasInRequest(request);
           if (ignorePrefix) request = request.substring(1);
         }
+
         resolvedPath = this.resolveFile(context, request);
       } catch (error) {
         resolveException(error, file, templateFile);
@@ -257,7 +254,6 @@ const resolver = {
       let [, file] = /require\((.+?)(?=\))/.exec(value) || [];
       // TODO: replace &amp; in resource query
       //file = file.replace(/&amp;/g, '&');
-      //console.log('\n *** PUG-LOADER resolveResource: ', file);
       return self.loader.require(file, templateFile);
     });
   },

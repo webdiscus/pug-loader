@@ -171,6 +171,11 @@ describe('require resource', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
+  test('require-node-module', (done) => {
+    const relTestCasePath = 'require-node-module';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-include-mixin-compile', (done) => {
     const relTestCasePath = 'require-resource-include-mixin-compile';
     compareContent(PATHS, relTestCasePath, done);
@@ -336,7 +341,7 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  test('exception: file can\'t be interpolated with the \'compile\' method', (done) => {
+  test("exception: file can't be interpolated with the 'compile' method", (done) => {
     const relTestCasePath = 'exception-interpolation-unsupported-value';
     const containString = `can't be interpolated with the 'compile' method`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
