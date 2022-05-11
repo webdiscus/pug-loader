@@ -314,6 +314,16 @@ describe('embedded filters tests', () => {
     const relTestCasePath = 'filter-escape';
     compareContent(PATHS, relTestCasePath, done);
   });
+
+  test(`filter code, method render`, (done) => {
+    const relTestCasePath = 'filter-code';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test(`filter highlight, method render`, (done) => {
+    const relTestCasePath = 'filter-highlight';
+    compareContent(PATHS, relTestCasePath, done);
+  });
 });
 
 describe('exception tests', () => {
@@ -337,7 +347,27 @@ describe('exception tests', () => {
 
   test('exception: filter not found', (done) => {
     const relTestCasePath = 'exception-filter-not-found';
-    const containString = `The 'embedFilters' option contains unknown filter name`;
+    const containString = `The 'embedFilters' option contains unknown filter:`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: by load a filter', (done) => {
+    const { filterLoadException } = require('../src/exeptions');
+    const expected = `Error by load`;
+    const result = () => {
+      filterLoadException('filter', '/path/', new Error('module not found'));
+    };
+    expect(result).toThrow(expected);
+    done();
+  });
+
+  test('exception: filter :highlight - unsupported module', (done) => {
+    const filterHighlight = require('../src/filters/highlight');
+    // reset cached module
+    filterHighlight.module = null;
+
+    const relTestCasePath = 'exception-filter-highlight-unsupported-module';
+    const containString = `unsupported module`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 

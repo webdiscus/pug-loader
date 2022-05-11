@@ -1,0 +1,57 @@
+//- Local variables
+- const fullYear = (new Date).getFullYear();
+
+//- External variables
+block variables
+
+doctype html
+html(lang='en' dir='ltr')
+  head
+    //- Meta
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1')
+    meta(property='robots' content='index, follow')
+    meta(property='description' content='Demo of pug filters embedded in pug-loader')
+    meta(property='keywords' content='webpack, pug, pug-plugin, pug-loader, filter, highlight, code, escape')
+    meta(property='author' content='webdiscus')
+
+    //- Favicons
+    link(rel='icon' href=require('~Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
+    link(rel='icon' href=require('~Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
+
+    //- Page title
+    title= title
+
+    //- Page styles
+    block style
+      //- common used styles
+      link(rel='stylesheet' href=require('~Styles/main.scss'))
+
+    //- Additional head block to add here page specifically assets
+    block head
+      script(src=require('~Scripts/common.js'))
+
+  body
+    //- Main header
+    .header-container
+      .header-content
+        a(href="index.html").header-left
+          img.app-logo(src=require('~Images/app-logo.svg'))
+          span Pug filters
+        .header-middle
+          h1= title
+        .header-right
+
+    //- Main content
+    main.main-container
+      .main-content
+        block content
+
+    //- Main footer
+    .footer-container
+      div.
+        Copyleft #[span.copyleft] #{fullYear} #[a(href="https://github.com/webdiscus") @webdiscus].
+        Powered by #[a(href="https://github.com/webdiscus/pug-plugin") Pug Plugin].
+
+    //- Page scripts
+    block script

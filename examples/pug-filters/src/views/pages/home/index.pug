@@ -1,0 +1,32 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = 'Home'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+
+block content
+  section
+    .container
+      .flex-column.center-x
+        h2 Available embedded filters
+        .teaser Here is the collection of pug filters embedded in <a href="https://github.com/webdiscus/pug-loader">@webdiscus/pug-loader</a>.
+
+      .filter-list
+        .flex-row
+          a(href="escape.html") :escape
+          div The filter replaces reserved HTML characters with their corresponding HTML entities.
+
+        .flex-row
+          a(href="code.html") :code
+          div The filter wraps a content with the #[:code:escape <code>] tag.
+
+        .flex-row
+          a(href="highlight.html") :highlight
+          div The filter highlights code syntax, using a highlighting module such as #[a(href="https://prismjs.com") prismjs].

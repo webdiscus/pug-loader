@@ -1,0 +1,42 @@
+img.demo {
+  width: 160px;
+}
+
+.colors {
+  width: 120px;
+  color: yellow;
+  text-align: center;
+}
+
+
+.color-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  .color-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 16px;
+
+    min-width: 50px;
+    min-height: 50px;
+    width: 100%;
+
+    color: #fff;
+  }
+}
+
+@media screen and (max-width: 760px) {
+  .color-container .color-cell {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .color-container .color-cell {
+    font-size: 12px;
+  }
+}

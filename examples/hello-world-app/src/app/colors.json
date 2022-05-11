@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Rose",
+    "hex": "#FF0080"
+  },
+  {
+    "name": "Violet",
+    "hex": "#7F00FF"
+  },
+  {
+    "name": "Azure",
+    "hex": "#0080FF"
+  },
+  {
+    "name": "Amazon",
+    "hex": "#3B7A57"
+  },
+  {
+    "name": "Blush",
+    "hex": "#DE5D83"
+  },
+  {
+    "name": "Coral",
+    "hex": "#FF7F50"
+  },
+  {
+    "name": "Feijoa",
+    "hex": "#9FD170"
+  },
+  {
+    "name": "Cerulean",
+    "hex": "#007BA7"
+  }
+]

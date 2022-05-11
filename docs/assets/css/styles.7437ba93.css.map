@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://./src/views/pages/home/styles.scss"],"names":[],"mappings":"AAEI,yCACE,eAAA,CAGF,oCACE,eAAA","sourcesContent":[".filter-list {\n  .flex-row {\n    &:not(:first-child) {\n      margin-top: 10px;\n    }\n\n    :first-child {\n      min-width: 120px;\n    }\n  }\n}\n"],"sourceRoot":""}

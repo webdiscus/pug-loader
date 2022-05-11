@@ -1,0 +1,346 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = ':highlight'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+
+block content
+  section
+    .container
+      p The #[:code :highlight] filter highlights code syntax.
+
+  section
+    .container
+      h2 Enable the filter
+
+      p.
+        The #[:code :highlight] filter require a highlighting module.<br>
+        Currently is supported the #[a(href="https://prismjs.com") prismjs] module,
+        the #[a(href="https://highlightjs.org") highlight.js] will be added later.<br>
+
+      p Why is #[:code prismjs] supported in the first place?
+      ul
+        li.
+          the #[:code prismjs] support 291 languages, the #[:code highlight.js] support only 197 languages
+        li.
+          the #[:code prismjs] support the #[:code pug] "from box",
+          but the #[:code highlight.js] require an additional "third-party" plugin for pug
+        li.
+          the #[:code prismjs] package is only 2 MB, the #[:code highlight.js] package is 3.7 MB
+
+      div By usage the #[:code :highlight] filter install the npm module:
+      pre.language-: code npm install -D prismjs
+
+      p Defaults, the filter is disabled. If this filter is used, it must be enabled in #[:code webpack.config.js].
+
+      div Use the Pug loader options in the webpack config:
+      pre.language-: code
+        :highlight(js)
+          {
+            test: /\.pug$/,
+            loader: '@webdiscus/pug-loader',
+            options: {
+              // enable embedded filters
+              embedFilters: {
+                // enable :highlight filter
+                highlight: {
+                  verbose: true,
+                  use: 'prismjs',
+                },
+              },
+            },
+          },
+
+      p The filter options:
+      ul
+        li #[:code verbose {boolean}] Enable output process info in console. Use it in #[:code development] mode only. Defaults is #[:code false].<br>
+        li.
+          #[:code use {string}] The name of a highlighting npm module. The module must be installed.
+          Currently, is supported the #[a(href="https://prismjs.com") prismjs] only.
+
+  section
+    .container
+      h2 Highlight an inline code
+
+      div Use the nested inline filters: #[:code #&lbrack;:code:highlight(lang) ...&rbrack;].
+
+      p.
+        #[b Note:]
+        For usage the #[:code &lbrack;] and #[:code &rbrack;] chars in pug inline filter,
+        the chars must be encoded with their corresponding HTML entities #[:code:escape &lbrack;] and #[:code:escape &rbrack;]
+
+      p For example:
+
+      p.
+        Pug: #[:code #&lbrack;:code:highlight(js) obj = { arr: &amp;lbrack;1, 2, 'banana'&amp;rbrack; };&rbrack;]<br>
+        #[b Result:] #[:code:highlight(js) const obj = { arr: &lbrack;1, 2, 'banana'&rbrack; };]
+
+      p.
+        Pug: #[:code #&lbrack;:code:highlight(html) &lt;div class="container"&gt;content&lt;/div&gt;&rbrack;]<br>
+        #[b Result:] #[:code:highlight(html) <div class="container">content</div>]
+
+  section
+    .container
+      h2 Highlight a code block
+
+      p.
+        To highlight the code syntax of a language use the #[:code :highlight(lang)] filter,
+        where the #[:code lang] is a language supported by a highlight module.<br>
+        #[b Note:] A highlight module may require a specific class name by the #[:code:escape <pre>] tag.<br>
+        E.g. the #[:code prismjs] themes needs #[:code:escape <pre class="language-">] for a background color.
+
+      div For example, highlight the #[:code html] code:
+      pre.language-: code
+        :highlight(pug)
+          pre.language-: code
+            :highlight(html)
+              <!-- Comment -->
+              <div class="code-container">
+                <p>Some text</p>
+                <script>
+                  const body = document.querySelector("body");
+                </script>
+              </div>
+
+      b Result:
+      pre.language-: code
+        :highlight(html)
+          <!-- Comment -->
+          <div class="code-container">
+            <p>Some text</p>
+            <script>
+              const body = document.querySelector("body");
+            </script>
+          </div>
+
+  section
+    .container
+      h2 Highlight a code in markdown
+
+      div To enable the #[:code :markdown-it] filter, install the npm package:
+      pre.language-: code npm install -D jstransformer-markdown-it
+
+      p.
+        To highlight a markdown use the nested filters #[:code :highlight:markdown-it].
+        All code blocks in markdown will be automatically highlighted by a language defined at a code block.
+
+      div For example:
+      pre.language-: code
+        :highlight(pug)
+          :highlight:markdown-it
+            _HTML code_
+            ```html
+            <body>
+              <p checked class="title" id="title">Title</p>
+              <!-- here goes the rest of the page -->
+            </body>
+            ```
+
+            _JavaScript code_
+            ```js
+            const arr = [1, 2, 'banana'];
+            ```
+
+      b Result:
+      :highlight:markdown-it
+        _HTML code_
+        ```html
+        <body>
+          <p checked class="title" id="title">Title</p>
+          <!-- here goes the rest of the page -->
+        </body>
+        ```
+        _JavaScript code_
+        ```js
+        const arr = [1, 2, 'banana'];
+        ```
+
+  section
+    .container
+      h2 Highlighted code examples in markdown
+
+      :highlight:markdown-it
+        **HTML**
+        ```html
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Title</title>
+            <style>body {width: 500px;}</style>
+            <script type="application/javascript">
+              function $init() {return true;}
+            </script>
+          </head>
+
+          <body>
+            <p checked class="title" id="title">Title</p>
+            <!-- here goes the rest of the page -->
+          </body>
+        </html>
+        ```
+
+        **SVG**
+        ```svg
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 170">
+          <path fill="#fff" d="M55.37 131.5H48.4v9.13h6.97c1.67 0 2.92-.4 3.78-1.22.85
+            -.8 1.28-1.92 1.28-3.33s-.43-2.54-1.28-3.35c-.86-.8-2.12-1.2-3.78-1.2m29.52
+            6.4c.3-.53.47-1.2.47-2.04 0-1.35-.45-2.4-1.37-3.2-.92-.76-2.14-1.15-3.65
+            -10.05h2.8v21.2h-2.4"/>
+        <svg/>
+        ```
+
+        **Pug**
+        ```pug
+        mixin pet(name)
+          li.pet= name
+
+        ul
+          each val in ['cat', 'dog']
+            +pet(val)
+
+        script.
+          console.log('This is coffee script');
+        ```
+
+        **CSS**
+        ```css
+        @font-face {
+          font-family: Chunkfive; src: url('Chunkfive.otf');
+        }
+
+        body, .usertext {
+          color: #F0F0F0; background: #600;
+          font-family: Chunkfive, sans;
+          --heading-1: 30px/32px Helvetica, sans-serif;
+        }
+
+        @import url(print.css);
+        @media print {
+          a[href^=http]::after {
+            content: attr(href)
+          }
+        }
+        ```
+
+        **SCSS**
+        ```scss
+        @import "compass/reset";
+
+        // variables
+        $colorGreen: #008000;
+        $colorGreenDark: darken($colorGreen, 10);
+
+        @mixin button($color:green) {
+            @if ($color == green) {
+                background-color: #008000;
+            }
+            @else if ($color == red) {
+                background-color: #B22222;
+            }
+        }
+
+        button {
+            @include button(red);
+        }
+        ```
+
+        **JavaScript**
+        ```js
+        function initHighlight(block, cls) {
+          try {
+            if (cls.search(/\bno\-highlight\b/) != -1)
+              return process(block, true, 0x0F) + ` class="${cls}"`;
+          } catch (e) {
+            // handle exception
+          }
+          for (var i = 0 / 2; i < classes.length; i++) {
+            if (checkCondition(classes[i]) === undefined)
+              console.log('undefined');
+          }
+
+          return block;
+        }
+
+        export initHighlight;
+        ```
+
+        **PHP**
+        ```php
+        namespace Location\Web;
+
+        abstract class URI extends BaseURI
+        {
+            abstract function test();
+            public static $list = [];
+
+            /**
+             * Returns a URI
+             * @return URI
+             */
+            static public function _factory($stats = array(), $uri = 'http')
+            {
+                $uri = explode(':', $uri, 0b10);
+                $scheme = isset($uri[1]) ? $uri[1] : '';
+
+                // Security check
+                if (!ctype_alnum($scheme)) {
+                    throw new UriException('Illegal scheme');
+                }
+
+                return [
+                    'uri'   => $uri,
+                    'value' => null,
+                ];
+            }
+        }
+        ```
+
+        **SQL**
+        ```sql
+        CREATE TABLE "topic" (
+            "id" integer NOT NULL PRIMARY KEY,
+            "forum_id" integer NOT NULL,
+            "subject" varchar(255) NOT NULL
+        );
+        ALTER TABLE "topic"
+        ADD CONSTRAINT forum_id FOREIGN KEY ("forum_id")
+        REFERENCES "forum" ("id");
+
+        SELECT forum_id, subject FROM topic WHERE id = 123
+        ```
+
+        **Markdown**
+        ```md
+        # hello world
+
+        you can write text [with links](http://example.com) inline or [link references][1].
+
+        * one _thing_ has *em*phasis
+        * two __things__ are **bold**
+
+        [1]: http://example.com
+
+        hello world
+        ===========
+
+        <this_is inline="xml"></this_is>
+
+        > markdown is so cool
+          so are code segments
+
+        1. one thing (yeah!)
+        2. two thing `i can write code`, and `more` wipee!
+        ```
+
+        **undefined**
+        ```
+        const arr = [1, 2, 'banana'];
+        const strings = arr.filter((item) => typeof item === 'string');
+        ```

@@ -1,16 +1,21 @@
 /**
- * The filter `:escape` escapes HTML tags in pug.
+ * The `:escape` filter replaces reserved HTML characters with their corresponding HTML entities.
+ * @see https://developer.mozilla.org/en-US/docs/Glossary/Entity
  *
- * Note: the filename w/o ext is the filter name.
+ * Block syntax:
  *
- * Usage:
+ * pre: code
+ *   :escape
+ *     <div>
+ *       <a href="home.html">Home</a>
+ *     </div>
  *
- *  pre: code
- *    :escape
- *      <a href="home.html">Home</a>
+ * Inline syntax:
+ *
+ * The #[:escape <div>] tag.
  */
 
-// Add the filter `escape` in the options of pug loader:
+// To enable the filter add to `@webdiscus/pug-loader` options the following:
 // {
 //   test: /\.pug$/,
 //   loader: '@webdiscus/pug-loader',
@@ -21,6 +26,20 @@
 //   },
 // },
 
-module.exports = function escape(text, options) {
-  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const reservedChars = /[&<>"]/g;
+const charReplacements = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
 };
+
+const escape = {
+  name: 'escape',
+
+  apply(text, options) {
+    return text.replace(reservedChars, (char) => charReplacements[char]);
+  },
+};
+
+module.exports = escape;

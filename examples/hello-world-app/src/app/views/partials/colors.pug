@@ -1,0 +1,6 @@
+//- You can load a data directly in Pug
+//- const colors = require('~App/colors.json')
+
+.color-container
+  each color in colors
+    .color-cell(style=`background-color: ${color.hex};`) #{color.name}

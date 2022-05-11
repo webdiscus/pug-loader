@@ -1,0 +1,20 @@
+extends ~Views/layouts/default.pug
+
+//- set variables used in layout
+block variables
+  - const title = 'Start page'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+  //- App loader
+  script(src=require('./main.js'))
+
+block content
+  section
+    .container
+      //- the root container of the App, see src/app/app.js
+      #app-root

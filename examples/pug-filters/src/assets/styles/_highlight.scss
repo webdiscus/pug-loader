@@ -1,0 +1,14 @@
+// import default prismjs styles from installed npm package
+// important: omit the file extension, e.g. .scss, .css
+//@use 'prismjs/themes/prism.css';
+@use 'prismjs/themes/prism-tomorrow';
+
+// override default styles of prismjs
+pre[class*="language-"] {
+  padding: 5px 10px;
+}
+pre[class*="language-"],
+code[class*="language-"] {
+  font-size: 13px;
+  line-height: inherit;
+}

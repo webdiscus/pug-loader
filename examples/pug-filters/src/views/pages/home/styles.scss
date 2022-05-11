@@ -1,0 +1,11 @@
+.filter-list {
+  .flex-row {
+    &:not(:first-child) {
+      margin-top: 10px;
+    }
+
+    :first-child {
+      min-width: 120px;
+    }
+  }
+}

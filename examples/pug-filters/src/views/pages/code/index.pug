@@ -1,0 +1,75 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = ':code'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+
+block content
+  section
+    .container
+      p.
+        The #[:code :code] filter wraps a content with the #[:code:escape <code>] tag.<br>
+
+  section
+    .container
+      h2 Enable the filter
+
+      p Defaults, the filter is disabled. If this filter is used, it must be enabled in #[:code webpack.config.js].
+      div Use the Pug loader options in the webpack config:
+      pre.language-: code
+        :highlight(js)
+          {
+            test: /\.pug$/,
+            loader: '@webdiscus/pug-loader',
+            options: {
+              // enable embedded filters
+              embedFilters: {
+                // enable the :code filter
+                code: {
+                  className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
+                },
+              },
+            },
+          },
+
+      p The filter options:
+
+      ul
+        li.
+          #[:code className {string}] This string will be added to class name of the #[:code:escape <code class="CLASS_NAME">] tag.
+          For example, the #[:code prismjs] use the #[:code language-*] as class name in #[:code:escape <code>] tag for styling this tag.
+
+      p.
+        The usage of inline filter #[:code #&lbrack;:code ...&rbrack;] is equivalent to inline tag #[:code #&lbrack;code.language- ...&rbrack;],
+        but using the #[:code #&lbrack;:code&rbrack;] filter a class name can be defined at initialisation and the filter can be used in combination with other as nested filter.
+
+  section
+    .container
+      h2 Inline syntax
+
+      p.
+        Pug: #[:code #&lbrack;:code function() { return true }&rbrack;]<br>
+        #[b Result]: #[:code function() { return true }]
+
+      div.
+        To display a HTML tag must be used nested filters #[:code :code:escape ...] to encode reserved HTML chars.<br>
+        See the usage of #[a(href="escape.html") :escape] filter.
+      p.
+        Pug: #[:code #&lbrack;:code:escape &lt;div&gt;&rbrack;] is equivalent to #[:code:escape <code class="language-">#{'<div>'}</code> ]<br>
+        #[b Result]: #[:code:escape <div>]
+
+      div.
+        To highlight a code syntax must be used nested filters #[:code :code:highlight(lang) ...].
+        When used #[:code :highlight] filter for HTML code then the #[:code :escape] filter is not needed.<br>
+        See the usage of #[a(href="highlight.html") :highlight] filter.
+
+      p.
+        Pug: #[:code #&lbrack;:code:highlight(html) &lt;div class="container"&gt;content&lt;/div&gt;&rbrack;]<br>
+        <b>Result:</b> #[:code:highlight(html) <div class="container">content</div>]

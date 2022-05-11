@@ -1,0 +1,109 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = ':escape'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+
+block content
+  section
+    .container
+      p.
+        The #[:code :escape] filter replaces reserved HTML characters #[:code & < > "]
+        with their corresponding HTML entities to display these characters as text.
+        See the #[a(href="https://developer.mozilla.org/en-US/docs/Glossary/Entity") HTML entity] documentation.
+
+  section
+    .container
+      h2 Enable the filter
+
+      p Defaults, the filter is disabled. If this filter is used, it must be enabled in #[:code webpack.config.js].
+      div Use the Pug loader options in the webpack config:
+      pre.language-: code
+        :highlight(js)
+          {
+            test: /\.pug$/,
+            loader: '@webdiscus/pug-loader',
+            options: {
+              // enable embedded filters
+              embedFilters: {
+                escape: true, // enable the :escape filter
+              },
+            },
+          },
+
+  section
+    .container
+      h2 Escape a block
+
+      div Pug template:
+      pre.language-: code
+        :highlight(pug)
+          pre: code
+            :escape
+              <!-- Comment -->
+              <div class="container">
+                <p>&copy; Copyright M&M'S</p>
+                <script>
+                  const body = document.querySelector("body");
+                </script>
+              </div>
+
+      div Generated HTML:
+      pre.language-: code
+        :highlight(html)
+          <pre>
+            <code>
+              &lt;!-- Comment --&gt;
+              &lt;div class=&quot;container&quot;&gt;
+                &lt;p&gt;&amp;copy; Copyright M&amp;M'S&lt;/p&gt;
+                &lt;script&gt;
+                  const body = document.querySelector(&quot;body&quot;);
+                &lt;/script&gt;
+              &lt;/div&gt;
+            </code>
+          </pre>
+
+      div #[b Result], what you see in a browser:
+      pre: code
+        :escape
+          <!-- Comment -->
+          <div class="container">
+            <p>&copy; Copyright M&M'S</p>
+            <script>
+              const body = document.querySelector("body");
+            </script>
+          </div>
+
+  section
+    .container
+      h2 Escape a string
+
+      div Pug template:
+      pre.language-: code
+        :highlight(pug)
+          :escape The <strong> element has the closing </strong> tag.
+
+      div: b Result:
+      :escape The <strong> element has the closing </strong> tag.
+
+  section
+    .container
+      h2 Escape inline syntax
+
+      div Pug template:
+      pre.language-: code
+        :highlight(pug)
+          div.
+            The #[:escape <html>] element is the root element.<br>
+            Inside the #[:escape <html>] element there is a #[:escape <body>] element.
+      b Result:
+      div.
+        The #[:escape <html>] element is the root element.<br>
+        Inside the #[:escape <html>] element there is a #[:escape <body>] element.

@@ -1,0 +1,22 @@
+{
+  "name": "app-hello-world",
+  "version": "1.0.0",
+  "description": "Simple web app",
+  "author": "webdiscus",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve",
+    "build": "webpack --mode=production --progress",
+    "watch": "webpack --mode=production --watch --progress"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "pug-plugin": "^2.3.1",
+    "sass": "^1.51.0",
+    "sass-loader": "^12.6.0",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.0"
+  }
+}

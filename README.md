@@ -40,17 +40,22 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 ## Contents
 
 1. [Install and Quick start](#install-and-quick-start)
-1. [Options](#options)
-1. [Embedded filters](#embed-filters)
-1. [Usage method `compile`](#method-compile)
-1. [Usage method `render`](#method-render)
-1. [Usage method `html`](#method-html)
-1. [Passing data into pug template](#passing-data-into-template)
-1. [Usage embedded resources](#usage-embedded-resources)
-1. [Usage with Angular Component](#usage-with-angular-component)
-1. [Recipes](#recipes)
-1. [Example "Hello World!"](https://github.com/webdiscus/pug-loader/tree/master/examples/webpack-app-hello-pug/)
-1. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
+2. [Options](#options)
+3. [Embedded Pug filters](#embed-filters)
+   - [:escape](#filter-escape)
+   - [:code](#filter-code)
+   - [:highlight](#filter-highlight)
+4. [Usage of pug-loader methods](#method-compile)
+   - [compile](#method-compile)
+   - [render](#method-render)
+   - [html](#method-html)
+5. [Passing data into pug template](#passing-data-into-template)
+6. [Usage embedded resources](#usage-embedded-resources)
+7. [Usage with Angular Component](#usage-with-angular-component)
+8. [Recipes](#recipes)
+9. [Example Hello World!](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-app/)
+9. [Example of using Pug filters](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters)
+10. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
 
 <a id="features" name="features" href="#features"></a>
 ## Features
@@ -62,9 +67,9 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 - resolves alias from `compilerOptions.paths` defined in `tsconfig.json`
   using [`tsconfig-paths-webpack-plugin`](https://github.com/dividab/tsconfig-paths-webpack-plugin)
 - resolves required images in the attribute `srcset` of `img` tag
-- has embedded filters, e.g `:escape`
 - resolves required JavaScript modules or JSON in pug
 - ignore the prefixes `~` `@` for webpack `resolve.alias`
+- embedded Pug filters: `:escape` `:code` `:highlight`
 - passing custom data into pug template
 - watching of changes in all dependencies
 - integration with `Angular Component`
@@ -299,7 +304,7 @@ The custom data will be passed in all pug templates, it can be useful by pass gl
 ### `embedFilters`
 Type: `Object` Default: `undefined`<br>
 Enable embedded pug filters.
-To enable a filter add to pug-loader options following:
+To enable a filter, add the following to the pug-loader options:
 ```js
 {
   embedFilters: {
@@ -319,84 +324,124 @@ If the filter has no options, use `true` as an option to enable the filter.
 > ⚠️ Defaults all embedded filters are disabled!\
 > Enable only filters used in your pug templates.
 
-> 💡 We have currently only one embedded filter, but other useful filters will occasionally be added. 
-> 
-> The goal of the embedded filters is use fast and lightweight filters without additional dependencies in package.json. 
-> Here we want collect most useful small filters.
-> It is like [custom filters](https://pugjs.org/language/filters.html#custom-filters), but already exists in the [filter collection](https://github.com/webdiscus/pug-loader/tree/master/src/filters), that can be simply via an option enabled.
-> 
-> In issues, you can suggest your own filter, and we can add it.
+> 💡 The goal of the embedded filters is use fast and lightweight filters without additional dependencies in package.json. 
+> Here we want to collect most useful small filters.
+> It is like [custom filters](https://pugjs.org/langucage/filters.html#custom-filters), but already exists in the [filter collection](https://github.com/webdiscus/pug-loader/tree/master/src/filters), that can be simply via an option enabled.\
+> The complete usage cases with more information you can see on the GitHub Page [pug filter examples](https://webdiscus.github.io/pug-loader/) and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters) of these examples.
 
-### `escape`
-Pug filter: `:escape` Filter options: `none`\
-The filter escapes HTML tags to display HTML code in the browser as plain text.
-This is useful when using syntax highlighting for code containing HTML tags.
+<a id="filter-escape" name="filter-escape" href="#filter-escape"></a>
+### `:escape`
+The `:escape` filter replaces reserved HTML characters with their corresponding HTML entities to display these characters as text.
 
+Filter options: `none`.
+
+Enable the filter:
+
+```js
+{
+  test: /\.pug$/,
+  loader: '@webdiscus/pug-loader',
+  options: {
+    // enable embedded filters
+    embedFilters: {
+      escape: true, // enable the :escape filter
+    },
+  },
+},
+```
+
+Using the `:escape` filter in pug:
+
+```html
+pre: code.language-html
+  :escape
+    <h1>Header</h1>
+    <p>Text</p>
+```
+
+Generated HTML:
+
+```html
+<pre>
+  <code class="language-html">
+    &lt;h1&gt;Header&lt;/h1&gt;
+    &lt;p&gt;Text&lt;/p&gt;
+  </code>
+</pre>
+```
+
+Inline syntax:
+```html
+p.
+  The #[:escape <html>] element is the root element.<br>
+  Inside the #[:escape <html>] element there is a #[:escape <body>] element.
+```
+
+Generated HTML:
+```html
+<p>The &lt;html&gt; element is the root element.<br>
+   Inside the &lt;html&gt; element there is a &lt;body&gt; element.</p>
+```
+
+> For more examples and info, see [pug filter :escape](https://webdiscus.github.io/pug-loader/escape.html).
+
+<a id="filter-code" name="filter-code" href="#filter-code"></a>
+### `:code`
+The `:code` filter wraps a content with the `<code>` tag.
+
+Filter options: 
+- `className {string}` The class name of the `code` tag. For example, the `prismjs` use the `language-*` as class name in `<code>` for styling this tag.
+
+Enable the filter:
+
+```js
+{
+  test: /\.pug$/,
+  loader: '@webdiscus/pug-loader',
+  options: {
+    // enable embedded filters
+    embedFilters: {
+      // enable the :code filter
+      code: {
+        className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
+      },
+    },
+  },
+},
+```
+
+> For more examples and info, see [pug filter :code](https://webdiscus.github.io/pug-loader/code.html).
+
+<a id="filter-highlight" name="filter-highlight" href="#filter-highlight"></a>
+### `:highlight`
+The `:highlight` filter highlights code syntax.
+
+Filter options:
+- `verbose {boolean}` Enable output process info in console.
+- `use {string}]` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
 
 Enable the filter:
 
 ```js
 {
   embedFilters: {
-    escape: true,
+    highlight: {
+      verbose: true,
+      use: 'prismjs',
+    },
   },
 }
 ```
 
-Using the `:escape` filter in pug:
-
+Usage example:
 ```pug
-pre: code.language-html
-  :escape
-    <!-- HTML -->
-    <div>
-      <p>Text</p>
-    </div>
+pre.language-: code
+  :highlight(html)
+    <!-- Comment -->
+    <h1>Header</h1>
+    <p>Text</p>
 ```
-
-Generates plain text:
-
-```
-<pre>
-  <code class="language-html">
-    &lt;!-- HTML --&gt;
-    &lt;div&gt;
-      &lt;p&gt;Text&lt;/p&gt;
-    &lt;/div&gt;
-  </code>
-</pre>
-```
-
-Display in browser:
-
-```html
-<!-- HTML -->
-<div>
-  <p>Text</p>
-</div>
-```
-
-Inline syntax:
-```
-p
-  :escape The <strong> element has the closing </strong> tag.
-
-p.
-  The #[:escape <html>] element is the root element.<br>
-  Inside the #[:escape <html>] element there is a #[:escape <body>] element.
-```
-
-Generates plain text:
-```
-<p>
-  The &lt;strong&gt; element has the closing &lt;/strong&gt; tag.
-</p>
-<p>
-  The &lt;html&gt; element is the root element.
-  <br>
-  Inside the &lt;html&gt; element there is a &lt;body&gt; element.
-</p>
-```
+> For more examples and info, see [pug filter :highlight](https://webdiscus.github.io/pug-loader/highlight.html).
 
 <a id="method-compile" name="method-compile" href="#method-compile"></a>
 

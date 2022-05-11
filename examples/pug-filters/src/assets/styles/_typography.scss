@@ -1,0 +1,68 @@
+@font-face {
+  font-family: 'OpenSans';
+  src:
+    url('~Fonts/OpenSans/open-sans-regular.svg') format('svg'),
+    url('~Fonts/OpenSans/open-sans-regular.woff2') format('woff2');
+  font-style: normal;
+}
+
+body {
+  font-family: OpenSans, sans-serif;
+}
+
+a {
+  //color: #737373;
+  color: #235e84;
+  text-decoration: none;
+
+  &.link {
+    color: #1993ff;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+code a {
+  color: #ccc;
+  text-decoration: underline;
+
+  &:hover {
+    color: #95cef8;
+  }
+}
+
+:not(pre) > code,
+:not(pre) > code[class*="language-"] {
+  padding: 0.1em 0.4em;
+}
+
+h1 {
+  text-align: center;
+}
+
+.teaser {
+  color: #737373;
+  text-align: center;
+  font-size: 18px;
+}
+
+.copyleft {
+  &:before {
+    content: '\00a9';
+  }
+  font-size: 18px;
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+.container > h2 {
+  margin-top: 30px;
+  margin-bottom: 15px;
+
+  &:first-of-type {
+    margin-top: 5px;
+  }
+
+}

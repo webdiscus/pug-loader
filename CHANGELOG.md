@@ -1,5 +1,10 @@
 # Change log
 
+## 2.2.0 (2022-05-15)
+
+- feat: add embedded filters `:code`, `:highlight`
+- fix: added `&` and `"` chars in `:escape` filter
+
 ## 2.1.1 (2022-05-11)
 
 - fix: support resolving npm modules in pug template

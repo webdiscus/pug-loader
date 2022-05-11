@@ -8,7 +8,12 @@ const walk = require('pug-walk');
 const { isWin } = require('./utils');
 const resolver = require('./resolver');
 const loader = require('./loader');
-const { filterNotFoundException, getPugCompileErrorMessage } = require('./exeptions');
+const {
+  filterNotFoundException,
+  filterLoadException,
+  filterInitException,
+  getPugCompileErrorMessage,
+} = require('./exeptions');
 
 // path of embedded pug-loader filters
 const filtersDir = path.join(__dirname, './filters/');
@@ -67,11 +72,47 @@ const resolvePlugin = {
 const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.val.indexOf('require(') >= 0;
 
 /**
+ * Load embedded pug filters.
+ * @param {{filterName: string, options: boolean|string|object}} filters
+ */
+const loadFilters = (filters) => {
+  for (const filterName in filters) {
+    const options = filters[filterName];
+    if (options) {
+      let filterPath = path.resolve(filtersDir, filterName + '.js');
+      let filter;
+
+      try {
+        filter = require(filterPath);
+      } catch (error) {
+        if (error.toString().indexOf('Cannot find module') >= 0) {
+          const entries = fs.readdirSync(filtersDir, { withFileTypes: true });
+          const files = entries.filter((file) => !file.isDirectory()).map((file) => path.basename(file.name, '.js'));
+          filterNotFoundException(filterName, files.join(', '));
+        }
+        filterLoadException(filterName, filterPath, error);
+      }
+
+      try {
+        // filter module may have the `init(options)` method
+        if (filter.init != null) {
+          filter.init(options);
+        }
+        // add filter to pug compiler
+        pug.filters[filterName] = filter.apply.bind(filter);
+      } catch (error) {
+        filterInitException(filterName, error);
+      }
+    }
+  }
+};
+
+/**
  * @param {string} content The pug template.
  * @param {function(error: string|null, result: string?)?} callback The asynchronous callback function.
  * @return {string|undefined}
  */
-const compile = function(content, callback) {
+const compile = function (content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
   const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
@@ -79,25 +120,7 @@ const compile = function(content, callback) {
   const resolverOptions = webpackOptions.resolve || {};
 
   if (!loaderOptions.name) loaderOptions.name = 'template';
-
-  // embedded pug-loader filters
-  if (loaderOptions.embedFilters) {
-    for (const filterName in loaderOptions.embedFilters) {
-      const filterOptions = loaderOptions.embedFilters[filterName];
-      // TODO: if filterOptions is a object then add it to loaderOptions.filterOptions by filterName
-      if (filterOptions) {
-        let filterPath = path.resolve(filtersDir, filterName + '.js');
-
-        try {
-          pug.filters[filterName] = require(filterPath);
-        } catch (error) {
-          const entries = fs.readdirSync(filtersDir, { withFileTypes: true });
-          const files = entries.filter((file) => !file.isDirectory()).map((file) => path.basename(file.name, '.js'));
-          filterNotFoundException(filterName, files.join(', '));
-        }
-      }
-    }
-  }
+  if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
 
   const compilerOptions = {
     // used to resolve import/extends and to improve errors
@@ -161,7 +184,6 @@ const compile = function(content, callback) {
   try {
     /** @type {{body: string, dependencies: []}} */
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions);
-
   } catch (error) {
     // watch files in which an error occurred
     if (error.filename) loaderContext.addDependency(path.normalize(error.filename));
@@ -195,7 +217,7 @@ const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
 
   if (plugins) {
     const pluginData = plugins.find(
-      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0,
+      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0
     );
 
     if (pluginData) {
@@ -210,7 +232,7 @@ const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
   return options;
 };
 
-module.exports = function(content, map, meta) {
+module.exports = function (content, map, meta) {
   const callback = this.async();
 
   compile.call(this, content, (err, result) => {

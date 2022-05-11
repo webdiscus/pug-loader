@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta property="robots" content="index, follow"><meta property="description" content="Demo of pug filters embedded in pug-loader"><meta property="keywords" content="webpack, pug, pug-plugin, pug-loader, filter, highlight, code, escape"><meta property="author" content="webdiscus"><link rel="icon" href="/pug-loader/assets/img/favicon.f6725057.svg" type="image/svg+xml" sizes="any"><link rel="icon" href="/pug-loader/assets/img/favicon-32px.0035c307.png" type="image/png" sizes="32x32"><title>:escape</title><link rel="stylesheet" href="/pug-loader/assets/css/main.dd6abbeb.css"><link rel="stylesheet" href="/pug-loader/assets/css/styles.64d5378b.css"><script src="/pug-loader/assets/js/common.d4eda587.js"></script></head><body><div class="header-container"><div class="header-content"><a class="header-left" href="index.html"><img class="app-logo" src="/pug-loader/assets/img/app-logo.52c7ee6a.svg"><span>Pug filters</span></a><div class="header-middle"><h1>:escape</h1></div><div class="header-right"></div></div></div><main class="main-container"><div class="main-content"><section><div class="container"><p>The <code class="language-">:escape</code> filter replaces reserved HTML characters <code class="language-">& < > "</code>
+with their corresponding HTML entities to display these characters as text.
+See the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Entity">HTML entity</a> documentation.
+</p></div></section><section><div class="container"><h2>Enable the filter</h2><p>Defaults, the filter is disabled. If this filter is used, it must be enabled in <code class="language-">webpack.config.js</code>.</p><div>Use the Pug loader options in the webpack config:</div><pre class="language-"><code><span class="token punctuation">{</span>
+  <span class="token literal-property property">test</span><span class="token operator">:</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">.pug$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span>
+  <span class="token literal-property property">loader</span><span class="token operator">:</span> <span class="token string">'@webdiscus/pug-loader'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">options</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token comment">// enable embedded filters</span>
+    <span class="token literal-property property">embedFilters</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">escape</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// enable the :escape filter</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre></div></section><section><div class="container"><h2>Escape a block</h2><div>Pug template:</div><pre class="language-"><code><span class="token tag">pre<span class="token punctuation">:</span></span> <span class="token tag">code</span>
+  <span class="token filter"><span class="token filter-name variable">:escape</span>
+    <span class="token text">&lt;!-- Comment -->
+    &lt;div class="container">
+      &lt;p>&amp;copy; Copyright M&amp;M'S&lt;/p>
+      &lt;script>
+        const body = document.querySelector("body");
+      &lt;/script>
+    &lt;/div></span></span>
+</code></pre><div>Generated HTML:</div><pre class="language-"><code><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>pre</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>code</span><span class="token punctuation">></span></span>
+    <span class="token entity named-entity" title="&lt;">&amp;lt;</span>!-- Comment --<span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+    <span class="token entity named-entity" title="&lt;">&amp;lt;</span>div class=<span class="token entity named-entity" title="&quot;">&amp;quot;</span>container<span class="token entity named-entity" title="&quot;">&amp;quot;</span><span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+      <span class="token entity named-entity" title="&lt;">&amp;lt;</span>p<span class="token entity named-entity" title="&gt;">&amp;gt;</span><span class="token entity named-entity" title="&amp;">&amp;amp;</span>copy; Copyright M<span class="token entity named-entity" title="&amp;">&amp;amp;</span>M'S<span class="token entity named-entity" title="&lt;">&amp;lt;</span>/p<span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+      <span class="token entity named-entity" title="&lt;">&amp;lt;</span>script<span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+        const body = document.querySelector(<span class="token entity named-entity" title="&quot;">&amp;quot;</span>body<span class="token entity named-entity" title="&quot;">&amp;quot;</span>);
+      <span class="token entity named-entity" title="&lt;">&amp;lt;</span>/script<span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+    <span class="token entity named-entity" title="&lt;">&amp;lt;</span>/div<span class="token entity named-entity" title="&gt;">&amp;gt;</span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>code</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>pre</span><span class="token punctuation">></span></span>
+</code></pre><div><b>Result</b>, what you see in a browser:</div><pre><code>&lt;!-- Comment --&gt;
+&lt;div class=&quot;container&quot;&gt;
+  &lt;p&gt;&amp;copy; Copyright M&amp;M'S&lt;/p&gt;
+  &lt;script&gt;
+    const body = document.querySelector(&quot;body&quot;);
+  &lt;/script&gt;
+&lt;/div&gt;
+</code></pre></div></section><section><div class="container"><h2>Escape a string</h2><div>Pug template:</div><pre class="language-"><code>:escape The &lt;strong> element has the closing &lt;/strong> tag<span class="token punctuation">.</span>
+</code></pre><div><b>Result:</b></div>The &lt;strong&gt; element has the closing &lt;/strong&gt; tag.</div></section><section><div class="container"><h2>Escape inline syntax</h2><div>Pug template:</div><pre class="language-"><code><span class="token tag">div</span><span class="token punctuation">.</span><span class="token multiline-plain-text">
+  The #[:escape &lt;html>] element is the root element.&lt;br>
+  Inside the #[:escape &lt;html>] element there is a #[:escape &lt;body>] element.</span></code></pre><b>Result:</b><div>The &lt;html&gt; element is the root element.<br>
+Inside the &lt;html&gt; element there is a &lt;body&gt; element.</div></div></section></div></main><div class="footer-container"><div>Copyleft <span class="copyleft"></span> 2022 <a href="https://github.com/webdiscus">@webdiscus</a>.
+Powered by <a href="https://github.com/webdiscus/pug-plugin">Pug Plugin</a>.
+</div></div></body></html>
