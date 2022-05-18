@@ -327,7 +327,7 @@ If the filter has no options, use `true` as an option to enable the filter.
 > 💡 The goal of the embedded filters is use fast and lightweight filters without additional dependencies in package.json. 
 > Here we want to collect most useful small filters.
 > It is like [custom filters](https://pugjs.org/langucage/filters.html#custom-filters), but already exists in the [filter collection](https://github.com/webdiscus/pug-loader/tree/master/src/filters), that can be simply via an option enabled.\
-> The complete usage cases with more information you can see on the GitHub Page [pug filter examples](https://webdiscus.github.io/pug-loader/) and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters) of these examples.
+> The complete usage cases with more information you can see on the GitHub Page [pug filter examples](https://webdiscus.github.io/pug-loader/pug-filters/) and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters) of these examples.
 
 <a id="filter-escape" name="filter-escape" href="#filter-escape"></a>
 ### `:escape`
@@ -383,7 +383,7 @@ Generated HTML:
    Inside the &lt;html&gt; element there is a &lt;body&gt; element.</p>
 ```
 
-> For more examples and info, see [pug filter :escape](https://webdiscus.github.io/pug-loader/escape.html).
+> For more information and examples, see [pug filter :escape](https://webdiscus.github.io/pug-loader/pug-filters/escape.html).
 
 <a id="filter-code" name="filter-code" href="#filter-code"></a>
 ### `:code`
@@ -410,7 +410,7 @@ Enable the filter:
 },
 ```
 
-> For more examples and info, see [pug filter :code](https://webdiscus.github.io/pug-loader/code.html).
+> For more information and examples, see [pug filter :code](https://webdiscus.github.io/pug-loader/pug-filters/code.html).
 
 <a id="filter-highlight" name="filter-highlight" href="#filter-highlight"></a>
 ### `:highlight`
@@ -418,7 +418,7 @@ The `:highlight` filter highlights code syntax.
 
 Filter options:
 - `verbose {boolean}` Enable output process info in console.
-- `use {string}]` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
+- `use {string}` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
 
 Enable the filter:
 
@@ -441,7 +441,7 @@ pre.language-: code
     <h1>Header</h1>
     <p>Text</p>
 ```
-> For more examples and info, see [pug filter :highlight](https://webdiscus.github.io/pug-loader/highlight.html).
+> For more information and examples, see [pug filter :highlight](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html).
 
 <a id="method-compile" name="method-compile" href="#method-compile"></a>
 

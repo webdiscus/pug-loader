@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
-    "pug-plugin": "^2.3.1",
+    "pug-plugin": "^2.4.0",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
     "webpack": "^5.72.1",

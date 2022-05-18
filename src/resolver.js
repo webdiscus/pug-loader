@@ -51,7 +51,7 @@ const resolver = {
   hasPlugins: false,
   resolveFile: null,
   loader: null,
-  dependencies: [],
+  dependency: null,
 
   /**
    * @param {string} context The root context path.
@@ -64,21 +64,20 @@ const resolver = {
     this.hasAlias = Object.keys(this.aliases).length > 0;
     this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
     this.resolveFile = fileResolverSyncFactory(context, options);
-    this.dependencies = [];
   },
 
   /**
-   * @param {Loader} loader
+   * @param {Loader} object
    */
-  setLoader(loader) {
-    this.loader = loader;
+  setLoader(object) {
+    this.loader = object;
   },
 
   /**
-   * @return {Array<string>}
+   * @param {LoaderDependency} object
    */
-  getDependencies() {
-    return this.dependencies;
+  setDependency(object) {
+    this.dependency = object;
   },
 
   /**
@@ -90,28 +89,14 @@ const resolver = {
   },
 
   /**
-   * Add required file for watching.
-   *
-   * @param {string} file
-   */
-  addDependency(file) {
-    if (!/.(js|json)$/i.test(file)) return;
-
-    const dependency = isWin ? path.normalize(file) : file;
-
-    // delete the file from require.cache to allow reloading cached files after changes by watch
-    delete require.cache[dependency];
-    this.dependencies.push(dependency);
-  },
-
-  /**
    * Resolve filename.
    *
    * @param {string} file The file to resolve.
    * @param {string} templateFile The template file.
+   * @param {boolean} [isScript=false] Whether the file is required in script tag.
    * @return {string}
    */
-  resolve(file, templateFile) {
+  resolve(file, templateFile, isScript = false) {
     const context = path.dirname(templateFile);
     let resolvedPath = null;
 
@@ -147,6 +132,7 @@ const resolver = {
     }
 
     if (isWin) resolvedPath = pathToPosix(resolvedPath);
+    if (!isScript) this.dependency.add(resolvedPath);
 
     return resolvedPath;
   },
@@ -159,9 +145,10 @@ const resolver = {
    *
    * @param {string} value The expression to resolve.
    * @param {string} templateFile The template file.
+   * @param {boolean} isScript Whether the file is required in script tag.
    * @return {string}
    */
-  interpolate(value, templateFile) {
+  interpolate(value, templateFile, isScript) {
     value = value.trim();
 
     const [, quote, file] = /(^"|'|`)(.+?)(?=`|'|")/.exec(value) || [];
@@ -234,6 +221,7 @@ const resolver = {
 
     if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
     if (!resolvedPath) resolvedPath = value;
+    if (!isScript) this.dependency.add(resolvedPath);
 
     return resolvedPath;
   },

@@ -10,7 +10,7 @@
 const vm = require('vm');
 const path = require('path');
 const { merge } = require('webpack-merge');
-const { getQueryData, injectExternalData } = require('./utils');
+const { getQueryData, injectExternalData, isWin } = require('./utils');
 const { executeTemplateFunctionException } = require('./exeptions');
 
 const scriptTagQuery = '?isScript';
@@ -21,7 +21,7 @@ const scriptTagQuery = '?isScript';
  */
 
 const loader = {
-  resolver: {},
+  resolver: null,
   method: null,
   esModule: false,
 
@@ -103,15 +103,11 @@ const loader = {
       require(file, templateFile) {
         const resolvedFile = loader.resolver.interpolate(file, templateFile);
 
-        loader.resolver.addDependency(resolvedFile);
-
         return `require(${resolvedFile})`;
       },
 
       requireScript(file, templateFile) {
-        const resolvedFile = loader.resolver.interpolate(file, templateFile);
-
-        loader.resolver.addDependency(resolvedFile);
+        const resolvedFile = loader.resolver.interpolate(file, templateFile, true);
 
         return `require(${resolvedFile} + '${scriptTagQuery}')`;
       },
@@ -132,8 +128,6 @@ const loader = {
       loaderRequire(file, templateFile) {
         const resolvedFile = loader.resolver.resolve(file, templateFile);
 
-        loader.resolver.addDependency(resolvedFile);
-
         if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
           return require(resolvedFile);
         }
@@ -142,9 +136,7 @@ const loader = {
       },
 
       loaderRequireScript(file, templateFile) {
-        const resolvedFile = loader.resolver.resolve(file, templateFile);
-
-        loader.resolver.addDependency(resolvedFile);
+        const resolvedFile = loader.resolver.resolve(file, templateFile, true);
 
         return `\\u0027 + require(\\u0027${resolvedFile}${scriptTagQuery}\\u0027) + \\u0027`;
       },
@@ -178,8 +170,6 @@ const loader = {
       loaderRequire(file, templateFile) {
         const resolvedFile = loader.resolver.resolve(file, templateFile);
 
-        loader.resolver.addDependency(resolvedFile);
-
         if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
           return require(resolvedFile);
         }
@@ -188,9 +178,7 @@ const loader = {
       },
 
       loaderRequireScript(file, templateFile) {
-        const resolvedFile = loader.resolver.resolve(file, templateFile);
-
-        loader.resolver.addDependency(resolvedFile);
+        const resolvedFile = loader.resolver.resolve(file, templateFile, true);
 
         return `${resolvedFile}${scriptTagQuery}`;
       },
@@ -234,6 +222,7 @@ const runTemplateFunction = (templateFile, funcBody, locals, { loaderRequire, lo
 
     return contextObject[loader.templateName](locals);
   } catch (error) {
+    loader.resolver.dependency.watch();
     executeTemplateFunctionException(error, templateFile);
   }
 };

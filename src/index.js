@@ -19,6 +19,45 @@ const {
 const filtersDir = path.join(__dirname, './filters/');
 
 /**
+ * Public API
+ * @typedef {Object} LoaderDependency
+ * @property {Function<loaderContext:Object>} init
+ * @property {Function<file:string>} add
+ * @property {Function} watch
+ */
+
+const dependency = {
+  files: new Set(),
+  dependencyExt: new Set(['.pug', '.jade', '.json', '.js', '.mjs', '.ts']),
+  loaderContext: null,
+
+  init(loaderContext) {
+    this.loaderContext = loaderContext;
+  },
+
+  /**
+   * Add file for watching.
+   *
+   * @param {string} file
+   */
+  add(file) {
+    let ext = path.extname(file);
+    if (!this.dependencyExt.has(ext)) return;
+
+    file = isWin ? path.normalize(file) : file;
+
+    // delete the file (.js, .json, etc.) from require.cache to reload cached files after changes by watch
+    delete require.cache[file];
+    this.files.add(file);
+  },
+
+  watch() {
+    const files = Array.from(this.files);
+    files.forEach(this.loaderContext.addDependency);
+  },
+};
+
+/**
  * The pug plugin to resolve path for include, extends, require.
  *
  * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
@@ -32,7 +71,9 @@ const resolvePlugin = {
    * @param {{}} options The options of pug compiler.
    * @return {string}
    */
-  resolve: (filename, templateFile, options) => resolver.resolve(filename.trim(), templateFile.trim()),
+  resolve(filename, templateFile, options) {
+    return resolver.resolve(filename.trim(), templateFile.trim());
+  },
 
   /**
    * Resolve the filename for require().
@@ -40,8 +81,8 @@ const resolvePlugin = {
    * @param {{}} ast The parsed tree of pug template.
    * @return {{}}
    */
-  preCodeGen: (ast) =>
-    walk(ast, (node) => {
+  preCodeGen(ast) {
+    return walk(ast, (node) => {
       if (node.type === 'Code') {
         // resolving for require of a code, e.g.: `- var data = require('./data.js')`
         if (containRequire(node)) {
@@ -60,7 +101,8 @@ const resolvePlugin = {
           }
         });
       }
-    }),
+    });
+  },
 };
 
 /**
@@ -170,37 +212,38 @@ const compile = function (content, callback) {
     basedir: compilerOptions.basedir,
     options: resolverOptions,
   });
+
   loader.init({
     resourceQuery,
     // in pug can be used external data, e.g. htmlWebpackPlugin.options
     customData: getHtmlWebpackPluginOptions(webpackOptions, filename),
     options: loaderOptions,
   });
+
+  dependency.init(loaderContext);
+
+  resolver.setDependency(dependency);
   resolver.setLoader(loader);
   loader.setResolver(resolver);
 
-  loaderContext.cacheable && loaderContext.cacheable(true);
+  if (loaderContext.cacheable) loaderContext.cacheable(true);
 
   try {
     /** @type {{body: string, dependencies: []}} */
-    compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions);
+    compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
+    // Note: don't use compileResult.dependencies because it is not available by compile error.
+    // We track all dependencies at compile process into `pugDependencies`,
+    // then by a compile error our pugDependencies are available to watch changes in corrupted pug files.
   } catch (error) {
-    // watch files in which an error occurred
-    if (error.filename) loaderContext.addDependency(path.normalize(error.filename));
+    if (error.filename) {
+      dependency.add(error.filename);
+    }
+    dependency.watch();
     callback(getPugCompileErrorMessage(error));
     return;
   }
-  const result = loader.export(filename, compileResult.body);
-
-  // add dependency files to watch changes
-  const dependencies = [...compileResult.dependencies, ...resolver.getDependencies()];
-  if (isWin) {
-    dependencies.forEach((file, index, files) => {
-      files[index] = path.normalize(file);
-    });
-  }
-  dependencies.forEach(loaderContext.addDependency);
-
+  const result = loader.export(filename, compileResult);
+  dependency.watch();
   callback(null, result);
 };
 

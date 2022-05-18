@@ -1,6 +1,6 @@
 const path = require('path');
-const PugPlugin = require('../../../pug-plugin'); // use local code of pug-plugin for development
 //const PugPlugin = require('pug-plugin'); // use it in your code
+const PugPlugin = require('../../../pug-plugin'); // use local code of pug-plugin for development
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -22,8 +22,8 @@ module.exports = (env, argv) => {
 
     output: {
       path: path.join(__dirname, 'dist'),
-      // build for GitHub Page: https://webdiscus.github.io/pug-loader/
-      publicPath: isProd ? '/pug-loader/' : '/',
+      // build for GitHub Page: https://webdiscus.github.io/pug-loader/pug-filters/
+      publicPath: isProd ? '/pug-loader/pug-filters/' : '/',
       // output filename of scripts
       filename: 'assets/js/[name].[contenthash:8].js',
     },
@@ -50,8 +50,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.pug$/,
-          //loader: PugPlugin.loader, // the `pug-plugin` already contains the `@webdiscus/pug-loader`
-          loader: '../../',
+          loader: PugPlugin.loader, // the `pug-plugin` already contains the `@webdiscus/pug-loader`
           options: {
             method: 'render', // fast method to render static html
             // enable embedded filters

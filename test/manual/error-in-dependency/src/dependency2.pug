@@ -1,0 +1,9 @@
+//- Test: invalid code generates error
+//- const str = /.+/$
+
+- const data = require('./data.json')
+- const module = require('./pug.module.js');
+
+h3 Dependency2
+p JSON Data: #{data.name}
+p Module: #{module('Pug')}

@@ -11,7 +11,7 @@ npm run start
 ```
 
 ## Build
-Build resources for GitHub Page: https://webdiscus.github.io/pug-loader/
+Build resources for GitHub Page: https://webdiscus.github.io/pug-loader/pug-filters/
 
 1. Generate resources:
     ```
