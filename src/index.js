@@ -36,7 +36,7 @@ const dependency = {
   },
 
   /**
-   * Add file for watching.
+   * Add file to watch list.
    *
    * @param {string} file
    */
@@ -127,7 +127,9 @@ const loadFilters = (filters) => {
       try {
         filter = require(filterPath);
       } catch (error) {
-        if (error.toString().indexOf('Cannot find module') >= 0) {
+        const message = error.toString();
+
+        if (message.indexOf('Cannot find module') >= 0 && message.indexOf('Please install the module') < 0) {
           const entries = fs.readdirSync(filtersDir, { withFileTypes: true });
           const files = entries.filter((file) => !file.isDirectory()).map((file) => path.basename(file.name, '.js'));
           filterNotFoundException(filterName, files.join(', '));

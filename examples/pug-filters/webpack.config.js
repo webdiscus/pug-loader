@@ -33,6 +33,7 @@ module.exports = (env, argv) => {
       escape: 'src/views/pages/escape/index.pug',
       code: 'src/views/pages/code/index.pug',
       highlight: 'src/views/pages/highlight/index.pug',
+      markdown: 'src/views/pages/markdown/index.pug',
     },
 
     plugins: [
@@ -50,7 +51,8 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.pug$/,
-          loader: PugPlugin.loader, // the `pug-plugin` already contains the `@webdiscus/pug-loader`
+          //loader: PugPlugin.loader, // the `pug-plugin` already contains the `@webdiscus/pug-loader`
+          loader: '../../',
           options: {
             method: 'render', // fast method to render static html
             // enable embedded filters
@@ -64,7 +66,14 @@ module.exports = (env, argv) => {
               // :highlight
               highlight: {
                 verbose: true,
-                use: 'prismjs', // name of a highlighting npm package, must be extra installed
+                use: 'prismjs', // name of a highlighting npm package, must be installed
+              },
+              // :markdown
+              markdown: {
+                highlight: {
+                  verbose: true,
+                  use: 'prismjs', // name of a highlighting npm package, must be installed
+                },
               },
             },
           },

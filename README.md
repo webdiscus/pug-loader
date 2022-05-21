@@ -10,7 +10,7 @@
         Pug Loader
         </a>
     </h1>
-  <div>Webpack loader to render pug templates</div>
+  <div>Webpack loader to render Pug templates</div>
 </div>
 
 ---
@@ -21,17 +21,16 @@
 [![codecov](https://codecov.io/gh/webdiscus/pug-loader/branch/master/graph/badge.svg?token=457T2BK3YN)](https://codecov.io/gh/webdiscus/pug-loader)
 [![node](https://img.shields.io/npm/dm/@webdiscus/pug-loader)](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
-This [pug-loader](https://www.npmjs.com/package/@webdiscus/pug-loader) render pug templates into HTML to save it in a
-file or compile pug to template function for usage the pug directly in JavaScript.
-The pug loader can resolve paths and webpack aliases for `extends` `include` `require()`.
+Pug loader renders Pug files into HTML or compiles them into a template function.
+This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 
-> ⚠️ **HIGHLY RECOMMENDED** to use the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
+> 💡 **RECOMMENDED** to use the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
 > _Pug plugin makes your life a lot easier._
 > _Keep your webpack config clean and clear._
 > 
 > This `pug-loader` is already included in the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
 > The `pug-plugin` enable using Pug templates as webpack entry points.\
-> The `pug-plugin` resolve and compile source files of scripts and styles included directly in Pug, without to define them in the webpack entry. 
+> The `pug-plugin` resolve and compile source files of scripts and styles required in Pug, without to define them in the webpack entry. 
 > You don't need more additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`. 
 > Pug plugin does everything by itself and much faster.
 > 
@@ -41,57 +40,77 @@ The pug loader can resolve paths and webpack aliases for `extends` `include` `re
 
 1. [Install and Quick start](#install-and-quick-start)
 2. [Options](#options)
-3. [Embedded Pug filters](#embed-filters)
-   - [:escape](#filter-escape)
-   - [:code](#filter-code)
-   - [:highlight](#filter-highlight)
-4. [Usage of pug-loader methods](#method-compile)
+3. [Usage of methods](#method-compile)
    - [compile](#method-compile)
    - [render](#method-render)
    - [html](#method-html)
-5. [Passing data into pug template](#passing-data-into-template)
-6. [Usage embedded resources](#usage-embedded-resources)
+4. [Usage of Pug filters](#embed-filters)
+   - [:escape](#filter-escape)
+   - [:code](#filter-code)
+   - [:highlight](#filter-highlight)
+   - [:markdown](#filter-markdown)
+5. [Passing data into Pug template](#passing-data-into-template)
+6. [Usage of embedded resources](#usage-embedded-resources)
 7. [Usage with Angular Component](#usage-with-angular-component)
 8. [Recipes](#recipes)
 9. [Example Hello World!](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-app/)
-9. [Example of using Pug filters](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters)
-10. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
+10. [Example Pug filters](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters)
+11. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
 
 <a id="features" name="features" href="#features"></a>
 ## Features
 
-- rendereing pug into pure `HTML string` to save it in separate file
-- compiling pug into `template function` for usage in JavaScript
+- rendereing Pug into pure `HTML string`
+- compiling Pug into `template function` for usage in JavaScript
 - generates a template function with both `CommonJS` and `ESM` syntax
 - resolves alias from webpack `resolve.alias`
-- resolves alias from `compilerOptions.paths` defined in `tsconfig.json`
-  using [`tsconfig-paths-webpack-plugin`](https://github.com/dividab/tsconfig-paths-webpack-plugin)
+- resolves alias from `tsconfig.json` `compilerOptions.paths`, 
+  requires [tsconfig-paths-webpack-plugin](https://github.com/dividab/tsconfig-paths-webpack-plugin)
 - resolves required images in the attribute `srcset` of `img` tag
 - resolves required JavaScript modules or JSON in pug
-- ignore the prefixes `~` `@` for webpack `resolve.alias`
-- embedded Pug filters: `:escape` `:code` `:highlight`
-- passing custom data into pug template
+- integrated Pug filters: `:escape` `:code` `:highlight` `:markdown` with highlighting of code blocks
+- passing custom data into Pug template
 - watching of changes in all dependencies
-- integration with `Angular Component`
-- supports for features and options of original [`pugjs/pug-loader`](https://github.com/pugjs/pug-loader/)
-- many time faster than original `pugjs/pug-loader`
+
+---
 
 <a id="install-and-quick-start" name="install-and-quick-start" href="#install-and-quick-start"></a>
-
 ## Install and Quick start
 
-To extract HTML from a pug template and save it to a file, use the [pug-plugin](https://github.com/webdiscus/pug-plugin)
-or [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin).
+**Choose your way:**
+- compile Pug files defined in webpack entry using the [`pug-plugin`](https://github.com/webdiscus/pug-plugin).
+  It is a very easy intuitive way.
+- compile Pug files defined in the [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) using a pug-loader.
+  It is non-intuitive and very complex way. Not recommended.
 
 ### Using [`pug-plugin`](https://github.com/webdiscus/pug-plugin)
+For details and examples please see the [pug-plugin](https://github.com/webdiscus/pug-plugin) site.
 
-Install the `pug-plugin` if you want extract HTML from pug defined in webpack entry.
+Install the `pug-plugin`:
 
 ```console
 npm install pug-plugin --save-dev
 ```
 
-> Note: the `pug-plugin` already contain the `pug-loader`, not need to install extra any `pug-loader`.
+**Note:** the `pug-plugin` already contains the [pug-loader](https://github.com/webdiscus/pug-loader), not need to install an additional Pug loader.
+
+> ⚠️ **ATTENTION**
+> 
+> The pug-plugin enable to use script and style source files directly in Pug, so easy:
+> ```pug
+> link(href=require('./styles.scss') rel='stylesheet')
+> script(src=require('./main.js'))
+> ```
+> Generated HTML contains hashed CSS and JS output filenames:
+> ```html
+> <link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
+> <script src="/assets/js/main.f4b855d8.js"></script>
+> ```
+> 
+> - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
+> - Don't import styles in JS. Use `require()` for style files in Pug.
+> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin processes files from webpack entry.
+> - Don't use `mini-css-extract-plugin` to extract CSS from styles. The Pug plugin extract CSS from styles required in Pug.
 
 Change your **webpack.config.js** according to the following minimal configuration:
 
@@ -101,30 +120,54 @@ const PugPlugin = require('pug-plugin');
 
 module.exports = {
   output: {
-    path: path.join(__dirname, 'public/'),
-    publicPath: '/', // must be defined any path, `auto` is not supported yet
+    path: path.join(__dirname, 'dist/'),
+    publicPath: '/', // must be defined any path, `auto` is not supported
+    // output filename of JS files
+    filename: 'assets/js/[name].[contenthash:8].js'
   },
-  entry: {
-    index: './src/index.pug', // the `pug-plugin` extract HTML from entry file
+  
+   entry: { 
+    // all scripts and styles can be used in Pug,
+    // do not need to define JS and SCSS in the webpack entry
+      
+    // define Pug files in entry:
+    index: './src/views/index.pug',      // output index.html
+    about: './src/views/about/index.pug' // output about.html
+    // ...
   },
+
   plugins: [
-    new PugPlugin(), // add it to handle pug files in entry
+    // enable processing of Pug files from entry
+    new PugPlugin({
+      modules: [
+        // module extracts CSS from style source files required in Pug
+        PugPlugin.extractCss({
+          // output filename of CSS files
+          filename: 'assets/css/[name].[contenthash:8].css'
+        })
+      ]
+    })
   ],
+
   module: {
     rules: [
       {
         test: /\.pug$/,
-        loader: PugPlugin.loader, // the pug-plugin already contain this pug-loader
+        loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
         options: {
-          method: 'render', // the fastest method to generate HTML files
+          method: 'render', // fastest method to generate static HTML files
         }
+      },
+      {
+        test: /\.(css|sass|scss)$/,
+        use: ['css-loader', 'sass-loader']
       },
     ],
   },
 };
 ```
 
-### Using [`html-webpack-plugin`](https://github.com/jantimon/html-webpack-plugin)
+### Using [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 
 Install the `pug-loader` only if you use the `html-webpack-plugin`.
 
@@ -160,7 +203,7 @@ module.exports = {
 };
 ```
 
-### Usage in JavaScript
+### Usage of Pug in JavaScript
 
 Install the `pug-loader`.
 
@@ -179,7 +222,7 @@ module.exports = {
     publicPath: '/', // must be defined any path, `auto` is not supported yet
   },
   entry: {
-    index: './src/index.js', // load a pug file in JS
+    index: './src/index.js', // load a Pug teplate in JS
   },
   module: {
     rules: [
@@ -192,7 +235,7 @@ module.exports = {
 };
 ```
 
-Load a pug template in JavaScript. Optional you can pass any data into generated template function.
+Load a Pug template in JavaScript. Optional you can pass any data into generated template function.
 
 **./src/index.js**
 
@@ -203,8 +246,9 @@ const html = tmpl({
 });
 ```
 
-<a id="options" name="options" href="#options"></a>
+---
 
+<a id="options" name="options" href="#options"></a>
 ## Original options
 
 [See original description of options](https://pugjs.org/api/reference.html#options)
@@ -238,7 +282,7 @@ Filters let to use other languages in Pug templates.
 ### `plugins`
 
 Type: `Array<Object>` Default: `[]`<br>
-Plugins allow to manipulate pug tags, template content in compile process.
+Plugins allow to manipulate Pug tags, template content in compile process.
 How it works [see in source of pug](https://github.com/pugjs/pug/blob/master/packages/pug/lib/index.js).
 
 ### `compileDebug`
@@ -257,10 +301,10 @@ This option is **deprecated** by pugjs and always is `false`. Don't use it.
 
 Type: `string` Default: `compile`<br>
 Values:
- - `compile` the pug template compiles into a template function and in JavaScript can be called with variables to render into HTML at runtime. \
+ - `compile` the Pug template compiles into a template function and in JavaScript can be called with variables to render into HTML at runtime. \
    The query parameter is `?pug-compile`. Can be used if the method is `render`. \
    Use this method, if the template have variables passed from JavaScript at runtime. [see usage](#method-compile)
- - `render` the pug template renders into HTML at compile time and exported as a string. 
+ - `render` the Pug template renders into HTML at compile time and exported as a string. 
    All required resource will be processed by the webpack and separately included as added strings wrapped to a function. \
    The query parameter is `?pug-render`. Can be used if the method is `compile` or is not defined in options. \
    Use this method, if the template does not have variables passed from JavaScript at runtime. The method generates the most compact and fastest code. [see usage](#method-render)
@@ -295,7 +339,7 @@ Values:
 ### `data`
 
 Type: `Object` Default: `{}`<br>
-The custom data will be passed in all pug templates, it can be useful by pass global data.
+The custom data will be passed in all Pug templates, it can be useful by pass global data.
 
 > ⚠️ Limitation by the `compile` method. \
 > A string representing the source code of the function is limited by the `function.toString()`, see [examples](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/toString#examples). \
@@ -303,7 +347,7 @@ The custom data will be passed in all pug templates, it can be useful by pass gl
 
 ### `embedFilters`
 Type: `Object` Default: `undefined`<br>
-Enable embedded pug filters.
+Enable embedded Pug filters.
 To enable a filter, add the following to the pug-loader options:
 ```js
 {
@@ -312,141 +356,19 @@ To enable a filter, add the following to the pug-loader options:
   }
 }
 ```
+
 Where `<FILTER_NAME>` is the name of a embedded filter, the available filters see below.
 The filter can have options `<FILTER_OPTIONS>` as an object.
 If the filter has no options, use `true` as an option to enable the filter.
 
+> See the complete information on the [pug filter](https://webdiscus.github.io/pug-loader/pug-filters/) site and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters).
 
-<a id="embed-filters" name="embed-filters" href="#embed-filters"></a>
-
-## Embedded filters
-
-> ⚠️ Defaults all embedded filters are disabled!\
-> Enable only filters used in your pug templates.
-
-> 💡 The goal of the embedded filters is use fast and lightweight filters without additional dependencies in package.json. 
-> Here we want to collect most useful small filters.
-> It is like [custom filters](https://pugjs.org/langucage/filters.html#custom-filters), but already exists in the [filter collection](https://github.com/webdiscus/pug-loader/tree/master/src/filters), that can be simply via an option enabled.\
-> The complete usage cases with more information you can see on the GitHub Page [pug filter examples](https://webdiscus.github.io/pug-loader/pug-filters/) and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters) of these examples.
-
-<a id="filter-escape" name="filter-escape" href="#filter-escape"></a>
-### `:escape`
-The `:escape` filter replaces reserved HTML characters with their corresponding HTML entities to display these characters as text.
-
-Filter options: `none`.
-
-Enable the filter:
-
-```js
-{
-  test: /\.pug$/,
-  loader: '@webdiscus/pug-loader',
-  options: {
-    // enable embedded filters
-    embedFilters: {
-      escape: true, // enable the :escape filter
-    },
-  },
-},
-```
-
-Using the `:escape` filter in pug:
-
-```html
-pre: code.language-html
-  :escape
-    <h1>Header</h1>
-    <p>Text</p>
-```
-
-Generated HTML:
-
-```html
-<pre>
-  <code class="language-html">
-    &lt;h1&gt;Header&lt;/h1&gt;
-    &lt;p&gt;Text&lt;/p&gt;
-  </code>
-</pre>
-```
-
-Inline syntax:
-```html
-p.
-  The #[:escape <html>] element is the root element.<br>
-  Inside the #[:escape <html>] element there is a #[:escape <body>] element.
-```
-
-Generated HTML:
-```html
-<p>The &lt;html&gt; element is the root element.<br>
-   Inside the &lt;html&gt; element there is a &lt;body&gt; element.</p>
-```
-
-> For more information and examples, see [pug filter :escape](https://webdiscus.github.io/pug-loader/pug-filters/escape.html).
-
-<a id="filter-code" name="filter-code" href="#filter-code"></a>
-### `:code`
-The `:code` filter wraps a content with the `<code>` tag.
-
-Filter options: 
-- `className {string}` The class name of the `code` tag. For example, the `prismjs` use the `language-*` as class name in `<code>` for styling this tag.
-
-Enable the filter:
-
-```js
-{
-  test: /\.pug$/,
-  loader: '@webdiscus/pug-loader',
-  options: {
-    // enable embedded filters
-    embedFilters: {
-      // enable the :code filter
-      code: {
-        className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
-      },
-    },
-  },
-},
-```
-
-> For more information and examples, see [pug filter :code](https://webdiscus.github.io/pug-loader/pug-filters/code.html).
-
-<a id="filter-highlight" name="filter-highlight" href="#filter-highlight"></a>
-### `:highlight`
-The `:highlight` filter highlights code syntax.
-
-Filter options:
-- `verbose {boolean}` Enable output process info in console.
-- `use {string}` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
-
-Enable the filter:
-
-```js
-{
-  embedFilters: {
-    highlight: {
-      verbose: true,
-      use: 'prismjs',
-    },
-  },
-}
-```
-
-Usage example:
-```pug
-pre.language-: code
-  :highlight(html)
-    <!-- Comment -->
-    <h1>Header</h1>
-    <p>Text</p>
-```
-> For more information and examples, see [pug filter :highlight](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html).
+---
 
 <a id="method-compile" name="method-compile" href="#method-compile"></a>
+## Usage of `compile` method
 
-## Usage method `compile` (default)
-
+This method is used by default.\
 In JavaScript the required template will be compiled into template function.\
 In webpack config add to `module.rules`:
 
@@ -465,25 +387,26 @@ const tmpl = require('template.pug');
 const html = tmpl({ key: 'value' }); // the HTML string
 ```
 
-To render the pug direct into HTML, use the query parameter `?pug-render`.
+To render the Pug direct into HTML, use the query parameter `?pug-render`.
 
 ```js
 // compile into template function, because loader option 'method' defaults is 'compile'
 const tmpl = require('template.pug');
 const html = tmpl({ key: 'value' });
 
-// render the pug file into HTML, using the parameter 'pug-render'
+// render the Pug file into HTML, using the parameter 'pug-render'
 const html2 = require('template2.pug?pug-render');
 ```
 
 > **Note:** if the query parameter `pug-render` is set, then will be used rendering for this template, independent of the loader option `method`.
 > Variables passed in template with method `render` will be used at compile time.
 
+---
+
 <a id="method-render" name="method-render" href="#method-render"></a>
+## Usage of `render` method
 
-## Usage method `render`
-
-This method will render the pug into HTML at compile time. \
+This method will render the Pug into HTML at compile time. \
 In webpack config add to `module.rules`:
 
 ```js
@@ -502,7 +425,7 @@ In JavaScript the result of require() is an HTML string.
 const html = require('template.pug'); // the HTML string
 ```
 
-To generate a template function for passing the data in pug at realtime, use the query parameter `?pug-compile`.
+To generate a template function for passing the data in Pug at realtime, use the query parameter `?pug-compile`.
 
 ```js
 // render into HTML, because loader option 'method' is 'render'
@@ -513,11 +436,12 @@ const tmpl2 = require('template2.pug?pug-compile');
 const html2 = tmpl2({ ... });
 ```
 
+---
+
 <a id="method-html" name="method-html" href="#method-html"></a>
+## Usage of `html` method
 
-## Usage method `html`
-
-This method will render the pug to pure HTML and should be used with an additional loader to handle HTML. \
+This method will render the Pug to pure HTML and should be used with an additional loader to handle HTML. \
 In webpack config add to `module.rules`:
 
 ```js
@@ -546,13 +470,217 @@ In JavaScript the result of require() is an HTML string:
 const html = require('template.pug'); // the HTML string
 ```
 
-<a id="passing-data-into-template" name="passing-data-into-template" href="#passing-data-into-template"></a>
+---
 
+<a id="embed-filters" name="embed-filters" href="#embed-filters"></a>
+## Embedded filters
+
+The goal of embedded filters is to use most useful lightweight filters without installation.
+The embedded filters are [custom filters](https://pugjs.org/langucage/filters.html#custom-filters) that are collected in [one place](https://github.com/webdiscus/pug-loader/tree/master/src/filters).
+These filters can be simply enabled via an option.\
+See the complete information on the [pug filter](https://webdiscus.github.io/pug-loader/pug-filters/) site and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters).
+
+Defaults all embedded filters are disabled. Enable only filters used in your Pug templates.
+
+<a id="filter-escape" name="filter-escape" href="#filter-escape"></a>
+### `:escape`
+The filter replaces reserved HTML characters with their corresponding HTML entities to display these characters as text.
+
+Filter options: `none`.
+
+Enable the filter:
+
+```js
+{
+  test: /\.pug$/,
+  loader: '@webdiscus/pug-loader',
+  options: {
+    // enable embedded filters
+    embedFilters: {
+      escape: true, // enable the :escape filter
+    },
+  },
+},
+```
+
+Using the `:escape` filter in pug:
+
+```html
+pre: code.language-html
+  :escape
+    <h1>Header</h1>
+```
+
+Generated HTML:
+
+```html
+<pre>
+  <code class="language-html">
+    &lt;h1&gt;Header&lt;/h1&gt;
+  </code>
+</pre>
+```
+
+Inline syntax:
+```html
+p.
+  The #[:escape <html>] element is the root element.<br>
+  Inside the #[:escape <html>] element there is a #[:escape <body>] element.
+```
+
+Generated HTML:
+```html
+<p>The &lt;html&gt; element is the root element.<br>
+   Inside the &lt;html&gt; element there is a &lt;body&gt; element.</p>
+```
+
+> For more information and examples, see the [:escape](https://webdiscus.github.io/pug-loader/pug-filters/escape.html) site.
+
+<a id="filter-code" name="filter-code" href="#filter-code"></a>
+### `:code`
+The  filter wraps a content with the `<code>` tag.
+
+Filter options: 
+- `className {string}` The class name of the `code` tag. For example, the `prismjs` use the `language-*` as class name in `<code>` for styling this tag.
+
+Enable the filter:
+
+```js
+{
+  test: /\.pug$/,
+  loader: '@webdiscus/pug-loader',
+  options: {
+    // enable embedded filters
+    embedFilters: {
+      // enable the :code filter
+      code: {
+        className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
+      },
+    },
+  },
+},
+```
+
+Usage examples:
+
+Pug: `#[:code function() { return true }]`\
+Display: `function() { return true }`
+
+Pug: `#[:code:escape <div>]`\
+Display: `<div>`
+
+Pug: `#[:code:highlight(html) <div class="container">content</div>]`\
+Display highlighted code: `<div class="container">content</div>`
+
+> For more information and examples, see the [:code](https://webdiscus.github.io/pug-loader/pug-filters/code.html) site.
+
+<a id="filter-highlight" name="filter-highlight" href="#filter-highlight"></a>
+### `:highlight`
+The  filter highlights code syntax.
+
+Filter options:
+- `verbose {boolean}` Enable output process info in console.
+- `use {string}` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
+
+Enable the filter:
+
+```js
+{
+  embedFilters: {
+    highlight: {
+      verbose: true,
+      use: 'prismjs',
+    },
+  },
+}
+```
+
+Usage example:
+```pug
+pre.language-: code
+  :highlight(html)
+    <!-- Comment -->
+    <h1>Header</h1>
+    <p>Text</p>
+```
+
+> For more information and examples, see the [:highlight](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html) site.
+
+<a id="filter-markdown" name="filter-markdown" href="#filter-markdown"></a>
+### `:markdown`
+The filter transform markdown to HTML and highlights code syntax.
+
+The `:markdown` filter require the [markdown-it](https://github.com/markdown-it/markdown-it) and [prismjs](https://prismjs.com) modules:
+```
+npm install -D markdown-it prismjs
+```
+
+Enable the filter:
+```js
+{
+  test: /.pug$/,
+  loader: '@webdiscus/pug-loader',
+  options: {
+    // enable embedded filters
+    embedFilters: {
+      // enable :markdown filter
+      markdown: {
+        // enable highlighting in markdown
+        highlight: {
+          verbose: true,
+          use: 'prismjs',
+        },
+      },
+    },
+  },
+},
+```
+
+The `highlight` options:
+
+- `verbose {boolean}` Enable output process info in console. Use it in development mode only. Defaults is false.
+- `use {string}` The name of a highlighting npm module. The module must be installed. Currently, is supported the [prismjs](https://prismjs.com) only.
+
+Usage example:
+```pug
+  :markdown
+    _HTML_
+    ```html
+    <!-- Comment -->
+    <div class="container">
+      <p>Some text</p>
+    </div>
+    ```
+    _JavaScript_
+    ```js
+    const arr = [1, 2, 'banana'];
+    ```
+```
+
+Display highlighted code blocks:
+
+> _HTML_
+> ```html
+> <!-- Comment -->
+> <div class="container">
+>   <p>Some text</p>
+> </div>
+> ```
+> _JavaScript_
+> ```js
+> const arr = [1, 2, 'banana'];
+> ```
+
+> For more information and examples, see the [:markdown](https://webdiscus.github.io/pug-loader/pug-filters/markdown.html) site.
+
+---
+
+<a id="passing-data-into-template" name="passing-data-into-template" href="#passing-data-into-template"></a>
 ## Passing data into template
 
 ### In JavaScript
 
-By default, the pug file is compiled as template function, into which can be passed an object with template variables.
+By default, the Pug file is compiled as template function, into which can be passed an object with template variables.
 
 ```js
 const tmpl = require('template.pug');
@@ -575,7 +703,7 @@ or as a JSON object:
 const html = require('template.pug?' + JSON.stringify({ myVar: 'value', foo: 'bar' }));
 ```
 
-Use variables `myVar` and `foo` in pug template.
+Use variables `myVar` and `foo` in Pug template.
 
 ```pug
 div The value of "myVar": #{myVar}
@@ -595,7 +723,7 @@ entry: {
 }
 ```
 
-Use the object `myData` in pug template.
+Use the object `myData` in Pug template.
 
 ```pug
 html
@@ -605,7 +733,7 @@ body
   div UUID: #{myData.options.uuid}
 ```
 
-To pass global data to all pug templates, add the loader options `data` as any object.
+To pass global data to all Pug templates, add the loader options `data` as any object.
 
 ```js
 module.exports = {
@@ -640,7 +768,7 @@ body
 
 ### Passing data in HtmlWebpackPlugin
 
-The user data can be passed into pug template with two ways:
+The user data can be passed into Pug template with two ways:
 
 - via HtmlWebpackPlugin options
 - via query parameters of template file
@@ -649,7 +777,7 @@ The user data can be passed into pug template with two ways:
 module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'The some page', // avaliable in pug as `htmlWebpackPlugin.options.title`
+      title: 'The some page', // avaliable in Pug as `htmlWebpackPlugin.options.title`
       template: path.join(__dirname, 'src/index.pug?' + JSON.stringify({ myVar: 'value' })), // avaliable as `myVar`
       filename: 'index.html',
     }),
@@ -665,7 +793,7 @@ module.exports = {
 };
 ```
 
-Use the passed variables `htmlWebpackPlugin.options` and `myVar` in pug template:
+Use the passed variables `htmlWebpackPlugin.options` and `myVar` in Pug template:
 
 ```pug
 html
@@ -695,11 +823,12 @@ each item in myData
   div #{item.id} #{item.name}
 ```
 
+---
+
 <a id="usage-embedded-resources" name="usage-embedded-resources" href="#usage-embedded-resources"></a>
+## Usage of embedded resources
 
-## Usage embedded resources
-
-To handle resources in pug with webpack use the `require()` function:
+To handle resources in Pug with webpack use the `require()` function:
 
 ```pug
 img(src=require('./path/to/image.jpeg'))
@@ -752,7 +881,6 @@ each file in files
 ```
 
 <a id="resolve_resources" name="resolve_resources" href="#resolve_resources"></a>
-
 ### 💡 Resolve resources
 
 The file in the current directory `MUST` start with `./`:
@@ -778,8 +906,9 @@ options: {
 ```
 
 ```pug
-img(src=require('/assets/images/image.jpeg')) <-- relative path from the basedir
+img(src=require('/assets/images/image.jpeg'))
 ```
+
 The file in the directory defined by `webpack aliase` `MAY` start with `~` or `@`, e.g. with the alias `Images: path.join(__dirname, 'src/assets/images/')`:
 ```pug
 img(src=require('Images/image.jpeg'))
@@ -841,24 +970,26 @@ resolve: {
 }
 ```
 
-| Example in pug template                                                                                                                                | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader  |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------------------|-----------------------|
-| `img(src=require('logo.png'))`                                                                                                                         | ✅ but not recomended                                   | ❌                                            | ❌                     |
-| `img(src=require('./logo.png'))`                                                                                                                     | ✅                                                      | ✅                                            | ✅                     |
-| `img(src=require('../images/logo.png'))`                                                                                                             | ✅                                                      | ✅                                            | ✅                     |
-| `img(src=require('~Images/logo.png'))`                                                                                                               | ✅                                                      | ✅                                            | ✅                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                      | ✅                                            | ✅                     |
-| `- var file = './logo.png'`<br>`img(src=require(file))`                                                                                              | ✅                                                      | ✅                                            | ❌                     |
-| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                                                                       | ✅                                                      | ✅                                              | ❌                     |
-| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                                                                      | ✅                                                      | ❌                                            | ❌                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                                      | ✅                                            | ✅                     |
-| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                      | ✅                                            | ✅                     |
-| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./logo.png'))` | ✅                                                      | ✅                                            | ❌                     |
+| Example in Pug template                                                                                                                                | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader  |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|----------------------------------------------|-----------------------|
+| `img(src=require('logo.png'))`                                                                                                                         | ✅ not recomended                                   | ❌                                            | ❌                     |
+| `img(src=require('./logo.png'))`                                                                                                                     | ✅                                                  | ✅                                            | ✅                     |
+| `img(src=require('../images/logo.png'))`                                                                                                             | ✅                                                  | ✅                                            | ✅                     |
+| `img(src=require('~Images/logo.png'))`                                                                                                               | ✅                                                  | ✅                                            | ✅                     |
+| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                  | ✅                                            | ✅                     |
+| `- var file = './logo.png'`<br>`img(src=require(file))`                                                                                              | ✅                                                  | ✅                                            | ❌                     |
+| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                                                                       | ✅                                                  | ✅                                              | ❌                     |
+| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                                                                      | ✅                                                  | ❌                                            | ❌                     |
+| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                                  | ✅                                            | ✅                     |
+| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                  | ✅                                            | ✅                     |
+| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./logo.png'))` | ✅                                                  | ✅                                            | ❌                     |
+
+---
 
 <a id="usage-with-angular-component" name="usage-with-angular-component" href="#usage-with-angular-component"></a>
 ## Usage with Angular Component
 
-Install
+Install modules:
 
 ```
 npm i --saveDev @webdiscus/pug-loader pug-plugin-ng
@@ -920,12 +1051,12 @@ Bind the file `webpack.config.js` in the Angular config `angular.json`:
 }
 ```
 
-In a component file, e.g. `./src/app/app.component.ts` set the `templateUrl` with pug file:
+In a component file, e.g. `./src/app/app.component.ts` set the `templateUrl` with Pug file:
 ```js
 import { Component } from '@angular/core';
 
-// the variable `description` will be passed into pug template via resource query
-const templateVars = '{"description": "Use pug template with Angular."}';
+// the variable `description` will be passed into Pug template via resource query
+const templateVars = '{"description": "Use Pug template with Angular."}';
 
 @Component({
   selector: 'app-root',
@@ -937,7 +1068,7 @@ export class AppComponent {
 }
 ```
 
-Create a pug template, e.g. `./src/app/app.component.pug`:
+Create a Pug template, e.g. `./src/app/app.component.pug`:
 
 ```pug
 h1 Hello Pug!
@@ -946,6 +1077,7 @@ p Description: #{description}
 
 See [the complete source of the example](https://github.com/webdiscus/pug-loader/tree/master/examples/angular-component-render/).
 
+---
 
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
@@ -960,9 +1092,9 @@ output
 <img srcset="/assets/image1.f78b30f4.jpeg 320w, /assets/image2.f78b30f4.jpeg 640w" src="/assets/image.f78b30f4.jpeg">
 ```
 
-### Usage a JavaScript module in pug
+### Usage of JavaScript in Pug
 
-Use the `require()` for CommonJS files in pug templates. \
+Use the `require()` for CommonJS files in Pug templates. \
 The JS module **say-hello.js**
 
 ```js
@@ -971,25 +1103,30 @@ module.exports = function(name) {
 }
 ```
 
-Use the module `sayHello` in pug template.
+Use the module `sayHello` in Pug template.
 
 ```pug
 - var sayHello = require('./say-hello')
 h1 #{sayHello('pug')}
 ```
 
+---
+
 ## Testing
 
 `npm run test` will run the unit and integration tests.\
 `npm run test:coverage` will run the tests with coverage.
 
+---
+
 ## Also See
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
-- [`ansis`][ansis] - ANSI color styling of text in terminal
-- [`pug GitHub`][pug]
-- [`pug API Reference`][pug-api]
-- [`pug-plugin`][pug-plugin]
+- [ansis][ansis] - ANSI color styling of text in terminal
+- [pug GitHub][pug]
+- [pug API Reference][pug-api]
+- [pug-plugin][pug-plugin]
+- [Pug filters][pug-filters] embedded in the pug-loader
 
 ## License
 
@@ -999,3 +1136,4 @@ h1 #{sayHello('pug')}
 [pug]: https://github.com/pugjs/pug
 [pug-api]: https://pugjs.org/api/reference.html
 [pug-plugin]: https://github.com/webdiscus/pug-plugin
+[pug-filters]: https://webdiscus.github.io/pug-loader/pug-filters

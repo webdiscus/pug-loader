@@ -1,7 +1,7 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.2.1",
-  "description": "Pug loader resolves paths and webpack aliases in a pug template and compiles it to HTML or into a template function.",
+  "version": "2.3.0",
+  "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",
     "loader",
@@ -71,8 +71,8 @@
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.12",
-    "@babel/preset-env": "^7.17.12",
+    "@babel/core": "^7.18.0",
+    "@babel/preset-env": "^7.18.0",
     "@types/jest": "^27.5.1",
     "css-loader": "^6.7.1",
     "html-loader": "^3.1.0",
@@ -80,7 +80,7 @@
     "jest": "^28.1.0",
     "prettier": "^2.6.2",
     "prismjs": "^1.28.0",
-    "pug-plugin": "^2.3.1",
+    "pug-plugin": "^2.4.1",
     "rimraf": "^3.0.2",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "webpack": "^5.72.1"

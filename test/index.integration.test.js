@@ -1,8 +1,12 @@
+import { filterLoadException } from '../src/exeptions';
+
 const path = require('path');
 const rimraf = require('rimraf');
 
 import { copyRecursiveSync } from './utils/file';
 import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
+import adapterHighlight from '../src/filters/highlight/adapter';
+import prismjs from '../src/filters/highlight/prismjs';
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
@@ -324,6 +328,17 @@ describe('embedded filters tests', () => {
     const relTestCasePath = 'filter-highlight';
     compareContent(PATHS, relTestCasePath, done);
   });
+
+  test('highlight prismjs - isInitialized', (done) => {
+    const prismjs = require('../src/filters/highlight/prismjs');
+    // reset cached module
+    prismjs.module = null;
+    prismjs.init({});
+
+    const result = prismjs.isInitialized();
+    expect(result).toBeTruthy();
+    done();
+  });
 });
 
 describe('exception tests', () => {
@@ -363,12 +378,27 @@ describe('exception tests', () => {
 
   test('exception: filter :highlight - unsupported module', (done) => {
     const filterHighlight = require('../src/filters/highlight');
+    const adapterHighlight = require('../src/filters/highlight/adapter');
     // reset cached module
+    adapterHighlight.module = null;
     filterHighlight.module = null;
 
     const relTestCasePath = 'exception-filter-highlight-unsupported-module';
-    const containString = `unsupported module`;
+    const containString = `unsupported highlight module`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: filter :highlight adapter - unsupported module', (done) => {
+    const adapterHighlight = require('../src/filters/highlight/adapter');
+    // reset cached module
+    adapterHighlight.module = null;
+
+    const expected = `Used unsupported module`;
+    const result = () => {
+      adapterHighlight.init({ use: 'unsupported-module' });
+    };
+    expect(result).toThrow(expected);
+    done();
   });
 
   test("exception: file can't be interpolated with the 'compile' method", (done) => {

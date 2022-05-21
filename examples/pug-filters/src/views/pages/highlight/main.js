@@ -1,1 +1,1 @@
-console.log('\n>> Contact page');
+console.log('\n>> Highlight page');

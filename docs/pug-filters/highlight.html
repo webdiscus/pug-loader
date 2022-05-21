@@ -2,7 +2,7 @@
 Currently is supported the <a href="https://prismjs.com">prismjs</a> module,
 the <a href="https://highlightjs.org">highlight.js</a> will be added later.<br>
 </p><p>Why is <code class="language-">prismjs</code> supported in the first place?</p><ul><li>the <code class="language-">prismjs</code> support 291 languages, the <code class="language-">highlight.js</code> support only 197 languages</li><li>the <code class="language-">prismjs</code> support the <code class="language-">pug</code> "from box",
-but the <code class="language-">highlight.js</code> require an additional "third-party" plugin for pug</li><li>the <code class="language-">prismjs</code> package is only 2 MB, the <code class="language-">highlight.js</code> package is 3.7 MB
+but the <code class="language-">highlight.js</code> require an additional "third-party" plugin for pug</li><li>the <code class="language-">prismjs</code> package size is only 2 MB, the <code class="language-">highlight.js</code> is 3.7 MB
 </li></ul><div>By usage the <code class="language-">:highlight</code> filter install the npm module:</div><pre class="language-"><code>npm install -D prismjs</code></pre><p>Defaults, the filter is disabled. If this filter is used, it must be enabled in <code class="language-">webpack.config.js</code>.</p><div>Use the Pug loader options in the webpack config:</div><pre class="language-"><code><span class="token punctuation">{</span>
   <span class="token literal-property property">test</span><span class="token operator">:</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">.pug$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span>
   <span class="token literal-property property">loader</span><span class="token operator">:</span> <span class="token string">'@webdiscus/pug-loader'</span><span class="token punctuation">,</span>
@@ -33,201 +33,62 @@ E.g. the <code class="language-">prismjs</code> themes needs <code class="langua
 </p><div>For example, highlight the <code class="language-">html</code> code:</div><pre class="language-"><code><span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
   <span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token text">(html)
     &lt;!-- Comment -->
-    &lt;div class="code-container">
+    &lt;div class="container">
       &lt;p>Some text&lt;/p>
       &lt;script>
         const body = document.querySelector("body");
       &lt;/script>
     &lt;/div></span></span>
 </code></pre><b>Result:</b><pre class="language-"><code><span class="token comment">&lt;!-- Comment --></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>code-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Some text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script"><span class="token language-javascript">
     <span class="token keyword">const</span> body <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"body"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
-</code></pre></div></section><section><div class="container"><h2>Highlight a code in markdown</h2><div>To enable the <code class="language-">:markdown-it</code> filter, install the npm package:</div><pre class="language-"><code>npm install -D jstransformer-markdown-it</code></pre><p>To highlight a markdown use the nested filters <code class="language-">:highlight:markdown-it</code>.
-All code blocks in markdown will be automatically highlighted by a language defined at a code block.
-</p><div>For example:</div><pre class="language-"><code><span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token filter-name variable">:markdown-it</span>
-  <span class="token text">_HTML code_
+</code></pre><h3>Tipp</h3><div>You can create the <code class="language-">mixin code</code> for the <code class="language-">pre</code> and  <code class="language-">code</code> tags:</div><pre class="language-"><code><span class="token mixin"><span class="token keyword">mixin</span> <span class="token function">code</span></span>
+  <span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
+    <span class="token tag">block</span>
+</code></pre><div>Then use the mixin and filter easy:</div><pre class="language-"><code><span class="token mixin"><span class="token name function">+code</span></span>
+  <span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token text">(js)
+    const arr = [1, 2, 'banana'];</span></span>
+</code></pre><b>Result:</b><pre class="language-"><code><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+</code></pre></div></section><section><div class="container"><h2>Highlight a code in markdown</h2><div>The embedded <code class="language-">:markdown</code> filter can self highlight code blocks.<br>
+How to enable and configure this filter see the <a href="markdown.html">:markdown</a> page.
+</div><div>Usage example:</div><pre class="language-"><code><span class="token filter"><span class="token filter-name variable">:markdown</span>
+  <span class="token text">_HTML_
   ```html
-  &lt;body>
-    &lt;p checked class="title" id="title">Title&lt;/p>
-    &lt;!-- here goes the rest of the page -->
-  &lt;/body>
+  &lt;!-- Comment -->
+  &lt;div class="container">
+    &lt;p>Some text&lt;/p>
+  &lt;/div>
   ```
 
-  _JavaScript code_
+  _JavaScript_
   ```js
   const arr = [1, 2, 'banana'];
   ```</span></span>
-</code></pre><b>Result:</b><p><em>HTML code</em></p>
-<pre class="language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span> <span class="token attr-name">checked</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Title<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
-  <span class="token comment">&lt;!-- here goes the rest of the page --></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
+</code></pre><b>Result:</b><p><em>HTML</em></p>
+<pre class="language-html"><code><span class="token comment">&lt;!-- Comment --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Some text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
 </code></pre>
-<p><em>JavaScript code</em></p>
-<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<p><em>JavaScript</em></p>
+<pre class="language-js"><code><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 </code></pre>
-</div></section><section><div class="container"><h2>Highlighted code examples in markdown</h2><p><strong>HTML</strong></p>
-<pre class="language-html"><code class="language-html"><span class="token doctype"><span class="token punctuation">&lt;!</span><span class="token doctype-tag">DOCTYPE</span> <span class="token name">html</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">></span></span>Title<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">></span></span><span class="token style"><span class="token language-css"><span class="token selector">body</span> <span class="token punctuation">{</span><span class="token property">width</span><span class="token punctuation">:</span> 500px<span class="token punctuation">;</span><span class="token punctuation">}</span></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>application/javascript<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"><span class="token language-javascript">
-      <span class="token keyword">function</span> <span class="token function">$init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token punctuation">}</span>
-    </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">></span></span>
+<h3>⚠️ Old way (not recommended!)</h3><p>Usage of the <code class="language-">jstransformer-markdown-it</code> npm module as <code class="language-">:markdown-it</code> filter is not recommended.
+This filter no longer maintained and contains outdated version of <code class="language-">markdown-it</code>
+module with <a href="https://github.com/jstransformers/jstransformer-markdown-it/issues/31">security vulnerabilities</a>.
+</p><p>To highlight a markdown use the nested filters <code class="language-">:highlight:markdown-it</code>.
+All code blocks in markdown will be automatically highlighted by a language defined at a code block.
+</p><div>Usage example:</div><pre class="language-"><code><span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token filter-name variable">:markdown-it</span>
+  <span class="token text">```html
+  &lt;p>Some text&lt;/p>
+  ```
 
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span> <span class="token attr-name">checked</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Title<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
-    <span class="token comment">&lt;!-- here goes the rest of the page --></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span>
-</code></pre>
-<p><strong>SVG</strong></p>
-<pre class="language-svg"><code class="language-svg"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>svg</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.w3.org/2000/svg<span class="token punctuation">"</span></span> <span class="token attr-name">viewBox</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0 0 200 170<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>path</span> <span class="token attr-name">fill</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>#fff<span class="token punctuation">"</span></span> <span class="token attr-name">d</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>M55.37 131.5H48.4v9.13h6.97c1.67 0 2.92-.4 3.78-1.22.85
-    -.8 1.28-1.92 1.28-3.33s-.43-2.54-1.28-3.35c-.86-.8-2.12-1.2-3.78-1.2m29.52
-    6.4c.3-.53.47-1.2.47-2.04 0-1.35-.45-2.4-1.37-3.2-.92-.76-2.14-1.15-3.65
-    -10.05h2.8v21.2h-2.4<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>svg</span><span class="token punctuation">/></span></span>
-</code></pre>
-<p><strong>Pug</strong></p>
-<pre class="language-pug"><code class="language-pug"><span class="token mixin"><span class="token keyword">mixin</span> <span class="token function">pet</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></span>
-  <span class="token tag">li<span class="token attr-class">.pet</span></span><span class="token punctuation">=</span><span class="token code"> name</span>
-
-<span class="token tag">ul</span>
-  <span class="token flow-control"><span class="token each"><span class="token keyword">each</span> val <span class="token keyword">in</span></span> <span class="token punctuation">[</span><span class="token string">'cat'</span><span class="token punctuation">,</span> <span class="token string">'dog'</span><span class="token punctuation">]</span></span>
-    <span class="token mixin"><span class="token name function">+pet</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span></span>
-
-<span class="token tag">script</span><span class="token punctuation">.</span><span class="token multiline-script">
-  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'This is coffee script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
-</code></pre>
-<p><strong>CSS</strong></p>
-<pre class="language-css"><code class="language-css"><span class="token atrule"><span class="token rule">@font-face</span></span> <span class="token punctuation">{</span>
-  <span class="token property">font-family</span><span class="token punctuation">:</span> Chunkfive<span class="token punctuation">;</span> <span class="token property">src</span><span class="token punctuation">:</span> <span class="token url"><span class="token function">url</span><span class="token punctuation">(</span><span class="token string url">'Chunkfive.otf'</span><span class="token punctuation">)</span></span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-
-<span class="token selector">body, .usertext</span> <span class="token punctuation">{</span>
-  <span class="token property">color</span><span class="token punctuation">:</span> #F0F0F0<span class="token punctuation">;</span> <span class="token property">background</span><span class="token punctuation">:</span> #600<span class="token punctuation">;</span>
-  <span class="token property">font-family</span><span class="token punctuation">:</span> Chunkfive<span class="token punctuation">,</span> sans<span class="token punctuation">;</span>
-  <span class="token property">--heading-1</span><span class="token punctuation">:</span> 30px/32px Helvetica<span class="token punctuation">,</span> sans-serif<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-
-<span class="token atrule"><span class="token rule">@import</span> <span class="token url"><span class="token function">url</span><span class="token punctuation">(</span>print.css<span class="token punctuation">)</span></span><span class="token punctuation">;</span></span>
-<span class="token atrule"><span class="token rule">@media</span> print</span> <span class="token punctuation">{</span>
-  <span class="token selector">a[href^=http]::after</span> <span class="token punctuation">{</span>
-    <span class="token property">content</span><span class="token punctuation">:</span> <span class="token function">attr</span><span class="token punctuation">(</span>href<span class="token punctuation">)</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p><strong>SCSS</strong></p>
-<pre class="language-scss"><code class="language-scss"><span class="token keyword">@import</span> <span class="token string">"compass/reset"</span><span class="token punctuation">;</span>
-
-<span class="token comment">// variables</span>
-<span class="token property"><span class="token variable">$colorGreen</span></span><span class="token punctuation">:</span> #008000<span class="token punctuation">;</span>
-<span class="token property"><span class="token variable">$colorGreenDark</span></span><span class="token punctuation">:</span> <span class="token function">darken</span><span class="token punctuation">(</span><span class="token variable">$colorGreen</span><span class="token punctuation">,</span> 10<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token keyword">@mixin</span> <span class="token function">button</span><span class="token punctuation">(</span><span class="token property"><span class="token variable">$color</span></span><span class="token punctuation">:</span>green<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">@if</span> <span class="token punctuation">(</span><span class="token variable">$color</span> <span class="token operator">==</span> green<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token property">background-color</span><span class="token punctuation">:</span> #008000<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">@else if</span> <span class="token punctuation">(</span><span class="token variable">$color</span> <span class="token operator">==</span> red<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token property">background-color</span><span class="token punctuation">:</span> #B22222<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-
-<span class="token selector">button </span><span class="token punctuation">{</span>
-    <span class="token keyword">@include</span> <span class="token function">button</span><span class="token punctuation">(</span>red<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p><strong>JavaScript</strong></p>
-<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">initHighlight</span><span class="token punctuation">(</span><span class="token parameter">block<span class="token punctuation">,</span> cls</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">try</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>cls<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">no-highlight</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
-      <span class="token keyword">return</span> <span class="token function">process</span><span class="token punctuation">(</span>block<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token number">0x0F</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string"> class="</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>cls<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">"</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// handle exception</span>
-  <span class="token punctuation">}</span>
-  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> classes<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">checkCondition</span><span class="token punctuation">(</span>classes<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span>
-      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'undefined'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span>
-
-  <span class="token keyword">return</span> block<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-
-<span class="token keyword">export</span> initHighlight<span class="token punctuation">;</span>
-</code></pre>
-<p><strong>PHP</strong></p>
-<pre class="language-php"><code class="language-php"><span class="token keyword">namespace</span> <span class="token package">Location<span class="token punctuation"></span>Web</span><span class="token punctuation">;</span>
-
-<span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name-definition class-name">URI</span> <span class="token keyword">extends</span> <span class="token class-name">BaseURI</span>
-<span class="token punctuation">{</span>
-    <span class="token keyword">abstract</span> <span class="token keyword">function</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token variable">$list</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-    <span class="token comment">/**
-     * Returns a URI
-     * @return URI
-     */</span>
-    <span class="token keyword">static</span> <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">_factory</span><span class="token punctuation">(</span><span class="token variable">$stats</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token variable">$uri</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'http'</span><span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token variable">$uri</span> <span class="token operator">=</span> <span class="token function">explode</span><span class="token punctuation">(</span><span class="token string single-quoted-string">':'</span><span class="token punctuation">,</span> <span class="token variable">$uri</span><span class="token punctuation">,</span> <span class="token number">0b10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token variable">$scheme</span> <span class="token operator">=</span> <span class="token keyword">isset</span><span class="token punctuation">(</span><span class="token variable">$uri</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token variable">$uri</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token punctuation">:</span> <span class="token string single-quoted-string">''</span><span class="token punctuation">;</span>
-
-        <span class="token comment">// Security check</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">ctype_alnum</span><span class="token punctuation">(</span><span class="token variable">$scheme</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">UriException</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'Illegal scheme'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-
-        <span class="token keyword">return</span> <span class="token punctuation">[</span>
-            <span class="token string single-quoted-string">'uri'</span>   <span class="token operator">=></span> <span class="token variable">$uri</span><span class="token punctuation">,</span>
-            <span class="token string single-quoted-string">'value'</span> <span class="token operator">=></span> <span class="token constant">null</span><span class="token punctuation">,</span>
-        <span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p><strong>SQL</strong></p>
-<pre class="language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> <span class="token string">"topic"</span> <span class="token punctuation">(</span>
-    <span class="token string">"id"</span> <span class="token keyword">integer</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">PRIMARY</span> <span class="token keyword">KEY</span><span class="token punctuation">,</span>
-    <span class="token string">"forum_id"</span> <span class="token keyword">integer</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span><span class="token punctuation">,</span>
-    <span class="token string">"subject"</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span>
-<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">ALTER</span> <span class="token keyword">TABLE</span> <span class="token string">"topic"</span>
-<span class="token keyword">ADD</span> <span class="token keyword">CONSTRAINT</span> forum_id <span class="token keyword">FOREIGN</span> <span class="token keyword">KEY</span> <span class="token punctuation">(</span><span class="token string">"forum_id"</span><span class="token punctuation">)</span>
-<span class="token keyword">REFERENCES</span> <span class="token string">"forum"</span> <span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token keyword">SELECT</span> forum_id<span class="token punctuation">,</span> subject <span class="token keyword">FROM</span> topic <span class="token keyword">WHERE</span> id <span class="token operator">=</span> <span class="token number">123</span>
-</code></pre>
-<p><strong>Markdown</strong></p>
-<pre class="language-md"><code class="language-md"><span class="token title important"><span class="token punctuation">#</span> hello world</span>
-
-you can write text <span class="token url">[<span class="token content">with links</span>](<span class="token url">http://example.com</span>)</span> inline or <span class="token url">[<span class="token content">link references</span>][<span class="token variable">1</span>]</span>.
-
-<span class="token list punctuation">*</span> one <span class="token italic"><span class="token punctuation">_</span><span class="token content">thing</span><span class="token punctuation">_</span></span> has <span class="token italic"><span class="token punctuation">*</span><span class="token content">em</span><span class="token punctuation">*</span></span>phasis
-<span class="token list punctuation">*</span> two <span class="token bold"><span class="token punctuation">__</span><span class="token content">things</span><span class="token punctuation">__</span></span> are <span class="token bold"><span class="token punctuation">**</span><span class="token content">bold</span><span class="token punctuation">**</span></span>
-
-<span class="token url-reference url"><span class="token punctuation">[</span><span class="token variable">1</span><span class="token punctuation">]</span><span class="token punctuation">:</span> http://example.com</span>
-
-<span class="token title important">hello world
-<span class="token punctuation">===========</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>this_is</span> <span class="token attr-name">inline</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>xml<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>this_is</span><span class="token punctuation">></span></span>
-
-<span class="token blockquote punctuation">></span> markdown is so cool
-  so are code segments
-
-<span class="token list punctuation">1.</span> one thing (yeah!)
-<span class="token list punctuation">2.</span> two thing <span class="token code-snippet code keyword">`i can write code`</span>, and <span class="token code-snippet code keyword">`more`</span> wipee!
-</code></pre>
-<p><strong>undefined</strong></p>
-<pre><code>const arr = [1, 2, 'banana'];
-const strings = arr.filter((item) =&gt; typeof item === 'string');
-</code></pre>
-</div></section></div></main><div class="footer-container"><div>Copyleft <span class="copyleft"></span> 2022 <a href="https://github.com/webdiscus">@webdiscus</a>.
+  ```js
+  const arr = [1, 2, 'banana'];
+  ```</span></span></code></pre></div></section></div></main><div class="footer-container"><div>Copyleft <span class="copyleft"></span> 2022 <a href="https://github.com/webdiscus">@webdiscus</a>.
 Powered by <a href="https://github.com/webdiscus/pug-plugin">Pug Plugin</a>.
 </div></div></body></html>

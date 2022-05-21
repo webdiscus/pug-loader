@@ -30,28 +30,27 @@ module.exports = (env, argv) => {
     entry: {
       // !!! ATTENTION !!!
       //
-      // All source files of styles and scripts, required in Pug, will be automatically processed by webpack.
-      // Use your scripts and styles directly in Pug, so easy:
-      //   - link(href=require('./styles.scss') rel='stylesheet')
-      //   - script(src=require('./main.js'))
+      // The pug-plugin enable to use script and style source files directly in Pug, so easy:
       //
-      // Don't define styles and js files in entry! You can require source files of js and scss directly in Pug.
-      // Don't use `html-webpack-plugin` to render Pug files in HTML! Pug plugin do it directly from here and much faster.
-      // Don't use `mini-css-extract-plugin` to extract CSS from styles! Pug plugin extract CSS from source styles required in Pug.
+      //   link(href=require('./styles.scss') rel='stylesheet')
+      //   script(src=require('./main.js'))
+      //
+      // Don't define styles and js files in entry. You can require source files of js and scss directly in Pug.
+      // Don't use `html-webpack-plugin` to render Pug files in HTML. Pug plugin do it directly from here and much faster.
+      // Don't use `mini-css-extract-plugin` to extract CSS from styles. Pug plugin extract CSS from style sources required in Pug.
 
       // Please, see more details under https://github.com/webdiscus/pug-plugin
 
-      // Yes, You can define Pug files directly here, in entry, so easy:
+      // Yes, You can define Pug files directly in entry, so easy:
       index: 'src/views/pages/home/index.pug',
     },
 
     plugins: [
-      // use the pug-plugin to compile pug files defined in entry
+      // enable processing of Pug files from entry
       new PugPlugin({
         verbose: true, // output information about the process to console
         modules: [
-          // the `extractCss` module extracts CSS from source style files
-          // you can require source style files directly in Pug
+          // module extracts CSS from style source files required directly in Pug
           PugPlugin.extractCss({
             // output filename of styles
             filename: 'assets/css/[name].[contenthash:8].css',
@@ -64,9 +63,9 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.pug$/,
-          loader: PugPlugin.loader, // the pug-loader is already included in PugPlugin
+          loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
           options: {
-            method: 'render', // fast method to compile Pug files in static HTML
+            method: 'render', // fastest method to generate static HTML files
           },
         },
 
