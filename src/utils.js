@@ -118,6 +118,47 @@ const injectExternalData = (funcBody, locals) => {
   );
 };
 
+/**
+ * Remove indents in Vue and React templates.
+ *
+ * For example, the content of this template contain the indent:
+ * <template lang='pug'>
+ *   p text
+ * </template>
+ *
+ * In Pug code the indent is not allowed and will be removed.
+ * Supports for both spaces and tabs.
+ *
+ * @param {string} content The Pug code.
+ * @returns {boolean|string} If no indent found return false otherwise return normalized code.
+ */
+const trimIndent = (content) => {
+  const SPACE = ' ';
+  const TAB = '\t';
+  const NL = '\n';
+
+  // skip new lines, tabs and spaces at begin
+  let codePos = 0;
+  while (content[codePos] === TAB || content[codePos] === SPACE || content[codePos] === NL) {
+    codePos++;
+  }
+
+  // find `start of line` pos at code line
+  let startLinePos = codePos;
+  while (startLinePos > 0 && content[--startLinePos] !== NL) {}
+  if (content[startLinePos] === NL) startLinePos++;
+
+  const indentSize = codePos - startLinePos;
+  const indentCode = content[startLinePos] === TAB ? '\u0009' : '\u0020';
+
+  if (indentSize > 0) {
+    const regexp = new RegExp(`^${indentCode}{${indentSize}}`, 'mg');
+    return content.replace(regexp, '');
+  }
+
+  return false;
+};
+
 module.exports = {
   loaderName,
   isWin,
@@ -125,4 +166,5 @@ module.exports = {
   getQueryData,
   outToConsole,
   injectExternalData,
+  trimIndent,
 };

@@ -29,8 +29,8 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 > _MyComponent.vue_
 > ```vue
 > <template lang='pug'>
->     h1 Hello Pug!
->     p Use the '@webdiscus/pug-loader'
+>   h1 Hello Pug!
+>   p Use the '@webdiscus/pug-loader'
 > </template>
 > ```
 >
@@ -47,8 +47,9 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 > | test coverage                     | &gt; 98%                | 0%                 |
 > | last update                       | right now               | 4 years ago        |
 >
-> See [setup](#usage-with-vue) and [usage example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
+> See [how to use Pug with Vue](#usage-with-vue) and [source of example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
 
+<br>
 
 > 💡 **Recommended** to use the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
 > _Pug plugin makes your life a lot easier._
@@ -67,14 +68,14 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 1. [Install and Quick start](#install-and-quick-start)
 2. [Options](#options)
 3. [Usage of methods](#method-compile)
-  - [compile](#method-compile)
-  - [render](#method-render)
-  - [html](#method-html)
+   - [compile](#method-compile)
+   - [render](#method-render)
+   - [html](#method-html)
 4. [Usage of Pug filters](#embed-filters)
-  - [:escape](#filter-escape)
-  - [:code](#filter-code)
-  - [:highlight](#filter-highlight)
-  - [:markdown](#filter-markdown)
+   - [:escape](#filter-escape)
+   - [:code](#filter-code)
+   - [:highlight](#filter-highlight)
+   - [:markdown](#filter-markdown)
 5. [Passing data into Pug template](#passing-data-into-template)
 6. [Usage of embedded resources](#usage-embedded-resources)
 7. [Usage with Angular](#usage-with-angular)
@@ -1146,7 +1147,7 @@ module.exports = defineConfig({
             // allow import of Pug in JavaScript
             {
               exclude: /\.vue$/,
-              loader: '../../',
+              loader: '@webdiscus/pug-loader',
               options: {
                 method: 'compile', // compile Pug into template function
                 ...pugLoaderOptions,
@@ -1154,7 +1155,7 @@ module.exports = defineConfig({
             },
             // allow <template lang="pug"> in Vue components
             {
-              loader: '../../',
+              loader: '@webdiscus/pug-loader',
               options: {
                 method: 'html', // render Pug into pure HTML string
                 ...pugLoaderOptions,
@@ -1171,10 +1172,10 @@ module.exports = defineConfig({
 **Usage Pug in Vue template**
 
 ```html
-<templatе lang='pug'>
+<template lang='pug'>
   h1 Hello Pug!
   p Paragraph
-</templatе>
+</template>
 ```
 **Note:** you can use an indent for Pug code in Vue template.
 
@@ -1183,22 +1184,23 @@ module.exports = defineConfig({
 App.vue
 ```html
 <template>
-  <div v-html='html'></div>
+  <div v-html='demo'></div>
 </template>
 
 <script>
-  import tmpl from './views/demo.pug';
-
+  // import Pug as template function
+  import demoTmpl from './views/demo.pug';
+  
   // define custom data used in Pug template
   const locals = { colors: ['red', 'green', 'blue'] };
   // pass custom data in Pug template
-  const rawHtml = tmpl(locals);
+  const demoHtml = demoTmpl(locals);
 
   export default {
     name: 'App',
     data() {
       return {
-        html: rawHtml
+        demo: demoHtml
       }
     }
   }

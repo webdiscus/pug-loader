@@ -1,7 +1,10 @@
 # Change log
 
+## 2.4.1 (2022-05-25)
+- docs: update readme
+
 ## 2.4.0 (2022-05-25)
-- feat: add support the Pug in Vue template
+- feat: add support the Pug in Vue
 - feat: add support an indent in Vue template for Pug code
 - chore: add usage example for Pug in Vue template
 - test: add test for remove unexpected indents in Vue template

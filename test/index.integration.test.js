@@ -5,8 +5,6 @@ const rimraf = require('rimraf');
 
 import { copyRecursiveSync } from './utils/file';
 import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
-import adapterHighlight from '../src/filters/highlight/adapter';
-import prismjs from '../src/filters/highlight/prismjs';
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
