@@ -19,6 +19,8 @@ const {
 const filtersDir = path.join(__dirname, './filters/');
 
 /**
+ * Dependencies in code for watching a changes.
+ *
  * Public API
  * @typedef {Object} LoaderDependency
  * @property {Function<loaderContext:Object>} init
@@ -160,7 +162,7 @@ const compile = function (content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
   const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
-  const webpackOptions = webpackCompiler.options;
+  const webpackOptions = webpackCompiler ? webpackCompiler.options : {};
   const resolverOptions = webpackOptions.resolve || {};
 
   if (!loaderOptions.name) loaderOptions.name = 'template';
@@ -207,8 +209,6 @@ const compile = function (content, callback) {
     pretty: false,
   };
 
-  let compileResult;
-
   resolver.init({
     context,
     basedir: compilerOptions.basedir,
@@ -223,13 +223,17 @@ const compile = function (content, callback) {
   });
 
   dependency.init(loaderContext);
-
   resolver.setDependency(dependency);
   resolver.setLoader(loader);
   loader.setResolver(resolver);
 
   if (loaderContext.cacheable) loaderContext.cacheable(true);
 
+  // remove indent in vue or react template
+  const template = removeTemplateIndent(content);
+  if (template !== false) content = template;
+
+  let compileResult;
   try {
     /** @type {{body: string, dependencies: []}} */
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
@@ -244,7 +248,9 @@ const compile = function (content, callback) {
     callback(getPugCompileErrorMessage(error));
     return;
   }
+
   const result = loader.export(filename, compileResult);
+
   dependency.watch();
   callback(null, result);
 };
@@ -275,6 +281,47 @@ const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
   }
 
   return options;
+};
+
+/**
+ * Remove indents in vue and react templates.
+ *
+ * For example, the content of this template contain the indent:
+ * <template lang='pug'>
+ *   p text
+ * </template>
+ *
+ * In Pug code the indent is not allowed and will be removed.
+ * Supports for both spaces and tabs.
+ *
+ * @param {string} content The Pug code.
+ * @returns {boolean|string} If no indent found return false otherwise return normalized code.
+ */
+const removeTemplateIndent = (content) => {
+  const SPACE = ' ';
+  const TAB = '\t';
+  const NL = '\n';
+
+  // skip new lines, tabs and spaces at begin
+  let codePos = 0;
+  while (content[codePos] === TAB || content[codePos] === SPACE || content[codePos] === NL) {
+    codePos++;
+  }
+
+  // find `start of line` pos at code line
+  let startLinePos = codePos;
+  while (startLinePos > 0 && content[--startLinePos] !== NL) {}
+  if (content[startLinePos] === NL) startLinePos++;
+
+  const indentSize = codePos - startLinePos;
+  const indentCode = content[startLinePos] === TAB ? '\u0009' : '\u0020';
+
+  if (indentSize > 0) {
+    const regexp = new RegExp(`^${indentCode}{${indentSize}}`, 'mg');
+    return content.replace(regexp, '');
+  }
+
+  return false;
 };
 
 module.exports = function (content, map, meta) {

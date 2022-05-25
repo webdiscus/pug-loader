@@ -3,7 +3,7 @@
 npm i
 ```
 
-## Start the app in browser for local development
+## Start the app in browser
 ```
 npm run start
 ```

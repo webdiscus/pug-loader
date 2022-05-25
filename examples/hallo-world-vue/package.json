@@ -1,0 +1,56 @@
+{
+  "name": "hallo-world-vue",
+  "version": "1.0.0",
+  "description": "Usage Vue with Pug",
+  "author": "webdiscus",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.0",
+    "@babel/eslint-parser": "^7.17.0",
+    "@vue/cli-plugin-babel": "~5.0.4",
+    "@vue/cli-plugin-eslint": "~5.0.4",
+    "@vue/cli-service": "~5.0.4",
+    "@webdiscus/pug-loader": "^2.4.0",
+    "css-loader": "^6.7.1",
+    "eslint": "^8.16.0",
+    "eslint-plugin-vue": "^9.0.1",
+    "html-loader": "^3.1.0",
+    "markdown-it": "^13.0.1",
+    "prismjs": "^1.28.0",
+    "sass": "^1.52.1",
+    "sass-loader": "^13.0.0",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.0"
+  },
+  "dependencies": {
+    "core-js": "^3.22.6",
+    "vue": "^3.2.36"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}

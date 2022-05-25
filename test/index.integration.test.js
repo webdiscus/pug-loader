@@ -42,6 +42,11 @@ describe('pug tests', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
+  test('remove indents in vue and react templates', (done) => {
+    const relTestCasePath = 'pug-remove-indent';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
   test('escape method compile', (done) => {
     const relTestCasePath = 'escape-method-compile';
     compareContent(PATHS, relTestCasePath, done);

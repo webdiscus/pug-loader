@@ -1,5 +1,11 @@
 # Change log
 
+## 2.4.0 (2022-05-25)
+- feat: add support the Pug in Vue template
+- feat: add support an indent in Vue template for Pug code
+- chore: add usage example for Pug in Vue template
+- test: add test for remove unexpected indents in Vue template
+
 ## 2.3.0 (2022-05-21)
 - feat: add embedded filter `:markdown` with highlighting code blocks
 
