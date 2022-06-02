@@ -16,8 +16,8 @@ html(lang='en' dir='ltr')
     meta(property='author' content='webdiscus')
 
     //- Favicons
-    link(rel='icon' href=require('~Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
-    link(rel='icon' href=require('~Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
+    link(rel='icon' href=require('Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
+    link(rel='icon' href=require('Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
 
     //- Page title
     title= title
@@ -25,18 +25,18 @@ html(lang='en' dir='ltr')
     //- Page styles
     block style
       //- common used styles
-      link(rel='stylesheet' href=require('~Styles/main.scss'))
+      link(rel='stylesheet' href=require('Styles/main.scss'))
 
     //- Additional head block to add here page specifically assets
     block head
-      script(src=require('~Scripts/common.js'))
+      script(src=require('Scripts/common.js'))
 
   body
     //- Main header
     .header-container
       .header-content
         a(href="index.html").header-left
-          img.app-logo(src=require('~Images/app-logo.svg'))
+          img.app-logo(src=require('Images/app-logo.svg'))
           span Pug filters
         .header-middle
           h1= title

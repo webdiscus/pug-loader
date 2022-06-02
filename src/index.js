@@ -23,17 +23,25 @@ const filtersDir = path.join(__dirname, './filters/');
  *
  * Public API
  * @typedef {Object} LoaderDependency
+ * @property {Array<RegExp>} watchFiles
  * @property {Function<loaderContext:Object>} init
  * @property {Function<file:string>} add
- * @property {Function} watch
+ * @property {Function|RegExp} watch
  */
 
 const dependency = {
   files: new Set(),
-  dependencyExt: new Set(['.pug', '.jade', '.json', '.js', '.mjs', '.ts']),
+  watchFiles: [/\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i],
   loaderContext: null,
+  isInit: false,
 
-  init(loaderContext) {
+  init(loaderContext, { watchFiles }) {
+    // avoid double push in array by watching
+    if (!this.isInit && watchFiles != null) {
+      if (!Array.isArray(watchFiles)) watchFiles = [watchFiles];
+      this.watchFiles.push(...watchFiles);
+      this.isInit = true;
+    }
     this.loaderContext = loaderContext;
   },
 
@@ -43,8 +51,9 @@ const dependency = {
    * @param {string} file
    */
   add(file) {
-    let ext = path.extname(file);
-    if (!this.dependencyExt.has(ext)) return;
+    if (!this.watchFiles.find((regex) => regex.test(file))) {
+      return;
+    }
 
     file = isWin ? path.normalize(file) : file;
 
@@ -222,7 +231,7 @@ const compile = function (content, callback) {
     options: loaderOptions,
   });
 
-  dependency.init(loaderContext);
+  dependency.init(loaderContext, loaderOptions);
   resolver.setDependency(dependency);
   resolver.setLoader(loader);
   loader.setResolver(resolver);

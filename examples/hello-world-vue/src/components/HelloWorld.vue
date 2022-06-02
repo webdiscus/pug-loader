@@ -11,41 +11,36 @@
   h1 How to use Pug with Vue
 
   p Install the Pug loader:
-  +code
-    :highlight
-      npm i --save-dev @webdiscus/pug-loader
+  +code: :highlight
+    npm i --save-dev @webdiscus/pug-loader
 
   p Change your #[i vue.config.js] according to the following minimal configuration:
-  +code
-    include:highlight(js) ../../vue.config.js
+  +code: include:highlight(js) ../../vue.config.js
 
   h1 Usage Pug in Vue template
 
   p With #[code @webdiscus/pug-loader] you can use an indent in template. Enjoy it!
   div Component #[i HelloWorld.vue]
-  +code
-    :highlight(pug)
-      <templatе lang='pug'>
-        h1 Hello Pug!
-        p Paragraph
-      </templatе>
+  +code: :highlight(pug)
+    <templatе lang='pug'>
+      h1 Hello Pug!
+      p Paragraph
+    </templatе>
 
   h2 Highlight code syntax in Pug
 
   p See more details for #[code: a(href="https://webdiscus.github.io/pug-loader/pug-filters/highlight.html") :highlight] filter.
 
   i JavaScript
-  +code
-    :highlight(js)
-      const arr = [1, 2, 'banana'];
+  +code: :highlight(js)
+    const arr = [1, 2, 'banana'];
 
   i HTML
-  +code
-    :highlight(html)
-      <!-- Comment -->
-      <div class="container">
-        <p>Paragraph</p>
-      </div>
+  +code: :highlight(html)
+    <!-- Comment -->
+    <div class="container">
+      <p>Paragraph</p>
+    </div>
 
   h2 Markdown in Pug
 
@@ -56,14 +51,13 @@
     ### Highlight code syntax in `markdown`
     _JavaScript_
     ```js
-      const arr = [1, 2, 'banana'];
+    const arr = [1, 2, 'banana'];
     ```
 
   h1 Usage Pug in JavaScript
 
   i App.vue
-  +code
-    include:highlight(html) ../App.vue
+  +code: include:highlight(html) ../App.vue
 </template>
 
 <style>

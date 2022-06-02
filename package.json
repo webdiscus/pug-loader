@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",

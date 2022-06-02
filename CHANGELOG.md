@@ -1,5 +1,9 @@
 # Change log
 
+## 2.5.0 (2022-06-02)
+- feat: add `watchFiles` option to watch for file changes in resolved dependencies
+- fix: in `:markdown` filter enable HTML tags in markdown source
+
 ## 2.4.1 (2022-05-25)
 - docs: update readme
 

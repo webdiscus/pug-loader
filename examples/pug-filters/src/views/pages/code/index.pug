@@ -1,4 +1,6 @@
-extends ~Views/layouts/layout.default.pug
+extends Views/layouts/default.pug
+
+include Views/mixins/code
 
 //- set variables used in layout
 block variables
@@ -15,29 +17,28 @@ block content
   section
     .container
       p.
-        The #[:code :code] filter wraps a content with the #[:code:escape <code>] tag.<br>
+        The #[:code :code] filter wraps a content with the #[:code:escape <code>] tag and a custom class name.<br>
 
   section
     .container
-      h2 Enable the filter
+      h2 Enable filter
 
       p Defaults, the filter is disabled. If this filter is used, it must be enabled in #[:code webpack.config.js].
       div Use the Pug loader options in the webpack config:
-      pre.language-: code
-        :highlight(js)
-          {
-            test: /\.pug$/,
-            loader: '@webdiscus/pug-loader',
-            options: {
-              // enable embedded filters
-              embedFilters: {
-                // enable the :code filter
-                code: {
-                  className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
-                },
+      +code: :highlight(js)
+        {
+          test: /\.pug$/,
+          loader: '@webdiscus/pug-loader',
+          options: {
+            // enable embedded filters
+            embedFilters: {
+              // enable the :code filter
+              code: {
+                className: 'language-', // class name of `<code>` tag, needed for `prismjs` theme
               },
             },
           },
+        },
 
       p The filter options:
 

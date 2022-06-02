@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta property="robots" content="index, follow"><meta property="description" content="Demo of pug filters embedded in pug-loader"><meta property="keywords" content="webpack, pug, pug-plugin, pug-loader, filter, highlight, code, escape"><meta property="author" content="webdiscus"><link rel="icon" href="/pug-loader/pug-filters/assets/img/favicon.f6725057.svg" type="image/svg+xml" sizes="any"><link rel="icon" href="/pug-loader/pug-filters/assets/img/favicon-32px.0035c307.png" type="image/png" sizes="32x32"><title>:highlight</title><link rel="stylesheet" href="/pug-loader/pug-filters/assets/css/main.dd6abbeb.css"><link rel="stylesheet" href="/pug-loader/pug-filters/assets/css/styles.3cecbc8f.css"><script src="/pug-loader/pug-filters/assets/js/common.cf5df758.js"></script></head><body><div class="header-container"><div class="header-content"><a class="header-left" href="index.html"><img class="app-logo" src="/pug-loader/pug-filters/assets/img/app-logo.52c7ee6a.svg"><span>Pug filters</span></a><div class="header-middle"><h1>:highlight</h1></div><div class="header-right"></div></div></div><main class="main-container"><div class="main-content"><section><div class="container"><p>The <code class="language-">:highlight</code> filter highlights code syntax.</p></div></section><section><div class="container"><h2>Enable the filter</h2><p>The <code class="language-">:highlight</code> filter require a highlighting module.<br>
+<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta property="robots" content="index, follow"><meta property="description" content="Demo of pug filters embedded in pug-loader"><meta property="keywords" content="webpack, pug, pug-plugin, pug-loader, filter, highlight, code, escape"><meta property="author" content="webdiscus"><link rel="icon" href="/pug-loader/pug-filters/assets/img/favicon.f6725057.svg" type="image/svg+xml" sizes="any"><link rel="icon" href="/pug-loader/pug-filters/assets/img/favicon-32px.0035c307.png" type="image/png" sizes="32x32"><title>:highlight</title><link rel="stylesheet" href="/pug-loader/pug-filters/assets/css/main.572a5fe4.css"><link rel="stylesheet" href="/pug-loader/pug-filters/assets/css/styles.3cecbc8f.css"><script src="/pug-loader/pug-filters/assets/js/common.cf5df758.js"></script></head><body><div class="header-container"><div class="header-content"><a class="header-left" href="index.html"><img class="app-logo" src="/pug-loader/pug-filters/assets/img/app-logo.52c7ee6a.svg"><span>Pug filters</span></a><div class="header-middle"><h1>:highlight</h1></div><div class="header-right"></div></div></div><main class="main-container"><div class="main-content"><section><div class="container"><p>The <code class="language-">:highlight</code> filter highlights code syntax.</p></div></section><section><div class="container"><h2>Enable filter</h2><p>The <code class="language-">:highlight</code> filter require a highlighting module.<br>
 Currently is supported the <a href="https://prismjs.com">prismjs</a> module,
 the <a href="https://highlightjs.org">highlight.js</a> will be added later.<br>
 </p><p>Why is <code class="language-">prismjs</code> supported in the first place?</p><ul><li>the <code class="language-">prismjs</code> support 291 languages, the <code class="language-">highlight.js</code> support only 197 languages</li><li>the <code class="language-">prismjs</code> support the <code class="language-">pug</code> "from box",
@@ -19,7 +19,21 @@ but the <code class="language-">highlight.js</code> require an additional "third
 <span class="token punctuation">}</span><span class="token punctuation">,</span>
 </code></pre><p>The filter options:</p><ul><li><code class="language-">verbose {boolean}</code> Enable output process info in console. Use it in <code class="language-">development</code> mode only. Defaults is <code class="language-">false</code>.<br></li><li><code class="language-">use {string}</code> The name of a highlighting npm module. The module must be installed.
 Currently, is supported the <a href="https://prismjs.com">prismjs</a> only.
-</li></ul></div></section><section><div class="container"><h2>Highlight an inline code</h2><div>Use the nested inline filters: <code class="language-">#&lbrack;:code:highlight(lang) ...&rbrack;</code>.</div><p><b>Note:</b>
+</li></ul></div></section><section><div class="container"><h2>Tipps</h2><h3>Inline nested tags</h3><div>Pug has inline syntax. Nested tags can be inlined with <code class="language-">: </code> at the end of each previous inline element.<br>
+For example, following nested <code class="language-">pre</code> and <code class="language-">code</code> tags:</div><pre class="language-"><code><span class="token tag">pre<span class="token attr-class">.language-pug</span></span>
+  <span class="token tag">code</span>
+    <span class="token tag">p</span> <span class="token plain-text">Hello Pug!</span>
+</code></pre><div>can be inlined:</div><pre class="language-"><code><span class="token tag">pre<span class="token attr-class">.language-pug</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
+  <span class="token tag">p</span> <span class="token plain-text">Hello Pug!</span>
+</code></pre><h3>Use mixins</h3><div>You can create the <code class="language-">mixin code</code> for the <code class="language-">pre</code> and  <code class="language-">code</code> tags:</div><pre class="language-"><code><span class="token mixin"><span class="token keyword">mixin</span> <span class="token function">code</span></span>
+  <span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
+    <span class="token tag">block</span>
+</code></pre><div>Then use the mixin and filter easily in same line:</div><pre class="language-"><code><span class="token mixin"><span class="token name function">+code</span><span class="token operator">:</span> <span class="token operator">:</span><span class="token function">highlight</span><span class="token punctuation">(</span>js<span class="token punctuation">)</span></span>
+  <span class="token tag">const</span> <span class="token plain-text">arr = [1, 2, 'banana'];</span>
+</code></pre><b>Result:</b><pre class="language-"><code><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+</code></pre><h3>Highlight a file</h3><div>For a large code example, it is recommended to save that code in a separate file and then include it.
+</div><pre class="language-"><code><span class="token mixin"><span class="token name function">+code</span><span class="token operator">:</span> include<span class="token operator">:</span><span class="token function">highlight</span><span class="token punctuation">(</span>pug<span class="token punctuation">)</span> code<span class="token operator">-</span>example<span class="token punctuation">.</span>pug</span>
+</code></pre></div></section><section><div class="container"><h2>Highlight an inline code</h2><div>Use the nested inline filters: <code class="language-">#&lbrack;:code:highlight(lang) ...&rbrack;</code>.</div><p><b>Note:</b>
 For usage the <code class="language-">&lbrack;</code> and <code class="language-">&rbrack;</code> chars in pug inline filter,
 the chars must be encoded with their corresponding HTML entities <code class="language-">&amp;lbrack;</code> and <code class="language-">&amp;rbrack;</code>
 </p><p>For example:</p><p>Pug: <code class="language-">#&lbrack;:code:highlight(js) obj = { arr: &amp;lbrack;1, 2, 'banana'&amp;rbrack; };&rbrack;</code><br>
@@ -30,29 +44,21 @@ the chars must be encoded with their corresponding HTML entities <code class="la
 where the <code class="language-">lang</code> is a language supported by a highlight module.<br>
 <b>Note:</b> A highlight module may require a specific class name by the <code class="language-">&lt;pre&gt;</code> tag.<br>
 E.g. the <code class="language-">prismjs</code> themes needs <code class="language-">&lt;pre class=&quot;language-&quot;&gt;</code> for a background color.
-</p><div>For example, highlight the <code class="language-">html</code> code:</div><pre class="language-"><code><span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
-  <span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token text">(html)
-    &lt;!-- Comment -->
-    &lt;div class="container">
-      &lt;p>Some text&lt;/p>
-      &lt;script>
-        const body = document.querySelector("body");
-      &lt;/script>
-    &lt;/div></span></span>
+</p><div>For example, highlight the <code class="language-">html</code> code:</div><pre class="language-"><code><span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code<span class="token punctuation">:</span></span> :highlight(html)
+  <span class="token markup"><span class="token comment">&lt;!-- Comment --></span></span>
+  <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Paragraph<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span>
+      <span class="token tag">const</span> <span class="token plain-text">body = document.querySelector("body");</span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span>
+  <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></span>
 </code></pre><b>Result:</b><pre class="language-"><code><span class="token comment">&lt;!-- Comment --></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Some text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Paragraph<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script"><span class="token language-javascript">
     <span class="token keyword">const</span> body <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"body"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
-</code></pre><h3>Tipp</h3><div>You can create the <code class="language-">mixin code</code> for the <code class="language-">pre</code> and  <code class="language-">code</code> tags:</div><pre class="language-"><code><span class="token mixin"><span class="token keyword">mixin</span> <span class="token function">code</span></span>
-  <span class="token tag">pre<span class="token attr-class">.language-</span><span class="token punctuation">:</span></span> <span class="token tag">code</span>
-    <span class="token tag">block</span>
-</code></pre><div>Then use the mixin and filter easy:</div><pre class="language-"><code><span class="token mixin"><span class="token name function">+code</span></span>
-  <span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token text">(js)
-    const arr = [1, 2, 'banana'];</span></span>
-</code></pre><b>Result:</b><pre class="language-"><code><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 </code></pre></div></section><section><div class="container"><h2>Highlight a code in markdown</h2><div>The embedded <code class="language-">:markdown</code> filter can self highlight code blocks.<br>
 How to enable and configure this filter see the <a href="markdown.html">:markdown</a> page.
 </div><div>Usage example:</div><pre class="language-"><code><span class="token filter"><span class="token filter-name variable">:markdown</span>
@@ -60,7 +66,7 @@ How to enable and configure this filter see the <a href="markdown.html">:markdow
   ```html
   &lt;!-- Comment -->
   &lt;div class="container">
-    &lt;p>Some text&lt;/p>
+    &lt;p>Paragraph&lt;/p>
   &lt;/div>
   ```
 
@@ -71,20 +77,20 @@ How to enable and configure this filter see the <a href="markdown.html">:markdow
 </code></pre><b>Result:</b><p><em>HTML</em></p>
 <pre class="language-html"><code><span class="token comment">&lt;!-- Comment --></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Some text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Paragraph<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
 </code></pre>
 <p><em>JavaScript</em></p>
 <pre class="language-js"><code><span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'banana'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 </code></pre>
 <h3>⚠️ Old way (not recommended!)</h3><p>Usage of the <code class="language-">jstransformer-markdown-it</code> npm module as <code class="language-">:markdown-it</code> filter is not recommended.
-This filter no longer maintained and contains outdated version of <code class="language-">markdown-it</code>
+This filter is no longer maintained and contains an outdated version of <code class="language-">markdown-it</code>
 module with <a href="https://github.com/jstransformers/jstransformer-markdown-it/issues/31">security vulnerabilities</a>.
 </p><p>To highlight a markdown use the nested filters <code class="language-">:highlight:markdown-it</code>.
 All code blocks in markdown will be automatically highlighted by a language defined at a code block.
 </p><div>Usage example:</div><pre class="language-"><code><span class="token filter"><span class="token filter-name variable">:highlight</span><span class="token filter-name variable">:markdown-it</span>
   <span class="token text">```html
-  &lt;p>Some text&lt;/p>
+  &lt;p>Paragraph&lt;/p>
   ```
 
   ```js

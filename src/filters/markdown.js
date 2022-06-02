@@ -50,7 +50,11 @@ const filter = {
   init({ highlight, langPrefix }) {
     if (this.module != null) return;
 
-    let options = {};
+    let options = {
+      // enable HTML tags in markdown source
+      html: true,
+    };
+
     if (highlight != null && highlight.use) {
       adapter.init({
         verbose: highlight.verbose === true,
@@ -58,16 +62,12 @@ const filter = {
       });
 
       langPrefix = adapter.getLangPrefix();
-      options = {
-        highlight: (text, lang) => {
-          return `<pre class="${langPrefix}${lang}"><code>` + adapter.highlight(text, lang) + '</code></pre>';
-        },
+      options.highlight = (text, lang) => {
+        return `<pre class="${langPrefix}${lang}"><code>` + adapter.highlight(text, lang) + '</code></pre>';
       };
     } else if (langPrefix) {
-      options = {
-        highlight: (text, lang) => {
-          return `<pre class="${langPrefix}${lang}"><code>` + text + '</code></pre>';
-        },
+      options.highlight = (text, lang) => {
+        return `<pre class="${langPrefix}${lang}"><code>` + text + '</code></pre>';
       };
     }
 

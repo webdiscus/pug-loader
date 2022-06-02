@@ -27,7 +27,7 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 > 💡**New:** now is supported an **indent** in Vue template.
 >
 > _MyComponent.vue_
-> ```vue
+> ```html
 > <template lang='pug'>
 >   h1 Hello Pug!
 >   p Use the '@webdiscus/pug-loader'
@@ -36,16 +36,16 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 >
 > **Why is this Pug loader best for Vue?**
 >
-> | Features                          | `@webdiscus/pug-loader` | `pug-plain-loader` |
-> |-------------------------|-----------------------|---------------------|
-> | indent in `<templatе lang='pug'>` | ✅                       | ❌                  |
-> | render into HTML                  | ✅                       | ✅                  |
-> | render into template function     | ✅                       | ❌                  |
-> | pass custom data to template      | ✅                       | ❌                  |
-> | embedded filter `:highlight`      | ✅                       | ❌                  |
-> | embedded filter `:markdown`       | ✅                       | ❌                  |
-> | test coverage                     | &gt; 98%                | 0%                 |
-> | last update                       | right now               | 4 years ago        |
+> | Features                          | `@webdiscus/pug-loader` |   `pug-plain-loader`    |
+> |-------------------------|:-----------------------:|:---------------------:|
+> | indent in `<templatе lang='pug'>` | ✅                       |            ❌            |
+> | render into HTML                  | ✅                       |            ✅            |
+> | render into template function     | ✅                       |            ❌            |
+> | pass custom data to template      | ✅                       |            ❌            |
+> | embedded filter `:highlight`      | ✅                       |            ❌            |
+> | embedded filter `:markdown`       | ✅                       |            ❌            |
+> | test coverage                     | &gt; 98%                |           0%            |
+> | last update                       | right now               |       4 years ago       |
 >
 > See [how to use Pug with Vue](#usage-with-vue) and [source of example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
 
@@ -96,7 +96,7 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
   requires [tsconfig-paths-webpack-plugin](https://github.com/dividab/tsconfig-paths-webpack-plugin)
 - resolves required images in the attribute `srcset` of `img` tag
 - resolves required JavaScript modules or JSON in pug
-- integrated Pug filters: `:escape` `:code` `:highlight` `:markdown` with highlighting of code blocks
+- integrated [Pug filters]: [`:escape`] [`:code`] [`:highlight`] [`:markdown`] with highlighting of code blocks
 - passing custom data into Pug template
 - watching of changes in all dependencies
 
@@ -116,7 +116,7 @@ For details and examples please see the [pug-plugin](https://github.com/webdiscu
 
 Install the `pug-plugin`:
 
-```console
+```bash
 npm install pug-plugin --save-dev
 ```
 
@@ -199,7 +199,7 @@ module.exports = {
 
 Install the `pug-loader` only if you use the `html-webpack-plugin`.
 
-```console
+```bash
 npm install @webdiscus/pug-loader --save-dev
 ```
 
@@ -235,7 +235,7 @@ module.exports = {
 
 Install the `pug-loader`.
 
-```console
+```bash
 npm install @webdiscus/pug-loader --save-dev
 ```
 
@@ -381,8 +381,8 @@ To enable a filter, add the following to the pug-loader options:
 {
   embedFilters: {
     <FILTER_NAME> : <FILTER_OPTIONS> | <TRUE>,
-      }
-      }
+  }
+}
 ```
 
 Where `<FILTER_NAME>` is the name of a embedded filter, the available filters see below.
@@ -390,6 +390,27 @@ The filter can have options `<FILTER_OPTIONS>` as an object.
 If the filter has no options, use `true` as an option to enable the filter.
 
 > See the complete information on the [pug filter](https://webdiscus.github.io/pug-loader/pug-filters/) site and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters).
+
+### `watchFiles`
+Type: `Array<RegExp>` Default: `[ /\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i ]`<br>
+This option allows you to configure a list of `RegExp` to watch for file changes in resolved dependencies.\
+The default value enables watching of Pug, scripts, markdown, etc. 
+and ignores images, styles to avoid double processing via Webpack and via Pug's own compiler.
+
+In some cases, you may want to use one SCSS file for styling 
+and include another SCSS file with a Pug filter for code syntax highlighting.
+The first SCSS file is watched via Webpack, but changes in the second will be ignored.\
+For example, we want to watch for changes in all source examples such as `main.c`, `colors.scss`, etc. from the `/code-samples/` folder, 
+to do this, add to the `watchFiles` option:
+
+```js
+{
+  watchFiles: [
+    /\\/code-samples\\/.+$/,
+  ]
+}
+```
+> **Note:** Default RegExp array will be extends, not overridden.
 
 ---
 
@@ -990,7 +1011,7 @@ img(src=require('@Images/' + file))
 ### Examples of file resolving
 
 The example of webpack alias used in the table below:
-```
+```js
 resolve: {
   alias: {
     Images: path.join(__dirname, 'src/assets/images/'),
@@ -998,19 +1019,19 @@ resolve: {
 }
 ```
 
-| Example in Pug template                                                                                                                                | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader  |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------------------|-----------------------|
-| `img(src=require('logo.png'))`                                                                                                                         | ✅ not recomended                                       | ❌                                            | ❌                     |
-| `img(src=require('./logo.png'))`                                                                                                                     | ✅                                                      | ✅                                            | ✅                     |
-| `img(src=require('../images/logo.png'))`                                                                                                             | ✅                                                      | ✅                                            | ✅                     |
-| `img(src=require('~Images/logo.png'))`                                                                                                               | ✅                                                      | ✅                                            | ✅                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                                                                 | ✅                                                      | ✅                                            | ✅                     |
-| `- var file = './logo.png'`<br>`img(src=require(file))`                                                                                              | ✅                                                      | ✅                                            | ❌                     |
-| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                                                                       | ✅                                                      | ✅                                              | ❌                     |
-| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                                                                      | ✅                                                      | ❌                                            | ❌                     |
-| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                                                                | ✅                                     `                | ✅                                            | ✅                     |
-| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                                                                 | ✅                                                      | ✅                                            | ✅                     |
-| `pugjs/pug-loader` can't resolve a resource<br>when used a mixin and require in same file: <br> `include mixins`<br>`img(src=require('./logo.png'))` | ✅                                                      | ✅                                            | ❌                     |
+| Example in Pug template                                                                               | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader |
+|-------------------------------------------------------------------------------------------------------|:------------------------------------------------------:|:---------------------------------------------:|:--------------------:|
+| `img(src=require('logo.png'))`                                                                        |                           ✅                            |                       ❌                       |          ❌           |
+| `img(src=require('./logo.png'))`                                                                      |                           ✅                            |                       ✅                       |          ✅           |
+| `img(src=require('../images/logo.png'))`                                                              |                           ✅                            |                       ✅                       |          ✅           |
+| `img(src=require('~Images/logo.png'))`                                                                |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                  |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = './logo.png'`<br>`img(src=require(file))`                                               |                           ✅                            |                       ✅                       |          ❌           |
+| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                        |                           ✅                            |                       ✅                       |          ❌           |
+| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                       |                           ✅                            |                       ❌                       |          ❌           |
+| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                 |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                  |                           ✅                            |                       ✅                       |          ✅           |
+| resolve a resource<br>when used a mixin and require in same file<br>see the [issue](pug-loader-issue) |                           ✅                            |                       ✅                       |          ❌           |
 
 ---
 
@@ -1274,4 +1295,10 @@ h1 #{sayHello('pug')}
 [pug]: https://github.com/pugjs/pug
 [pug-api]: https://pugjs.org/api/reference.html
 [pug-plugin]: https://github.com/webdiscus/pug-plugin
-[pug-filters]: https://webdiscus.github.io/pug-loader/pug-filters
+[pug-loader-issue]: https://github.com/pugjs/pug-loader/issues/123
+
+[Pug filters]: https://webdiscus.github.io/pug-loader/pug-filters
+[`:escape`]: https://webdiscus.github.io/pug-loader/pug-filters/escape.html
+[`:code`]: https://webdiscus.github.io/pug-loader/pug-filters/code.html
+[`:highlight`]: https://webdiscus.github.io/pug-loader/pug-filters/highlight.html
+[`:markdown`]: https://webdiscus.github.io/pug-loader/pug-filters/markdown.html

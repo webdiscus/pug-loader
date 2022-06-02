@@ -59,11 +59,6 @@ describe('pug tests', () => {
     const relTestCasePath = 'escape-method-html';
     compareContent(PATHS, relTestCasePath, done);
   });
-
-  test('pass options from html-webpack-plugin', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-options';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
 });
 
 describe('pass data tests', () => {
@@ -240,21 +235,6 @@ describe('require resource', () => {
 });
 
 describe('require pug in javascript', () => {
-  test(`options.method default`, (done) => {
-    const relTestCasePath = 'javascript-option-method-default';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.method=render`, (done) => {
-    const relTestCasePath = 'javascript-option-method-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.method=html`, (done) => {
-    const relTestCasePath = 'javascript-option-method-html';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
   test(`query method compile`, (done) => {
     const relTestCasePath = 'javascript-query-method-compile';
     compareTemplateFunction(PATHS, relTestCasePath, done);
@@ -267,16 +247,6 @@ describe('require pug in javascript', () => {
 
   test(`query methods compile and render`, (done) => {
     const relTestCasePath = 'javascript-query-method-all';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data, method compile`, (done) => {
-    const relTestCasePath = 'javascript-option-data-compile';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data, method render`, (done) => {
-    const relTestCasePath = 'javascript-option-data-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
@@ -341,6 +311,43 @@ describe('embedded filters tests', () => {
     const result = prismjs.isInitialized();
     expect(result).toBeTruthy();
     done();
+  });
+});
+
+describe('options tests', () => {
+  test(`options.method default`, (done) => {
+    const relTestCasePath = 'javascript-option-method-default';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.method=render`, (done) => {
+    const relTestCasePath = 'javascript-option-method-render';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.method=html`, (done) => {
+    const relTestCasePath = 'javascript-option-method-html';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data, method compile`, (done) => {
+    const relTestCasePath = 'javascript-option-data-compile';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data, method render`, (done) => {
+    const relTestCasePath = 'javascript-option-data-render';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test('pass options from html-webpack-plugin', (done) => {
+    const relTestCasePath = 'html-webpack-plugin-options';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test(`option-watchFiles, method render`, (done) => {
+    const relTestCasePath = 'option-watchFiles';
+    compareContent(PATHS, relTestCasePath, done);
   });
 });
 

@@ -1,0 +1,36 @@
+//@use 'prismjs/themes/prism-tomorrow.min';
+//@use 'prism-themes/themes/prism-darcula.min';
+@use 'prism-themes/themes/prism-one-light';
+
+// override default styles of prismjs
+pre[class*="language-"] {
+  padding: 5px 10px;
+}
+pre[class*="language-"],
+code[class*="language-"] {
+  font-size: 13px;
+  line-height: inherit;
+}
+
+body {
+  font-family: sans-serif;
+  font-size: 20px;
+  margin: 0;
+}
+
+.content {
+  margin: 48px;
+}
+
+// GutHub layout
+.markdown-body {
+  max-width: 896px;
+  margin-right: 48px !important;
+  margin-left: 48px !important;
+
+  padding-right: 32px !important;
+  padding-left: 32px !important;
+  padding-bottom: 32px !important;
+
+  border: 1px solid #d0d7de;
+}

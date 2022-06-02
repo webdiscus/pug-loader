@@ -1,0 +1,33 @@
+mixin code
+  pre.language-: code
+    block
+
+html
+  head
+    link(rel='stylesheet' href=require('./styles.scss'))
+    link(rel='stylesheet' href=require('./markdown.scss'))
+    script(src=require('./main.js'))
+  body
+    .content
+      h1 Watch of dependencies
+      +code: :highlight(pug)
+        p Hello Pug!
+      +code: include:highlight(pug) deps/file.pug
+      +code: include:highlight(js) deps/file.js
+      +code: include:highlight(js) deps/file.mjs
+      +code: include:highlight(js) deps/file.jsx
+      +code: include:highlight(js) deps/file.ts
+      +code: include:highlight(js) deps/file.tsx
+      +code: include:highlight(js) deps/file.json
+      // watch files added via the `watchFiles` option
+      +code: include:highlight(js) deps/main.c
+      +code: include:highlight(css) deps/file.css
+      +code: include:highlight(scss) deps/file.scss
+      +code: include:highlight(scss) styles.scss
+
+      h2 Markdown
+      include:markdown deps/markdown.md
+
+    br
+    .content: h1 Preview README.md
+    .markdown-body: include:markdown ../../../../README.md
