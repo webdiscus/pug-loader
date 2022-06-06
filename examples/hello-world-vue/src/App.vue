@@ -10,7 +10,7 @@
   import demoTmpl from './views/demo.pug';
 
   // define custom data used in Pug template
-  const locals = { colors: ['red', 'green', 'blue'] };
+  const locals = { colors: ['red', 'green', 'blue', 'orange'] };
   // pass custom data in Pug template
   const demoHtml = demoTmpl(locals);
 

@@ -1,5 +1,11 @@
 # Change log
 
+## 2.6.1 (2022-06-06)
+- fix: add support the prefixes `~` `@` for file alias
+
+## 2.6.0 (2022-06-04)
+- feat: add support the resolving a file alias in `include`
+
 ## 2.5.0 (2022-06-02)
 - feat: add `watchFiles` option to watch for file changes in resolved dependencies
 - fix: in `:markdown` filter enable HTML tags in markdown source

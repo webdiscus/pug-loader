@@ -123,6 +123,11 @@ describe('extend / include / raw include', () => {
     const relTestCasePath = 'include-script-relative';
     compareContent(PATHS, relTestCasePath, done);
   });
+
+  test('include-alias-file', (done) => {
+    const relTestCasePath = 'include-alias-file';
+    compareContent(PATHS, relTestCasePath, done);
+  });
 });
 
 describe('require code', () => {

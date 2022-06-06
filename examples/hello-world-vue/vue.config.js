@@ -24,7 +24,8 @@ module.exports = defineConfig({
   chainWebpack: (config) => {
     const pugRule = config.module.rule('pug');
 
-    // clear all existing pug loaders
+    // IMPORTANT: clear all existing pug loader settings
+    // defaults pug loader is the `pug-plain-loader`
     pugRule.uses.clear();
     pugRule.oneOfs.clear();
   },
@@ -35,20 +36,20 @@ module.exports = defineConfig({
         {
           test: /\.pug$/,
           oneOf: [
-            // allow import of Pug in JavaScript
-            {
-              exclude: /\.vue$/,
-              loader: '@webdiscus/pug-loader',
-              options: {
-                method: 'compile', // compile Pug into template function
-                ...pugLoaderOptions,
-              },
-            },
             // allow <template lang="pug"> in Vue components
             {
+              resourceQuery: /^\?vue/u,
               loader: '@webdiscus/pug-loader',
               options: {
                 method: 'html', // render Pug into pure HTML string
+                ...pugLoaderOptions,
+              },
+            },
+            // allow import of Pug in JavaScript
+            {
+              loader: '@webdiscus/pug-loader',
+              options: {
+                method: 'compile', // compile Pug into template function
                 ...pugLoaderOptions,
               },
             },

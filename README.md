@@ -116,7 +116,7 @@ For details and examples please see the [pug-plugin](https://github.com/webdiscu
 
 Install the `pug-plugin`:
 
-```bash
+```
 npm install pug-plugin --save-dev
 ```
 
@@ -199,7 +199,7 @@ module.exports = {
 
 Install the `pug-loader` only if you use the `html-webpack-plugin`.
 
-```bash
+```
 npm install @webdiscus/pug-loader --save-dev
 ```
 
@@ -235,7 +235,7 @@ module.exports = {
 
 Install the `pug-loader`.
 
-```bash
+```
 npm install @webdiscus/pug-loader --save-dev
 ```
 
@@ -1019,19 +1019,19 @@ resolve: {
 }
 ```
 
-| Example in Pug template                                                                               | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader |
-|-------------------------------------------------------------------------------------------------------|:------------------------------------------------------:|:---------------------------------------------:|:--------------------:|
-| `img(src=require('logo.png'))`                                                                        |                           ✅                            |                       ❌                       |          ❌           |
-| `img(src=require('./logo.png'))`                                                                      |                           ✅                            |                       ✅                       |          ✅           |
-| `img(src=require('../images/logo.png'))`                                                              |                           ✅                            |                       ✅                       |          ✅           |
-| `img(src=require('~Images/logo.png'))`                                                                |                           ✅                            |                       ✅                       |          ✅           |
-| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                                  |                           ✅                            |                       ✅                       |          ✅           |
-| `- var file = './logo.png'`<br>`img(src=require(file))`                                               |                           ✅                            |                       ✅                       |          ❌           |
-| `- var file = './images/logo.png'`<br>`img(src=require(file))`                                        |                           ✅                            |                       ✅                       |          ❌           |
-| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                                       |                           ✅                            |                       ❌                       |          ❌           |
-| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                                 |                           ✅                            |                       ✅                       |          ✅           |
-| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                                  |                           ✅                            |                       ✅                       |          ✅           |
-| resolve a resource<br>when used a mixin and require in same file<br>see the [issue](pug-loader-issue) |                           ✅                            |                       ✅                       |          ❌           |
+| Example in Pug template                                                                      | @webdiscus/<br>pug-loader<br>`render` / `html` methods | @webdiscus/<br>pug-loader<br>`compile` method | pugjs/<br>pug-loader |
+|----------------------------------------------------------------------------------------------|:------------------------------------------------------:|:---------------------------------------------:|:--------------------:|
+| `img(src=require('logo.png'))`                                                               |                           ✅                            |                       ❌                       |          ❌           |
+| `img(src=require('./logo.png'))`                                                             |                           ✅                            |                       ✅                       |          ✅           |
+| `img(src=require('../images/logo.png'))`                                                     |                           ✅                            |                       ✅                       |          ✅           |
+| `img(src=require('~Images/logo.png'))`                                                       |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = 'logo.png'`<br>``img(src=require(`~Images/${file}`))``                         |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = './logo.png'`<br>`img(src=require(file))`                                      |                           ✅                            |                       ✅                       |          ❌           |
+| `- var file = './images/logo.png'`<br>`img(src=require(file))`                               |                           ✅                            |                       ✅                       |          ❌           |
+| `- var file = '../images/logo.png'`<br>`img(src=require(file))`                              |                           ✅                            |                       ❌                       |          ❌           |
+| `- var file = 'logo.png'`<br>``img(src=require(`./images/${file}`))``                        |                           ✅                            |                       ✅                       |          ✅           |
+| `- var file = 'logo.png'`<br>`img(src=require('../images/' + file))`                         |                           ✅                            |                       ✅                       |          ✅           |
+| resolve a resource<br>when used mixin and require in same file<br>see the [pug-loader issue] |                           ✅                            |                       ✅                       |          ❌           |
 
 ---
 
@@ -1165,20 +1165,20 @@ module.exports = defineConfig({
         {
           test: /\.pug$/,
           oneOf: [
-            // allow import of Pug in JavaScript
-            {
-              exclude: /\.vue$/,
-              loader: '@webdiscus/pug-loader',
-              options: {
-                method: 'compile', // compile Pug into template function
-                ...pugLoaderOptions,
-              },
-            },
             // allow <template lang="pug"> in Vue components
             {
+              resourceQuery: /^\?vue/u,
               loader: '@webdiscus/pug-loader',
               options: {
                 method: 'html', // render Pug into pure HTML string
+                ...pugLoaderOptions,
+              },
+            },
+            // allow import of Pug in JavaScript
+            {
+              loader: '@webdiscus/pug-loader',
+              options: {
+                method: 'compile', // compile Pug into template function
                 ...pugLoaderOptions,
               },
             },
@@ -1189,6 +1189,10 @@ module.exports = defineConfig({
   },
 });
 ```
+
+For additional information see please the discussion:
+[How to configure the plugin for both Vue and non-Vue usage?](https://github.com/webdiscus/pug-loader/discussions/16)
+
 
 **Usage Pug in Vue template**
 
@@ -1295,7 +1299,7 @@ h1 #{sayHello('pug')}
 [pug]: https://github.com/pugjs/pug
 [pug-api]: https://pugjs.org/api/reference.html
 [pug-plugin]: https://github.com/webdiscus/pug-plugin
-[pug-loader-issue]: https://github.com/pugjs/pug-loader/issues/123
+[pug-loader issue]: https://github.com/pugjs/pug-loader/issues/123
 
 [Pug filters]: https://webdiscus.github.io/pug-loader/pug-filters
 [`:escape`]: https://webdiscus.github.io/pug-loader/pug-filters/escape.html

@@ -47,6 +47,7 @@ const fileResolverSyncFactory = (path, options) => {
 const resolver = {
   basedir: '/',
   aliasRegexp: /^([~@])?(.*?)(?=\/)/,
+  aliasFileRegexp: /^([~@])?(.*?)$/,
   hasAlias: false,
   hasPlugins: false,
   resolveFile: null,
@@ -264,28 +265,38 @@ const resolver = {
   resolveAlias(request) {
     if (this.hasAlias === false) return null;
 
+    // resolve alias to full filepath, e.g. `include AliasToFile`
+    if (request.endsWith('.pug') && request.indexOf(path.sep) < 0) {
+      request = request.slice(0, -4);
+      const [, prefix, aliasName] = this.aliasFileRegexp.exec(request) || [];
+      let targetPath = this.aliases[aliasName];
+      if (targetPath == null && prefix != null && aliasName != null) targetPath = this.aliases[aliasName.slice(1)];
+
+      return targetPath;
+    }
+
+    // resolve alias as part of a request, e.g. `include Alias/path/to/file`
     let { ignorePrefix, aliasName, targetPath } = this.parseAliasInRequest(request);
 
     // try resolve alias w/o prefix
-    if (ignorePrefix === true) targetPath = this.aliases[aliasName.substring(1)];
+    if (ignorePrefix === true) targetPath = this.aliases[aliasName.slice(1)];
 
-    return typeof targetPath === 'string' ? path.join(targetPath + request.substring(aliasName.length)) : targetPath;
+    return typeof targetPath === 'string' ? path.join(targetPath + request.slice(aliasName.length)) : targetPath;
   },
 
   /**
    * @param {string} request
-   * @returns {{aliasName: string, ignorePrefix: boolean, targetPath: string || array || null}}
+   * @returns {{ignorePrefix: boolean, aliasName: string, targetPath: string || array || null}}
    * @private
    */
   parseAliasInRequest(request) {
     const [, prefix, alias] = this.aliasRegexp.exec(request) || [];
-    const aliasName = (prefix || '') + (alias || '');
-    const targetPath = this.aliases[aliasName];
-    const ignorePrefix = prefix != null && alias != null && targetPath == null;
+    let aliasName = (prefix || '') + (alias || '');
+    let targetPath = this.aliases[aliasName];
 
     return {
       // whether a prefix should be ignored to try resolve alias w/o prefix
-      ignorePrefix,
+      ignorePrefix: targetPath == null && prefix != null && alias != null,
       aliasName,
       targetPath,
     };

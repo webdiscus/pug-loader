@@ -2,10 +2,10 @@ mixin code
   pre.language-: code
     block
 
+doctype html
 html
   head
     link(rel='stylesheet' href=require('./styles.scss'))
-    link(rel='stylesheet' href=require('./markdown.scss'))
     script(src=require('./main.js'))
   body
     .content
@@ -27,7 +27,3 @@ html
 
       h2 Markdown
       include:markdown deps/markdown.md
-
-    br
-    .content: h1 Preview README.md
-    .markdown-body: include:markdown ../../../../README.md
