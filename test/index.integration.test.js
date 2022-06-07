@@ -168,6 +168,21 @@ describe('require resource', () => {
     compareContent(PATHS, relTestCasePath, done);
   });
 
+  test('require-img-query-compile', (done) => {
+    const relTestCasePath = 'require-img-query-compile';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-img-query-render', (done) => {
+    const relTestCasePath = 'require-img-query-render';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-img-query-html', (done) => {
+    const relTestCasePath = 'require-img-query-html';
+    compareContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-string', (done) => {
     const relTestCasePath = 'require-resource-string';
     compareContent(PATHS, relTestCasePath, done);

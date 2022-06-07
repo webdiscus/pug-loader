@@ -125,12 +125,42 @@ const loader = {
       method: 'render',
       queryParam: 'pug-render',
 
+      encodeReservedChars(str) {
+        if (str.indexOf('?') < 0) return str;
+
+        const match = /[&'"]/g;
+        const replacements = {
+          '&': '\\u0026',
+          "'": '\\u0060',
+          '"': '\\u0060',
+        };
+        const replacer = (value) => replacements[value];
+
+        return str.replace(match, replacer);
+      },
+
+      decodeReservedChars(str) {
+        const match = /('|\\u0026|\\u0027|\\u0060|\n)/g;
+        const replacements = {
+          "'": "\\'",
+          '\\u0026': '&',
+          '\\u0027': "'",
+          '\\u0060': "\\'",
+          '\n': '\\n',
+        };
+        const replacer = (value) => replacements[value];
+
+        return str.replace(match, replacer);
+      },
+
       loaderRequire(file, templateFile) {
-        const resolvedFile = loader.resolver.resolve(file, templateFile);
+        let resolvedFile = loader.resolver.resolve(file, templateFile);
 
         if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
           return require(resolvedFile);
         }
+
+        resolvedFile = this.encodeReservedChars(resolvedFile);
 
         return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
       },
@@ -150,12 +180,9 @@ const loader = {
       },
 
       export(templateFile, funcBody, locals) {
-        const result = runTemplateFunction(templateFile, funcBody, locals, this)
-          .replace(/\n/g, '\\n')
-          .replace(/'/g, "\\'")
-          .replace(/\\u0027/g, "'");
+        let result = runTemplateFunction(templateFile, funcBody, locals);
 
-        return loader.getExportCode() + "'" + result + "';";
+        return loader.getExportCode() + "'" + this.decodeReservedChars(result) + "';";
       },
     },
 
@@ -167,14 +194,25 @@ const loader = {
       method: 'html',
       queryParam: null,
 
+      encodeReservedChars(str) {
+        // encode reserved chars in query only
+        if (str.indexOf('?') < 0) return str;
+
+        return str.replace(/&/g, '\\u0026');
+      },
+
+      decodeReservedChars(str) {
+        return str.replace(/\\u0026/g, '&');
+      },
+
       loaderRequire(file, templateFile) {
-        const resolvedFile = loader.resolver.resolve(file, templateFile);
+        let resolvedFile = loader.resolver.resolve(file, templateFile);
 
         if (!path.extname(resolvedFile) || loader.resolver.isScript(resolvedFile)) {
           return require(resolvedFile);
         }
 
-        return resolvedFile;
+        return this.encodeReservedChars(resolvedFile);
       },
 
       loaderRequireScript(file, templateFile) {
@@ -193,7 +231,9 @@ const loader = {
       },
 
       export(templateFile, funcBody, locals) {
-        return runTemplateFunction(templateFile, funcBody, locals, this);
+        let result = runTemplateFunction(templateFile, funcBody, locals);
+
+        return this.decodeReservedChars(result);
       },
     },
   ],
@@ -203,21 +243,19 @@ const loader = {
  * @param {string} templateFile The path of template file.
  * @param {string} funcBody The function body.
  * @param {Object} locals The local template variables.
- * @param {Function} loaderRequire The require function for the method.
- * @param {Function} loaderRequireScript The require script function for the method.
  * @return {string}
  * @throws
  */
-const runTemplateFunction = (templateFile, funcBody, locals, { loaderRequire, loaderRequireScript }) => {
+const runTemplateFunction = (templateFile, funcBody, locals) => {
   try {
     const contextOptions = {
       require,
-      __PUG_LOADER_REQUIRE__: loaderRequire,
-      __PUG_LOADER_REQUIRE_SCRIPT__: loaderRequireScript,
+      __PUG_LOADER_REQUIRE__: loader.method.loaderRequire.bind(loader.method),
+      __PUG_LOADER_REQUIRE_SCRIPT__: loader.method.loaderRequireScript.bind(loader.method),
     };
-
     const contextObject = vm.createContext(contextOptions);
     const script = new vm.Script(funcBody, { filename: templateFile });
+
     script.runInContext(contextObject);
 
     return contextObject[loader.templateName](locals);

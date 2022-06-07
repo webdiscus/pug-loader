@@ -241,8 +241,7 @@ const resolver = {
 
     return value.replaceAll(/require\(.+?\)/g, (value) => {
       let [, file] = /require\((.+?)(?=\))/.exec(value) || [];
-      // TODO: replace &amp; in resource query
-      //file = file.replace(/&amp;/g, '&');
+
       return self.loader.require(file, templateFile);
     });
   },

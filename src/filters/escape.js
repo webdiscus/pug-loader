@@ -33,12 +33,13 @@ const charReplacements = {
   '>': '&gt;',
   '"': '&quot;',
 };
+const replacer = (char) => charReplacements[char];
 
 const escape = {
   name: 'escape',
 
   apply(text, options) {
-    return text.replace(reservedChars, (char) => charReplacements[char]);
+    return text.replace(reservedChars, replacer);
   },
 };
 
