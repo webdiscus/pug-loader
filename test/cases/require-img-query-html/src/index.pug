@@ -1,3 +1,5 @@
+- const fixedEncodeURIComponent = require('./fixedEncodeURIComponent.js');
+
 p Hello World!
 
 //- test new line \n
@@ -18,17 +20,13 @@ pre.
 //-img(src=require('./image.jpeg?key=val&data={"a":"a&b?[]:#*@+,;=$(/!)"}'))
 
 //- test query parameters for https://github.com/dazuaz/responsive-loader
-img.query1(src=require('./image.jpeg?format=webp&size=100&placeholder=true'))
+img.query1(src=require('./image.jpeg?format=webp&size=100'))
 
-- let data = encodeURIComponent('{size:105, format: %27webp%27, placeholder: true}');
-//-img.query2(src=require('./image.jpeg?' + data))
-
-//- Note: 'html-loader' not support any quotes in query, see https://github.com/dazuaz/responsive-loader/issues/154
-    Using `method:html` with 'html-loader' following notation is not works:
-//-img.query2(src=require('./image.jpeg?{size:102, format: "webp", placeholder: true}'))
-//-img.query3(src=require("./image.jpeg?{size:103, format: 'webp', placeholder: true}"))
-//-img.query4(src=require("./image.jpeg?{size:104, format: \"webp\", placeholder: true}"))
-//-img.query5(src=require(`./image.jpeg?{size:105, format: '${'webp'}', placeholder: true}`))
+//- Note: the `html-loader` not support the double quotes in query parameter
+//-img.query2(src=require('./image.jpeg?'+ fixedEncodeURIComponent('{size:102, format: "webp", placeholder: true}')))
+img.query3(src=require("./image.jpeg?" + fixedEncodeURIComponent("{size:103, format: 'webp', placeholder: true}")))
+//-img.query4(src=require("./image.jpeg?"+ fixedEncodeURIComponent("{size:104, format: \"webp\", placeholder: true}")))
+img.query5(src=require(`./image.jpeg?${fixedEncodeURIComponent(`{size:105, format: '${'webp'}', placeholder: true}`)}`))
 
 //- SyntaxError: JSON5: invalid character '`'
 //-img.query6(src=require('./image.jpeg?{size:100, format: `webp`, placeholder: true}'))

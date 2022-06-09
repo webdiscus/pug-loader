@@ -232,24 +232,56 @@ const resolver = {
    * For example, see test case `require-img-srcset`.
    *
    * @param {string} templateFile The filename of the template where resolves the resource.
-   * @param {string} value The resource value include require().
+   * @param {string} value The resource value or code included require().
    * @return {string}
    */
   resolveResource(templateFile, value) {
-    const self = this;
+    const loader = this.loader;
+    const openTag = 'require(';
+    const openTagLen = openTag.length;
+    let pos = value.indexOf(openTag);
+
+    if (pos < 0) return value;
+
+    let lastPos = 0;
+    let result = '';
+    let char;
+
     if (isWin) templateFile = pathToPosix(templateFile);
 
-    return value.replaceAll(/require\(.+?\)/g, (value) => {
-      let [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+    while (~pos) {
+      let startPos = pos + openTagLen;
+      let endPos = startPos;
+      let opened = 1;
 
-      return self.loader.require(file, templateFile);
-    });
+      do {
+        char = value[++endPos];
+        if (char === '(') opened++;
+        else if (char === ')') opened--;
+      } while (opened > 0 && char != null && char !== '\n' && char !== '\r');
+
+      if (opened > 0) {
+        throw new Error('[pug-loader] parse error: check the `(` bracket, it is not closed at same line:\n' + value);
+      }
+
+      const file = value.slice(startPos, endPos);
+      const replacement = loader.require(file, templateFile);
+
+      result += value.slice(lastPos, pos) + replacement;
+      lastPos = endPos + 1;
+      pos = value.indexOf(openTag, lastPos);
+    }
+
+    if (value.length - 1 > pos + openTagLen) {
+      result += value.slice(lastPos);
+    }
+
+    return result;
   },
 
   resolveScript(templateFile, value) {
-    if (isWin) templateFile = pathToPosix(templateFile);
-
     const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+    if (isWin) templateFile = pathToPosix(templateFile);
 
     return this.loader.requireScript(file, templateFile);
   },

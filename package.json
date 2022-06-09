@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",
@@ -81,7 +81,7 @@
     "prettier": "^2.6.2",
     "prismjs": "^1.28.0",
     "pug-plugin": "^2.7.0",
-    "responsive-loader": "^3.0.3",
+    "responsive-loader": "^3.0.4",
     "rimraf": "^3.0.2",
     "sharp": "^0.30.6",
     "tsconfig-paths-webpack-plugin": "^3.5.2",

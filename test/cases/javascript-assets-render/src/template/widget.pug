@@ -20,8 +20,6 @@
 
 h1 Hello World!
 
-//- test resolve of embedded resources
-
 //- required files that should resolve in the current directory need to start with './'
 img.a1(src=require('./image.jpeg'))
 img.a2(src=require('./' + file))
@@ -55,9 +53,9 @@ div.b= data.items.b
   var colorModule = require('@data/cat-1/color')
 
   // alias `~Data` from webpack alias
-  var colorModule2 = require('~Data/cat-1/color')
+  var colorModule2 = require('~Data/cat-1/color');
 
-  colorModule.add(require('@data/colors.json'))
+  colorModule.add(require('@data/colors.json'));
   var colors = colorModule.getData();
   var str = colorModule.getHelloColor('green');
 

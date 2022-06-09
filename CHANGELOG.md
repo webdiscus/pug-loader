@@ -1,5 +1,8 @@
 # Change log
 
+## 2.6.3 (2022-06-09)
+- fix: parse require() value with complex interpolation
+
 ## 2.6.2 (2022-06-08)
 - fix: encode reserved chars for resource query
 
