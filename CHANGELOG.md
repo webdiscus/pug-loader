@@ -1,5 +1,8 @@
 # Change log
 
+## 2.6.4 (2022-06-10)
+- fix: add supports for webpack resolve modules
+
 ## 2.6.3 (2022-06-09)
 - fix: parse require() value with complex interpolation
 

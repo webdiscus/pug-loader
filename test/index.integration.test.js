@@ -252,6 +252,11 @@ describe('require resource', () => {
     const relTestCasePath = 'require-scripts-html';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
+
+  test('webpack resolve modules', (done) => {
+    const relTestCasePath = 'resolve-modules';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
 });
 
 describe('require pug in javascript', () => {

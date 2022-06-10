@@ -6,15 +6,21 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '',
+    publicPath: '/',
+  },
+
+  resolve: {
+    // test modules
+    modules: ['src', 'node_modules'],
   },
 
   entry: {
-    index: './src/pages/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [
     new PugPlugin({
+      pretty: true,
       modules: [
         PugPlugin.extractCss({
           filename: 'assets/css/[name].[contenthash:8].css',
@@ -30,7 +36,6 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'render',
-          esModule: true, // Test: transformation of ESM to CommonJS source in PugPlugin.extractHtml
         },
       },
 

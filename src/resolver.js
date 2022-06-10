@@ -11,12 +11,10 @@ const { resolveException, unsupportedInterpolationException } = require('./exept
  */
 const fileResolverSyncFactory = (path, options) => {
   const resolve = ResolverFactory.create.sync({
-    ...options,
-    // allow resolve node modules
-    aliasFields: [],
-    modules: ['node_modules'],
-    extensions: ['.js'],
     preferRelative: true,
+    ...options,
+    // restrict default extensions list '.js', '.json', '.wasm' for faster resolving
+    extensions: options.extensions.length ? options.extensions : ['.js'],
   });
 
   return (context, request) => {
