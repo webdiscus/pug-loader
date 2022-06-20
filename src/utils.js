@@ -1,6 +1,5 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
-const vm = require('vm');
 
 const loaderName = 'pug-loader';
 
@@ -86,7 +85,7 @@ const injectExternalData = (funcBody, locals) => {
 
   let localsString = JSON.stringify(locals, (key, value) => {
     if (typeof value === 'function') {
-      value = value.toString().replaceAll('\n', '');
+      value = value.toString().replace(/\n/g, '');
 
       // transform `{ fn() {} }` to `{ fn: () => {} }`
       const keySize = key.length;
@@ -104,7 +103,7 @@ const injectExternalData = (funcBody, locals) => {
 
   // remove the quotes around the function body
   if (hasQuoteMarks) {
-    localsString = localsString.replaceAll('"' + quoteMark, '').replaceAll(quoteMark + '"', '');
+    localsString = localsString.replace(/("__REMOVE_QUOTE__|__REMOVE_QUOTE__")/g, '');
   }
 
   return (

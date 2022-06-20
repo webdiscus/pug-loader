@@ -111,7 +111,7 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 - compile Pug files defined in the [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) using a pug-loader.
   It is non-intuitive and very complex way. Not recommended.
 
-### Using [`pug-plugin`](https://github.com/webdiscus/pug-plugin)
+### Usage of [`pug-plugin`](https://github.com/webdiscus/pug-plugin)
 For details and examples please see the [pug-plugin](https://github.com/webdiscus/pug-plugin) site.
 
 Install the `pug-plugin`:
@@ -195,7 +195,7 @@ module.exports = {
 };
 ```
 
-### Using [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
+### Usage with [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 
 Install the `pug-loader` only if you use the `html-webpack-plugin`.
 
@@ -231,7 +231,9 @@ module.exports = {
 };
 ```
 
-### Usage of Pug in JavaScript
+### Usage in JavaScript
+
+A Pug template can be used in JavaScript code as template function with custom data.
 
 Install the `pug-loader`.
 
@@ -360,7 +362,7 @@ Values:
 ```js
 {
   method: 'render',
-    esModule: true,
+  esModule: true,
 }
 ```
 

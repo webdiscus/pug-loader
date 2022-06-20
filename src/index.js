@@ -1,6 +1,3 @@
-// add polyfill for node.js >= 12.0.0 && < 15.0.0
-require('./polyfills/string.replaceAll');
-
 const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
@@ -14,6 +11,8 @@ const {
   filterInitException,
   getPugCompileErrorMessage,
 } = require('./exeptions');
+
+const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
 
 // path of embedded pug-loader filters
 const filtersDir = path.join(__dirname, './filters/');
@@ -56,10 +55,10 @@ const dependency = {
     }
 
     file = isWin ? path.normalize(file) : file;
-
-    // delete the file (.js, .json, etc.) from require.cache to reload cached files after changes by watch
-    delete require.cache[file];
     this.files.add(file);
+
+    // delete the file from require.cache to reload cached files after changes by watch
+    delete require.cache[file];
   },
 
   watch() {
@@ -172,7 +171,6 @@ const compile = function (content, callback) {
   const loaderOptions = loaderContext.getOptions() || {};
   const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
   const webpackOptions = webpackCompiler ? webpackCompiler.options : {};
-  const resolverOptions = webpackOptions.resolve || {};
 
   if (!loaderOptions.name) loaderOptions.name = 'template';
   if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
@@ -221,13 +219,13 @@ const compile = function (content, callback) {
   resolver.init({
     context,
     basedir: compilerOptions.basedir,
-    options: resolverOptions,
+    options: webpackOptions.resolve || {},
   });
 
   loader.init({
     resourceQuery,
-    // in pug can be used external data, e.g. htmlWebpackPlugin.options
-    customData: getHtmlWebpackPluginOptions(webpackOptions, filename),
+    // provide custom data from other plugins
+    customData: HtmlWebpackPlugin.userOptions(webpackOptions, filename),
     options: loaderOptions,
   });
 
@@ -247,8 +245,9 @@ const compile = function (content, callback) {
     /** @type {{body: string, dependencies: []}} */
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
     // Note: don't use compileResult.dependencies because it is not available by compile error.
-    // We track all dependencies at compile process into `pugDependencies`,
-    // then by a compile error our pugDependencies are available to watch changes in corrupted pug files.
+    // The Pug loader tracks all dependencies during compilation and stores them in `LoaderDependency`,
+    // when a compilation error occurs, the modified dependencies in the corrupted pug file
+    // are available in `LoaderDependency` to watching after an error.
   } catch (error) {
     if (error.filename) {
       dependency.add(error.filename);
@@ -262,34 +261,6 @@ const compile = function (content, callback) {
 
   dependency.watch();
   callback(null, result);
-};
-
-/**
- * Get user options of HtmlWebpackPlugin({}).
- *
- * @param {Object} webpackOptions The webpack config options.
- * @param {string} filename The filename of pug template.
- * @returns {{htmlWebpackPlugin: {options: {}}}}
- */
-const getHtmlWebpackPluginOptions = (webpackOptions, filename) => {
-  const plugins = webpackOptions.plugins;
-  let options = {};
-
-  if (plugins) {
-    const pluginData = plugins.find(
-      (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(filename) >= 0
-    );
-
-    if (pluginData) {
-      options = { htmlWebpackPlugin: { options: {} } };
-
-      if (pluginData.hasOwnProperty('userOptions')) {
-        options.htmlWebpackPlugin.options = pluginData.userOptions;
-      }
-    }
-  }
-
-  return options;
 };
 
 module.exports = function (content, map, meta) {

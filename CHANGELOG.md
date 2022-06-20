@@ -1,5 +1,9 @@
 # Change log
 
+## 2.6.5 (2022-06-20)
+- fix: warning by watching interpolated dependencies with `compile` method
+- refactor: replace polyfill for replaceAll() with regexp replace()
+
 ## 2.6.4 (2022-06-10)
 - fix: add supports for webpack resolve modules
 
@@ -61,7 +65,7 @@
 - feat: add support a function in loader option `data` for `compile` method.
 
 ## 1.8.0 (2022-03-05)
-- feat: resolve the variable contained a sub directory in the relative path
+- feat: resolve the variable contained a subdirectory in the relative path
   ```pug
   - var file = './subdir/image.jpg';
   img(src=require(file))

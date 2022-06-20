@@ -218,11 +218,20 @@ const resolver = {
       }
     }
 
-    if (isWin && resolvedPath != null) resolvedPath = pathToPosix(resolvedPath);
-    if (!resolvedPath) resolvedPath = value;
-    if (!isScript) this.dependency.add(resolvedPath);
+    if (resolvedPath != null) {
+      if (isWin) resolvedPath = pathToPosix(resolvedPath);
 
-    return resolvedPath;
+      if (!isScript) {
+        // remove quotes: '/path/to/file.js' -> /path/to/file.js
+        const watchFile = resolvedPath.slice(1, resolvedPath.length - 1);
+        // add to watch only full resolved path, w/o interpolation like: '/path/to/' + file
+        if (/["'`$]/g.test(watchFile) === false) {
+          this.dependency.add(watchFile);
+        }
+      }
+    }
+
+    return resolvedPath || value;
   },
 
   /**
