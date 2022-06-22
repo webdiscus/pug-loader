@@ -31,7 +31,8 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.setTimeout(5000);
+  // 10s is required for test on slow Windows PC
+  jest.setTimeout(10000);
 });
 
 describe('pug tests', () => {

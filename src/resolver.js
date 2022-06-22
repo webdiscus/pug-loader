@@ -304,7 +304,7 @@ const resolver = {
     if (this.hasAlias === false) return null;
 
     // resolve alias to full filepath, e.g. `include AliasToFile`
-    if (request.endsWith('.pug') && request.indexOf(path.sep) < 0) {
+    if (request.endsWith('.pug') && request.indexOf('/') < 0) {
       request = request.slice(0, -4);
       const [, prefix, aliasName] = this.aliasFileRegexp.exec(request) || [];
       let targetPath = this.aliases[aliasName];

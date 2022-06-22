@@ -253,7 +253,8 @@ const compile = function (content, callback) {
       dependency.add(error.filename);
     }
     dependency.watch();
-    callback(getPugCompileErrorMessage(error));
+    const compileError = new Error(getPugCompileErrorMessage(error));
+    callback(compileError);
     return;
   }
 

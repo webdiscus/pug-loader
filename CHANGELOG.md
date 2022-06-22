@@ -1,5 +1,8 @@
 # Change log
 
+## 2.6.6 (2022-06-22)
+- fix: issue by resolving Pug aliases on Windows
+
 ## 2.6.5 (2022-06-20)
 - fix: warning by watching interpolated dependencies with `compile` method
 - refactor: replace polyfill for replaceAll() with regexp replace()
