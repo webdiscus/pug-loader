@@ -15,7 +15,6 @@ const {
 } = require('./exeptions');
 
 const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
-const { re } = require('@babel/core/lib/vendor/import-meta-resolve');
 
 // path of embedded pug-loader filters
 const filtersDir = path.join(__dirname, './filters/');
