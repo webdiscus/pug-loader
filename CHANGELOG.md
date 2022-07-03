@@ -1,5 +1,9 @@
 # Change log
 
+## 2.7.0 (2022-07-03)
+- feat: display the error message on broken page due to fatal error
+- feat: add HMR support on broken page due to fatal error
+
 ## 2.6.6 (2022-06-22)
 - fix: issue by resolving Pug aliases on Windows
 

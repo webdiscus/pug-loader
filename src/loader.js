@@ -4,16 +4,17 @@
  * @property {string} queryParam The same as `method`, but defined in resource query parameter.
  * @property {function(file:string, context:string)=} loaderRequire The function to resolve resource file in template.
  * @property {function(file:string, context:string)} require The inject require of resource.
- * @property {function(templateFile:string, funcBody:string, locals:{})} export Generates a result of loader method.
+ * @property {function(templateFile:string, source:string, locals:{})} export Generates a result of loader method.
  */
 
 const vm = require('vm');
 const path = require('path');
 const { merge } = require('webpack-merge');
-const { getQueryData, injectExternalData, isWin } = require('./utils');
+const { getQueryData, injectExternalData } = require('./utils');
 const { executeTemplateFunctionException } = require('./exeptions');
 
 const scriptTagQuery = '?isScript';
+const hmrRequest = path.join(__dirname, './hmr.js') + scriptTagQuery;
 
 /**
  * @typedef {Object} Loader
@@ -83,11 +84,20 @@ const loader = {
 
   /**
    * @param {string} templateFile
-   * @param {string} funcBody
+   * @param {string} source
    * @return {string}
    */
-  export(templateFile, funcBody) {
-    return this.method.export(templateFile, funcBody, this.data);
+  export(templateFile, source) {
+    return this.method.export(templateFile, source, this.data);
+  },
+
+  /**
+   * @param {Error} error
+   * @param {Function} getErrorMessage
+   * @return {string}
+   */
+  exportError(error, getErrorMessage) {
+    return this.method.exportError(error, getErrorMessage);
   },
 
   /**
@@ -112,11 +122,19 @@ const loader = {
         return `require(${resolvedFile} + '${scriptTagQuery}')`;
       },
 
-      export(templateFile, funcBody, locals) {
+      export(templateFile, source, locals) {
         if (Object.keys(locals).length > 0) {
-          funcBody = injectExternalData(funcBody, locals);
+          source = injectExternalData(source, locals);
         }
-        return funcBody + ';' + loader.getExportCode() + loader.templateName + ';';
+        return source + ';' + loader.getExportCode() + loader.templateName + ';';
+      },
+
+      exportError(error, getErrorMessage) {
+        const requireHmrScript = `' + require('${hmrRequest}') + '`;
+        const errStr = error.toString().replace(/'/g, "\\'");
+        const message = getErrorMessage.call(null, errStr, requireHmrScript);
+
+        return loader.getExportCode() + `() => '${message}';`;
       },
     },
 
@@ -179,10 +197,17 @@ const loader = {
         return `__PUG_LOADER_REQUIRE_SCRIPT__(${file}, '${templateFile}')`;
       },
 
-      export(templateFile, funcBody, locals) {
-        let result = runTemplateFunction(templateFile, funcBody, locals);
+      export(templateFile, source, locals) {
+        let result = runTemplateFunction(templateFile, source, locals);
 
         return loader.getExportCode() + "'" + this.decodeReservedChars(result) + "';";
+      },
+
+      exportError(error, getErrorMessage) {
+        const requireHmrScript = `' + require('${hmrRequest}') + '`;
+        const errStr = error.toString().replace(/'/g, "\\'");
+        const message = getErrorMessage.call(null, errStr, requireHmrScript);
+        return loader.getExportCode() + "'" + message + "';";
       },
     },
 
@@ -230,10 +255,14 @@ const loader = {
         return `__PUG_LOADER_REQUIRE_SCRIPT__(${file}, '${templateFile}')`;
       },
 
-      export(templateFile, funcBody, locals) {
-        let result = runTemplateFunction(templateFile, funcBody, locals);
+      export(templateFile, source, locals) {
+        let result = runTemplateFunction(templateFile, source, locals);
 
         return this.decodeReservedChars(result);
+      },
+
+      exportError(error, getErrorMessage) {
+        return getErrorMessage.call(null, error.toString(), hmrRequest);
       },
     },
   ],
@@ -241,12 +270,12 @@ const loader = {
 
 /**
  * @param {string} templateFile The path of template file.
- * @param {string} funcBody The function body.
+ * @param {string} source The function body.
  * @param {Object} locals The local template variables.
  * @return {string}
  * @throws
  */
-const runTemplateFunction = (templateFile, funcBody, locals) => {
+const runTemplateFunction = (templateFile, source, locals) => {
   try {
     const contextOptions = {
       require,
@@ -254,7 +283,7 @@ const runTemplateFunction = (templateFile, funcBody, locals) => {
       __PUG_LOADER_REQUIRE_SCRIPT__: loader.method.loaderRequireScript.bind(loader.method),
     };
     const contextObject = vm.createContext(contextOptions);
-    const script = new vm.Script(funcBody, { filename: templateFile });
+    const script = new vm.Script(source, { filename: templateFile });
 
     script.runInContext(contextObject);
 

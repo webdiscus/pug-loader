@@ -8,6 +8,14 @@ html
     link(rel='stylesheet' href=require('./styles.scss'))
     script(src=require('./main.js'))
   body
+    //- Manual simulate errors:
+    //-div= undefined.variable
+    //-img(src=require('NoFound/image.jpeg2'))
+    //-
+      // alias `@data` from tsconfig
+      var cat = 'cat-1';
+      var colors = require(`@data/${cat}/color.js`)
+
     .content
       h1 Watch of dependencies
       +code: :highlight(pug)

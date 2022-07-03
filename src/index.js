@@ -10,9 +10,12 @@ const {
   filterLoadException,
   filterInitException,
   getPugCompileErrorMessage,
+  getPugCompileErrorHtml,
+  getExecuteTemplateFunctionErrorMessage,
 } = require('./exeptions');
 
 const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
+const { re } = require('@babel/core/lib/vendor/import-meta-resolve');
 
 // path of embedded pug-loader filters
 const filtersDir = path.join(__dirname, './filters/');
@@ -240,10 +243,11 @@ const compile = function (content, callback) {
   const template = trimIndent(content);
   if (template !== false) content = template;
 
-  let compileResult;
+  let compileResult, result;
   try {
     /** @type {{body: string, dependencies: []}} */
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
+
     // Note: don't use compileResult.dependencies because it is not available by compile error.
     // The Pug loader tracks all dependencies during compilation and stores them in `LoaderDependency`,
     // when a compilation error occurs, the modified dependencies in the corrupted pug file
@@ -253,22 +257,43 @@ const compile = function (content, callback) {
       dependency.add(error.filename);
     }
     dependency.watch();
+
+    // render error message for output in browser
+    const exportError = loader.exportError(error, getPugCompileErrorHtml);
     const compileError = new Error(getPugCompileErrorMessage(error));
-    callback(compileError);
+    callback(compileError, exportError);
+
     return;
   }
 
-  const result = loader.export(filename, compileResult);
+  try {
+    result = loader.export(filename, compileResult);
+  } catch (error) {
+    // render error message for output in browser
+    const exportError = loader.exportError(error, getExecuteTemplateFunctionErrorMessage);
+    const compileError = new Error(error);
+    callback(compileError, exportError);
+
+    return;
+  }
 
   dependency.watch();
   callback(null, result);
 };
 
 module.exports = function (content, map, meta) {
-  const callback = this.async();
+  const loaderContext = this;
+  const callback = loaderContext.async();
 
-  compile.call(this, content, (err, result) => {
-    if (err) return callback(err);
+  compile.call(loaderContext, content, (error, result) => {
+    if (error) {
+      // if HMR is disabled interrupt the compilation process
+      if (loaderContext.hot !== true) return callback(error);
+
+      // if HMR is enabled emit an error that will be displayed in the output
+      // it will NOT interrupt the compilation process
+      loaderContext.emitError(error);
+    }
     callback(null, result, map, meta);
   });
 };

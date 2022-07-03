@@ -1,7 +1,8 @@
 const ansis = require('ansis');
 const { loaderName } = require('./utils');
 
-const ansisLoaderName = `\n${ansis.black.bgRedBright(`[${loaderName}]`)}`;
+const ansisLoaderName = `\n${ansis.red(`[${loaderName}]`)}`;
+const htmlLoaderName = `<span style="color:#e36049">[${loaderName}]</span>`;
 let lastError = null;
 
 class PugLoaderException extends Error {
@@ -27,7 +28,7 @@ const PugLoaderError = function (message, error = '') {
     lastError = error.toString();
     throw new Error(lastError);
   }
-  lastError = message + `\n` + error;
+  lastError = message + `\n\nOriginal Error:\n` + error;
   throw new PugLoaderException(lastError);
 };
 
@@ -39,7 +40,7 @@ const PugLoaderError = function (message, error = '') {
  */
 const resolveException = (error, file, templateFile) => {
   const message =
-    `${ansisLoaderName} the file ${ansis.yellow(file)} can't be resolved in the pug template:\n` +
+    `${ansisLoaderName} The file ${ansis.yellow(file)} can't be resolved in the pug template:\n` +
     ansis.cyan(templateFile);
 
   PugLoaderError(message, error);
@@ -57,7 +58,7 @@ const unsupportedInterpolationException = (value, templateFile) => {
     )} can't be interpolated with the 'compile' method in the pug template: ${ansis.cyan(templateFile)}\n` +
     `${ansis.yellow(
       'Possible solution: '
-    )} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias instead of alias from tsconfig.`;
+    )} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias.`;
 
   PugLoaderError(message);
 };
@@ -68,15 +69,7 @@ const unsupportedInterpolationException = (value, templateFile) => {
  * @throws {Error}
  */
 const executeTemplateFunctionException = (error, sourceFile) => {
-  const message =
-    `${ansisLoaderName} Failed to execute template function.\n` +
-    `${ansis.red.bold(`Template file:`)} ${ansis.cyan(sourceFile)}\n` +
-    `${ansis.red.bold(`Possible reason:`)} in the template may be used undefined variable.\n` +
-    `${ansis.black.bgYellow(`Solution`)} in this case pass a variable into a pug file via the query parameter.\n` +
-    `For example, if in pug is used the external variable, like ${ansis.yellow(`title= customData.options.title`)},\n` +
-    `then pass it into pug ${ansis.magenta(
-      `'template.pug?customData=' + JSON.stringify({options:{title:'My title'}})`
-    )}`;
+  const message = `${ansisLoaderName} Failed to execute template function.\n` + `Template file: ${sourceFile}`;
 
   PugLoaderError(message, error);
 };
@@ -119,11 +112,44 @@ const filterInitException = (filterName, error) => {
 };
 
 /**
- * @param {string} error
+ * @param {Error} error
  * @returns {string}
  */
 const getPugCompileErrorMessage = (error) => {
   return `${ansisLoaderName} Pug compilation failed.\n` + error.toString();
+};
+
+/**
+ * @param {string} error
+ * @param {string} requireHmrScript
+ * @returns {string}
+ */
+const errorTemplateHtml = (error, requireHmrScript) => {
+  let message = error.replace(/\n/g, '<br>');
+  message = ansis.strip(message);
+  message = message.replace(`[${loaderName}]`, htmlLoaderName);
+
+  return `<!DOCTYPE html><html>
+<head><script src="${requireHmrScript}"></script></head>
+<body><div>${message}</div></body></html>`.replace(/\n/g, '');
+};
+
+/**
+ * @param {Error} error
+ * @param {string} requireHmrScript
+ * @returns {string}
+ */
+const getPugCompileErrorHtml = (error, requireHmrScript) => {
+  return errorTemplateHtml(getPugCompileErrorMessage(error), requireHmrScript);
+};
+
+/**
+ * @param {Error} error
+ * @param {string} requireHmrScript
+ * @returns {string}
+ */
+const getExecuteTemplateFunctionErrorMessage = (error, requireHmrScript) => {
+  return errorTemplateHtml(error.toString(), requireHmrScript);
 };
 
 module.exports = {
@@ -131,7 +157,9 @@ module.exports = {
   resolveException,
   unsupportedInterpolationException,
   executeTemplateFunctionException,
+  getExecuteTemplateFunctionErrorMessage,
   getPugCompileErrorMessage,
+  getPugCompileErrorHtml,
   filterNotFoundException,
   filterLoadException,
   filterInitException,

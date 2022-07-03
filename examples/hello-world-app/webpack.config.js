@@ -103,10 +103,7 @@ module.exports = (env, argv) => {
       static: {
         directory: path.join(__dirname, 'public'),
       },
-      port: 8080,
-      https: false,
       compress: true,
-
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

@@ -1,6 +1,5 @@
 const path = require('path');
-//const PugPlugin = require('pug-plugin'); // use it in your code
-const PugPlugin = require('../../../pug-plugin'); // use local code of pug-plugin for development
+const PugPlugin = require('pug-plugin');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -51,8 +50,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.pug$/,
-          //loader: PugPlugin.loader, // the `pug-plugin` already contains the `@webdiscus/pug-loader`
-          loader: '../../',
+          loader: PugPlugin.loader,
           options: {
             method: 'render', // fast method to render static html
             // enable embedded filters
@@ -120,10 +118,7 @@ module.exports = (env, argv) => {
       static: {
         directory: path.join(__dirname, 'public'),
       },
-      port: 8080,
-      https: false,
       compress: true,
-
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

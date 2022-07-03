@@ -24,7 +24,7 @@
 Pug loader renders Pug files into HTML or compiles them into a template function.
 This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 
-> 💡**New:** now is supported an **indent** in Vue template.
+> 💡**Pug loader** supports an **indent** in Vue template.
 >
 > _MyComponent.vue_
 > ```html
@@ -33,33 +33,20 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 >   p Use the '@webdiscus/pug-loader'
 > </template>
 > ```
->
-> **Why is this Pug loader best for Vue?**
->
-> | Features                          | `@webdiscus/pug-loader` |   `pug-plain-loader`    |
-> |-------------------------|:-----------------------:|:---------------------:|
-> | indent in `<templatе lang='pug'>` | ✅                       |            ❌            |
-> | render into HTML                  | ✅                       |            ✅            |
-> | render into template function     | ✅                       |            ❌            |
-> | pass custom data to template      | ✅                       |            ❌            |
-> | embedded filter `:highlight`      | ✅                       |            ❌            |
-> | embedded filter `:markdown`       | ✅                       |            ❌            |
-> | test coverage                     | &gt; 98%                |           0%            |
-> | last update                       | right now               |       4 years ago       |
->
 > See [how to use Pug with Vue](#usage-with-vue) and [source of example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
 
 <br>
 
 > 💡 **Recommended** to use the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
-> _Pug plugin makes your life a lot easier._
-> _Keep your webpack config clean and clear._
+> The Pug plugin enable to specify Pug files in webpack entry and generates HTML file that includes the hashed output JS and CSS filenames whose source files are used in the Pug template.
 >
-> This `pug-loader` is already included in the [pug-plugin](https://github.com/webdiscus/pug-plugin).\
-> The `pug-plugin` enable using Pug templates as webpack entry points.\
-> The `pug-plugin` resolve and compile source files of scripts and styles required in Pug, without to define them in the webpack entry.
-> You don't need more additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
-> Pug plugin does everything by itself and much faster.
+> Highlights:
+>
+> - The Pug file is the entry point for all scripts and styles.
+> - Source scripts and styles should be specified directly in Pug.
+> - All JS and CSS files will be extracted from their sources specified in Pug.
+> - No longer need to define scripts and styles in the webpack entry.
+> - No longer need to import styles in JavaScript to inject them into HTML via additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
 >
 > Please see [usage examples](https://github.com/webdiscus/pug-plugin#usage-examples) and the demo app [Hello World](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
 
@@ -88,7 +75,7 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 <a id="features" name="features" href="#features"></a>
 ## Features
 
-- rendereing Pug into pure `HTML string`
+- rendering Pug into pure `HTML string`
 - compiling Pug into `template function` for usage in JavaScript
 - generates a template function with both `CommonJS` and `ESM` syntax
 - resolves alias from webpack `resolve.alias`
@@ -252,7 +239,7 @@ module.exports = {
     publicPath: '/', // must be defined any path, `auto` is not supported yet
   },
   entry: {
-    index: './src/index.js', // load a Pug teplate in JS
+    index: './src/index.js', // load a Pug template in JS
   },
   module: {
     rules: [
@@ -306,8 +293,9 @@ Add a list of global names to make accessible in templates.
 ### `filters`
 
 Type: `object` Default: `undefined`<br>
-Hash table of [custom filters](https://pugjs.org/language/filters.html#custom-filters).
 Filters let to use other languages in Pug templates.
+You can add your own [custom filters](https://pugjs.org/language/filters.html#custom-filters) to Pug.
+See the [build-in filters](https://webdiscus.github.io/pug-loader/pug-filters).
 
 ### `plugins`
 
