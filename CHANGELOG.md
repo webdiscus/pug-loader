@@ -1,5 +1,8 @@
 # Change log
 
+## 2.7.1 (2022-07-03)
+- fix: remove unused module
+
 ## 2.7.0 (2022-07-03)
 - feat: display the error message on broken page due to fatal error
 - feat: add HMR support on broken page due to fatal error
