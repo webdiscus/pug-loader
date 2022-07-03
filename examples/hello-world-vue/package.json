@@ -16,7 +16,7 @@
     "@vue/cli-plugin-babel": "~5.0.6",
     "@vue/cli-plugin-eslint": "~5.0.6",
     "@vue/cli-service": "~5.0.6",
-    "@webdiscus/pug-loader": "^2.7.1",
+    "@webdiscus/pug-loader": "^2.7.2",
     "css-loader": "^6.7.1",
     "eslint": "^8.19.0",
     "eslint-plugin-vue": "^9.1.1",

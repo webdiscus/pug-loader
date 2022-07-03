@@ -10,11 +10,12 @@
 const vm = require('vm');
 const path = require('path');
 const { merge } = require('webpack-merge');
-const { getQueryData, injectExternalData } = require('./utils');
+const { getQueryData, injectExternalData, isWin, pathToPosix } = require('./utils');
 const { executeTemplateFunctionException } = require('./exeptions');
 
 const scriptTagQuery = '?isScript';
-const hmrRequest = path.join(__dirname, './hmr.js') + scriptTagQuery;
+let hmrRequest = path.join(__dirname, 'hmr.js') + scriptTagQuery;
+if (isWin) hmrRequest = pathToPosix(hmrRequest);
 
 /**
  * @typedef {Object} Loader
