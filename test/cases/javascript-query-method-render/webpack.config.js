@@ -1,5 +1,4 @@
 const path = require('path');
-const basePath = path.resolve(__dirname);
 
 module.exports = {
   mode: 'production',
@@ -15,9 +14,9 @@ module.exports = {
 
   resolve: {
     alias: {
-      Includes: path.join(basePath, 'src/includes/'),
-      Images: path.join(basePath, 'src/images/'),
-      Template: path.join(basePath, 'src/template/'),
+      Includes: path.join(__dirname, 'src/includes/'),
+      Images: path.join(__dirname, 'src/images/'),
+      Views: path.join(__dirname, 'src/views/'),
     },
   },
 
@@ -30,6 +29,7 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'render',
+          name: 'custom_template_function', // test template function name in generated code
         },
       },
     ],

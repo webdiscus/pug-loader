@@ -1,5 +1,7 @@
 .DS_Store
 .idea
+.run
+.angular
 _ignored
 package-lock.json
 coverage

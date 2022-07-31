@@ -1,5 +1,17 @@
 # Change log
 
+## 2.8.0 (2022-08-03)
+- feat: add resolving of file alias for scripts and styles
+- feat: improve resolving of script files specified w/o extension
+- feat: improve performance
+- fix: allow to use url query in script source file
+- fix: resolving of absolute path using root context
+- fix: resolving of alias to file using root context
+- chore: optimize for using with pug-plugin
+- chore: using html-webpack-plugin with Pug is deprecated, use [pug-plugin](https://github.com/webdiscus/pug-plugin)) instead
+- refactor: optimize code
+- tests: add test cases and optimize test fixtures
+
 ## 2.7.2 (2022-07-03)
 - fix: HMR issue on Windows
 

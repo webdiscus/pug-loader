@@ -2,9 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
-const { isWin, trimIndent } = require('./utils');
-const resolver = require('./resolver');
-const loader = require('./loader');
+const { plugin, scriptStore } = require('./ModuleProxy');
+const dependency = require('./Dependency');
+const resolver = require('./Resolver');
+const loader = require('./Loader');
+const { trimIndent } = require('./Utils');
+
+const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
+
 const {
   filterNotFoundException,
   filterLoadException,
@@ -12,118 +17,9 @@ const {
   getPugCompileErrorMessage,
   getPugCompileErrorHtml,
   getExecuteTemplateFunctionErrorMessage,
-} = require('./exeptions');
+} = require('./Exeptions');
 
-const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
-
-// path of embedded pug-loader filters
 const filtersDir = path.join(__dirname, './filters/');
-
-/**
- * Dependencies in code for watching a changes.
- *
- * Public API
- * @typedef {Object} LoaderDependency
- * @property {Array<RegExp>} watchFiles
- * @property {Function<loaderContext:Object>} init
- * @property {Function<file:string>} add
- * @property {Function|RegExp} watch
- */
-
-const dependency = {
-  files: new Set(),
-  watchFiles: [/\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i],
-  loaderContext: null,
-  isInit: false,
-
-  init(loaderContext, { watchFiles }) {
-    // avoid double push in array by watching
-    if (!this.isInit && watchFiles != null) {
-      if (!Array.isArray(watchFiles)) watchFiles = [watchFiles];
-      this.watchFiles.push(...watchFiles);
-      this.isInit = true;
-    }
-    this.loaderContext = loaderContext;
-  },
-
-  /**
-   * Add file to watch list.
-   *
-   * @param {string} file
-   */
-  add(file) {
-    if (!this.watchFiles.find((regex) => regex.test(file))) {
-      return;
-    }
-
-    file = isWin ? path.normalize(file) : file;
-    this.files.add(file);
-
-    // delete the file from require.cache to reload cached files after changes by watch
-    delete require.cache[file];
-  },
-
-  watch() {
-    const files = Array.from(this.files);
-    files.forEach(this.loaderContext.addDependency);
-  },
-};
-
-/**
- * The pug plugin to resolve path for include, extends, require.
- *
- * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
- */
-const resolvePlugin = {
-  /**
-   * Resolve the filename for extends / include / raw include.
-   *
-   * @param {string} filename The extends/include filename in template.
-   * @param {string} templateFile The absolute path to template.
-   * @param {{}} options The options of pug compiler.
-   * @return {string}
-   */
-  resolve(filename, templateFile, options) {
-    return resolver.resolve(filename.trim(), templateFile.trim());
-  },
-
-  /**
-   * Resolve the filename for require().
-   *
-   * @param {{}} ast The parsed tree of pug template.
-   * @return {{}}
-   */
-  preCodeGen(ast) {
-    return walk(ast, (node) => {
-      if (node.type === 'Code') {
-        // resolving for require of a code, e.g.: `- var data = require('./data.js')`
-        if (containRequire(node)) {
-          const result = resolver.resolveResource(node.filename, node.val);
-          if (result != null && result !== node.val) node.val = result;
-        }
-      } else if (node.attrs) {
-        // resolving for tag attributes, e.g.: `img(src=require('./image.jpeg'))`
-        node.attrs.forEach((attr) => {
-          if (containRequire(attr)) {
-            const result =
-              node.name === 'script'
-                ? resolver.resolveScript(attr.filename, attr.val)
-                : resolver.resolveResource(attr.filename, attr.val);
-            if (result != null && result !== attr.val) attr.val = result;
-          }
-        });
-      }
-    });
-  },
-};
-
-/**
- * Whether the node value contains the require().
- *
- * @param {{val: *}} obj
- * @return {boolean}
- */
-const containRequire = (obj) => obj.val && typeof obj.val === 'string' && obj.val.indexOf('require(') >= 0;
 
 /**
  * Load embedded pug filters.
@@ -164,25 +60,88 @@ const loadFilters = (filters) => {
 };
 
 /**
+ * Whether the node value contains the require().
+ *
+ * @param {string} value
+ * @return {boolean}
+ */
+const hasRequire = (value) => value != null && typeof value === 'string' && value.indexOf('require(') > -1;
+
+/**
+ * The pug plugin to resolve path for include, extends, require.
+ *
+ * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
+ */
+const resolvePlugin = {
+  /**
+   * Resolve the filename for extends / include / raw include.
+   *
+   * @param {string} filename The extends/include filename in template.
+   * @param {string} templateFile The absolute path to template.
+   * @param {{}} options The options of pug compiler.
+   * @return {string}
+   */
+  resolve(filename, templateFile, options) {
+    return resolver.resolve(filename.trim(), templateFile.trim());
+  },
+
+  /**
+   * Resolve the filename for require().
+   *
+   * @param {{}} ast The parsed tree of pug template.
+   * @return {{}}
+   */
+  preCodeGen(ast) {
+    return walk(ast, (node) => {
+      if (node.type === 'Code') {
+        // resolving for require of a code, like `- var data = require('./data.js')`
+        const value = node.val;
+        if (hasRequire(value)) {
+          const result = loader.resolveResource(value, node.filename);
+          if (result != null) node.val = result;
+        }
+      } else if (node.attrs) {
+        // resolving for tag attributes, like `img(src=require('./image.jpeg'))`
+        for (let attr of node.attrs) {
+          const value = attr.val;
+          if (hasRequire(value)) {
+            const result =
+              node.name === 'script'
+                ? loader.resolveScript(value, attr.filename)
+                : loader.resolveResource(value, attr.filename);
+            if (result != null) attr.val = result;
+          }
+        }
+      }
+    });
+  },
+};
+
+/**
  * @param {string} content The pug template.
- * @param {function(error: string|null, result: string?)?} callback The asynchronous callback function.
+ * @param {function(error: Error|null, result: string?)?} callback The asynchronous callback function.
  * @return {string|undefined}
  */
 const compile = function (content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
-  const { _compiler: webpackCompiler, resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
-  const webpackOptions = webpackCompiler ? webpackCompiler.options : {};
+  const { resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
+  const webpackOptions = loaderContext._compiler.options || {};
+  const isPlugin = plugin.isUsed();
+  let customData = {};
 
   if (!loaderOptions.name) loaderOptions.name = 'template';
   if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
+
+  let basedir = loaderOptions.basedir || context;
+  if (basedir.slice(-1) !== '/') basedir += '/';
 
   const compilerOptions = {
     // used to resolve import/extends and to improve errors
     filename,
 
     // the root directory of all absolute inclusion, defaults is `/`.
-    basedir: loaderOptions.basedir || '/',
+    basedir,
 
     doctype: loaderOptions.doctype || 'html',
     self: loaderOptions.self || false,
@@ -218,29 +177,36 @@ const compile = function (content, callback) {
     pretty: false,
   };
 
+  if (!isPlugin) {
+    const template = trimIndent(content);
+    if (template !== false) content = template;
+    // TODO: drop support HtmlWebpackPlugin in next major version 3.x, because must be used pug-plugin instead
+    customData = HtmlWebpackPlugin.getUserOptions(filename, webpackOptions);
+  }
+
+  scriptStore.init({
+    issuer: filename,
+  });
+
+  dependency.init({
+    loaderContext,
+    watchFiles: loaderOptions.watchFiles,
+  });
+
   resolver.init({
-    context,
     basedir: compilerOptions.basedir,
     options: webpackOptions.resolve || {},
   });
 
   loader.init({
+    filename,
     resourceQuery,
-    // provide custom data from other plugins
-    customData: HtmlWebpackPlugin.userOptions(webpackOptions, filename),
     options: loaderOptions,
+    customData,
+    isPlugin,
   });
 
-  dependency.init(loaderContext, loaderOptions);
-  resolver.setDependency(dependency);
-  resolver.setLoader(loader);
-  loader.setResolver(resolver);
-
   if (loaderContext.cacheable) loaderContext.cacheable(true);
-
-  // remove indent in template
-  const template = trimIndent(content);
-  if (template !== false) content = template;
 
   let compileResult, result;
   try {
@@ -248,9 +214,7 @@ const compile = function (content, callback) {
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
 
     // Note: don't use compileResult.dependencies because it is not available by compile error.
-    // The Pug loader tracks all dependencies during compilation and stores them in `LoaderDependency`,
-    // when a compilation error occurs, the modified dependencies in the corrupted pug file
-    // are available in `LoaderDependency` to watching after an error.
+    // The Pug loader tracks all dependencies during compilation and stores them in `Dependency` instance.
   } catch (error) {
     if (error.filename) {
       dependency.add(error.filename);
@@ -266,7 +230,7 @@ const compile = function (content, callback) {
   }
 
   try {
-    result = loader.export(filename, compileResult);
+    result = loader.export(compileResult);
   } catch (error) {
     // render error message for output in browser
     const exportError = loader.exportError(error, getExecuteTemplateFunctionErrorMessage);
@@ -296,3 +260,5 @@ module.exports = function (content, map, meta) {
     callback(null, result, map, meta);
   });
 };
+
+module.exports.scriptStore = scriptStore;

@@ -1,0 +1,47 @@
+h1 Hello!
+
+//- test resolve of embedded resources
+- file2 = 'image2.png'
+p= '../images/image.png'
+img(src=require('../images/image.png'))
+p= 'Images/image.png'
+img(src=require('Images/image.png'))
+p= '"Images/" + file2'
+img(src=require('Images/' + file2))
+p= '`Images/${file2}`'
+img(src=require(`Images/${file2}`))
+
+//- test require of a function
+-
+  var colorModule = require('../includes/color')
+  colorModule.add(require('../includes/colors.json'))
+  var colors = colorModule.getData();
+  var str = colorModule.getHelloColor('green');
+
+p #{colorModule.getHelloColor('green')}
+
+//- test single require of a JSON
+- var colors = require('../includes/colors.json')
+
+.first
+  each color in colors
+    i= color.name
+
+//- test multiple requires of a JSON in a object
+-
+  var data = [
+    {
+      name: 'Red Green Blue',
+      colors: require('../includes/colors.json'),
+    },
+    {
+      name: 'Rose Violet Azure',
+      colors: require('Includes/colors2.json'),
+    }
+  ]
+
+.second
+  each item in data
+    h3= item.name
+    each color in item.colors
+      i= color.name

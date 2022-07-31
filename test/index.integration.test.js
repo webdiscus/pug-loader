@@ -1,128 +1,120 @@
-import { filterLoadException } from '../src/exeptions';
+import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
+import { filterLoadException } from '../src/Exeptions';
 
 const path = require('path');
-const rimraf = require('rimraf');
-
-import { copyRecursiveSync } from './utils/file';
-import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
-
-// The base path of test directory.
-const basePath = path.resolve(__dirname, './');
 
 const PATHS = {
-  base: basePath,
-  testSource: path.join(basePath, 'cases'),
-  // absolute path of temp outputs for test
-  testOutput: path.join(basePath, 'output'),
+  base: __dirname,
+  testSource: path.join(__dirname, 'cases'),
   // relative path in the test directory to web root dir name, same as by a web server (e.g. nginx)
   webRoot: '/public/',
   // relative path in the test directory to expected files for test
   expected: '/expected/',
   // relative path in the public directory
   output: '/assets/',
-  assets: '/public/assets/',
 };
 
-beforeAll(() => {
-  // delete all files from path
-  rimraf.sync(PATHS.testOutput);
-  // copy test files to temp directory
-  copyRecursiveSync(PATHS.testSource, PATHS.testOutput);
-});
+// 10s is required for test on slow instance like github
+const testTimeout = 10000;
+
+beforeAll(() => {});
 
 beforeEach(() => {
-  // 10s is required for test on slow Windows PC
-  jest.setTimeout(10000);
+  // on linux/macOS not work set the testTimeout in jest.config.js
+  jest.setTimeout(testTimeout);
 });
 
 describe('pug tests', () => {
-  test('hello-world', (done) => {
+  test('hello-world-simple', (done) => {
     const relTestCasePath = 'hello-world';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('hello-world-app', (done) => {
+    const relTestCasePath = 'hello-world-app';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('doctype-html5-mixin', (done) => {
+    const relTestCasePath = 'doctype-html5-mixin';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('remove indents in vue and react templates', (done) => {
-    const relTestCasePath = 'pug-remove-indent';
+    const relTestCasePath = 'pug-remove-indent-webpack';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test('inline-code-minify', (done) => {
+    const relTestCasePath = 'inline-code-minify';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('escape method compile', (done) => {
     const relTestCasePath = 'escape-method-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('escape method render', (done) => {
     const relTestCasePath = 'escape-method-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('escape method html', (done) => {
     const relTestCasePath = 'escape-method-html';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-});
-
-describe('pass data tests', () => {
-  test('pass-data-method-compile', (done) => {
-    const relTestCasePath = 'pass-data-method-compile';
-    compareContent(PATHS, relTestCasePath, done);
-  });
-
-  test('pass-data-method-render', (done) => {
-    const relTestCasePath = 'pass-data-method-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
 
 describe('extend / include / raw include', () => {
   test('extends-alias', (done) => {
     const relTestCasePath = 'extends-alias';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('extends-relative', (done) => {
     const relTestCasePath = 'extends-relative';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include alias from resolve.alias', (done) => {
     const relTestCasePath = 'include-alias-resolve.alias';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include alias from resolve.plugins', (done) => {
     const relTestCasePath = 'include-alias-resolve.plugins';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include alias from resolve.plugin-compile', (done) => {
     const relTestCasePath = 'include-alias-resolve.plugins-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include alias from resolve.plugin-render', (done) => {
     const relTestCasePath = 'include-alias-resolve.plugins-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include-basedir', (done) => {
     const relTestCasePath = 'include-basedir';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include-relative', (done) => {
     const relTestCasePath = 'include-relative';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include-script-alias', (done) => {
     const relTestCasePath = 'include-script-alias';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include-script-relative', (done) => {
     const relTestCasePath = 'include-script-relative';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('include-alias-file', (done) => {
@@ -134,94 +126,94 @@ describe('extend / include / raw include', () => {
 describe('require code', () => {
   test('require json via alias', (done) => {
     const relTestCasePath = 'require-json-alias';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require json relative', (done) => {
     const relTestCasePath = 'require-json-relative';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require js module relative', (done) => {
     const relTestCasePath = 'require-js-relative';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
 
 describe('require resource', () => {
   test('require-alias-array-compile', (done) => {
     const relTestCasePath = 'require-alias-array-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-alias-array-render', (done) => {
     const relTestCasePath = 'require-alias-array-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-fonts', (done) => {
     const relTestCasePath = 'require-fonts';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-img-srcset', (done) => {
     const relTestCasePath = 'require-img-srcset';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-img-query-compile', (done) => {
     const relTestCasePath = 'require-img-query-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-img-query-render', (done) => {
     const relTestCasePath = 'require-img-query-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-img-query-html', (done) => {
     const relTestCasePath = 'require-img-query-html';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-string', (done) => {
     const relTestCasePath = 'require-resource-string';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-alias', (done) => {
     const relTestCasePath = 'require-resource-alias';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-node-module', (done) => {
     const relTestCasePath = 'require-node-module';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-include-mixin-compile', (done) => {
     const relTestCasePath = 'require-resource-include-mixin-compile';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-include-mixin-render', (done) => {
     const relTestCasePath = 'require-resource-include-mixin-render';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-variable-current-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-current-dir';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-variable-parent-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-parent-dir';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-variable-sub-dir', (done) => {
     const relTestCasePath = 'require-resource-variable-sub-dir';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('require-assets-method-compile', (done) => {
@@ -238,23 +230,25 @@ describe('require resource', () => {
     const relTestCasePath = 'require-assets-method-html';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
+});
 
-  test('require-scripts-compile', (done) => {
+describe('require scripts', () => {
+  test('method compile', (done) => {
     const relTestCasePath = 'require-scripts-compile';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
-  test('require-scripts-render', (done) => {
+  test('method render', (done) => {
     const relTestCasePath = 'require-scripts-render';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
-  test('require-scripts-html', (done) => {
+  test('method html', (done) => {
     const relTestCasePath = 'require-scripts-html';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
-  test('webpack resolve modules', (done) => {
+  test('webpack config: resolve.modules', (done) => {
     const relTestCasePath = 'resolve-modules';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
@@ -302,12 +296,12 @@ describe('require pug in javascript', () => {
   });
 
   test(`javascript esModule=false require, method render`, (done) => {
-    const relTestCasePath = 'javascript-esmodule-false-require-render';
+    const relTestCasePath = 'javascript-esm-false-require-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
   test(`javascript esModule=true import, method render`, (done) => {
-    const relTestCasePath = 'javascript-esmodule-true-import-render';
+    const relTestCasePath = 'javascript-esm-true-import-render';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 });
@@ -315,17 +309,17 @@ describe('require pug in javascript', () => {
 describe('embedded filters tests', () => {
   test(`filter escape, method render`, (done) => {
     const relTestCasePath = 'filter-escape';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test(`filter code, method render`, (done) => {
     const relTestCasePath = 'filter-code';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test(`filter highlight, method render`, (done) => {
     const relTestCasePath = 'filter-highlight';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test('highlight prismjs - isInitialized', (done) => {
@@ -342,38 +336,57 @@ describe('embedded filters tests', () => {
 
 describe('options tests', () => {
   test(`options.method default`, (done) => {
-    const relTestCasePath = 'javascript-option-method-default';
+    const relTestCasePath = 'option-method-default-js';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
   test(`options.method=render`, (done) => {
-    const relTestCasePath = 'javascript-option-method-render';
+    const relTestCasePath = 'option-method-render-js';
     compareTemplateFunction(PATHS, relTestCasePath, done);
   });
 
   test(`options.method=html`, (done) => {
-    const relTestCasePath = 'javascript-option-method-html';
+    const relTestCasePath = 'option-method-html-js';
     compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data, method compile`, (done) => {
-    const relTestCasePath = 'javascript-option-data-compile';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data, method render`, (done) => {
-    const relTestCasePath = 'javascript-option-data-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test('pass options from html-webpack-plugin', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-options';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
   test(`option-watchFiles, method render`, (done) => {
     const relTestCasePath = 'option-watchFiles';
-    compareContent(PATHS, relTestCasePath, done);
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+});
+
+describe('options: pass data', () => {
+  test(`options.data, entry js, method compile`, (done) => {
+    const relTestCasePath = 'option-data-js-compile';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data, entry js, method render`, (done) => {
+    const relTestCasePath = 'option-data-js-render';
+    compareTemplateFunction(PATHS, relTestCasePath, done);
+  });
+
+  test('options.data entry pug method compile', (done) => {
+    const relTestCasePath = 'option-data-pug-compile';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('options.data entry pug method render', (done) => {
+    const relTestCasePath = 'option-data-pug-render';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+});
+
+describe('pass data in html-webpack-plugin', () => {
+  test('pass data from plugin options', (done) => {
+    const relTestCasePath = 'html-webpack-plugin-options';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('pass data from plugin options and query', (done) => {
+    const relTestCasePath = 'html-webpack-plugin-options-query';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
 
@@ -403,7 +416,6 @@ describe('exception tests', () => {
   });
 
   test('exception: by load a filter', (done) => {
-    const { filterLoadException } = require('../src/exeptions');
     const expected = `Error by load`;
     const result = () => {
       filterLoadException('filter', '/path/', new Error('module not found'));
@@ -435,6 +447,12 @@ describe('exception tests', () => {
     };
     expect(result).toThrow(expected);
     done();
+  });
+
+  test("exception: script can't be interpolated with the 'compile' method", (done) => {
+    const relTestCasePath = 'exception-interpolation-unsupported-script';
+    const containString = `can't be interpolated with the 'compile' method`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
   test("exception: file can't be interpolated with the 'compile' method", (done) => {

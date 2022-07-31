@@ -1,0 +1,88 @@
+//- The limitations:
+  // following not works with the `compile` method:
+  - var file = '../images/image.png';
+  img(src=require(file))
+
+  // resolve of alias from tsconfig in interpolating string is not supported for `compile` method
+  // alias `@data` from tsconfig
+  -var cat = 'cat-1';
+  -var colorModule = require(`@data/${cat}/color.js`)
+
+//-
+- var name = 'image';
+- var file = name + '.png';
+- var file2 = './image.png';
+- var file3 = './subdir/image.png';
+- var file4 = require(file3);
+
+//- the limitation, following not works with the `compile` method:
+- var file5 = '../assets/images/image.png';
+
+h1 Hello World!
+
+//- required files that should resolve in the current directory need to start with './'
+img.a1(src=require('./image.png'))
+img.a2(src=require('./' + file))
+img.a3(src=require(`${file2}`))
+img.a4(src=require(file2))
+img.a5(src=require(file3))
+img.a6(src=file4)
+img.a7(src=require(file5))
+
+img.b1(src=require('./subdir/image.png'))
+img.b2(src=require('./subdir/' + file))
+img.c1(src=require('../assets/images/image.png'))
+img.c2(src=require('../assets/images/' + file))
+
+img.d1(src=require('Images/image.png'))
+img.d2(src=require("~Images/" + file))
+img.d3(src=require(`@Images/${file}`))
+img.d4(src=require(`@Images/image.png`))
+
+//- alias defined in tsconfig.json using the webpack resolve.plugins
+img.e1(src=require(`@TSImages/image.png`))
+img.e2(src=require(`@TSImages/` + file))
+
+//- test option `basedir` and trim()
+img.f1(src=require( '/assets/images/' + file))
+div.a= data.items.a
+div.b= data.items.b
+
+-
+  // test require of a function
+  var colorModule = require('@data/cat-1/color')
+
+  // alias `Data` from webpack alias
+  var colorModule2 = require('~Data/cat-1/color');
+
+  colorModule.add(require('@data/colors.json'));
+  var colors = colorModule.getData();
+  var str = colorModule.getHelloColor('green');
+
+p #{colorModule.getHelloColor('green')}
+
+//- test single require of a JSON
+- var colors = require('../data/colors.json')
+
+.first
+  each color in colors
+    i= color.name
+
+//- test multiple requires of a JSON in a object
+-
+  var data = [
+    {
+      name: 'Red Green Blue',
+      colors: require('../data/colors.json'),
+    },
+    {
+      name: 'Rose Violet Azure',
+      colors: require('Data/cat-2/colors2.json'),
+    }
+  ]
+
+.second
+  each item in data
+    h3= item.name
+    each color in item.colors
+      i= color.name

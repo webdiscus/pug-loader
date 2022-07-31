@@ -7,6 +7,7 @@ module.exports = (env, argv) => {
   return {
     mode: isProd ? 'production' : 'development',
     devtool: isProd ? 'source-map' : 'inline-source-map',
+    stats: 'minimal',
 
     resolve: {
       // aliases used in sources of pug, scss, js
@@ -48,14 +49,12 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        verbose: true, // output information about the process to console
-        modules: [
-          // module extracts CSS from style source files required directly in Pug
-          PugPlugin.extractCss({
-            // output filename of styles
-            filename: 'assets/css/[name].[contenthash:8].css',
-          }),
-        ],
+        verbose: !isProd, // output information about the process to console
+        // module extracts CSS from style source files required directly in Pug
+        extractCss: {
+          // output filename of styles
+          filename: 'assets/css/[name].[contenthash:8].css',
+        },
       }),
     ],
 

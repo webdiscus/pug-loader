@@ -1,13 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const webRootPath = path.join(__dirname, 'public/');
-
 module.exports = {
   mode: 'production',
 
   output: {
-    path: webRootPath,
+    path: path.join(__dirname, 'public/'),
     publicPath: '',
   },
 
@@ -15,26 +13,22 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Startseite',
-      tmplData: {
-        lang: 'de-DE',
+      title: 'Home',
+      pluginData: {
+        teaser: 'Teaser of home page.',
+        description: 'Home custom data.',
       },
-      template: path.join(
-        __dirname,
-        'src/index.pug?dataFromQuery=' + JSON.stringify({ options: { description: 'Benutzerdefinierte Homepage' } })
-      ),
+      template: path.join(__dirname, 'src/index.pug'),
       filename: 'index.html',
     }),
 
     new HtmlWebpackPlugin({
       title: 'About',
-      tmplData: {
-        lang: 'en-US',
+      pluginData: {
+        teaser: 'Teaser of about page.',
+        description: 'About custom data.',
       },
-      template: path.join(
-        __dirname,
-        'src/about.pug?dataFromQuery=' + JSON.stringify({ options: { description: 'Custom about page' } })
-      ),
+      template: path.join(__dirname, 'src/about.pug'),
       filename: 'about.html',
     }),
   ],

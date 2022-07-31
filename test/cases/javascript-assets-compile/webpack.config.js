@@ -26,7 +26,7 @@ module.exports = {
     alias: {
       Images: path.join(__dirname, 'src/assets/images/'),
       Data: path.join(__dirname, 'src/data/'),
-      Templates: path.join(__dirname, 'src/template/'),
+      Templates: path.join(__dirname, 'src/views/'),
     },
   },
 

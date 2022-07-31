@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -8,11 +8,18 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/[name].[contenthash:4].js',
+    filename: 'assets/[name].[contenthash:8].js',
+  },
+
+  resolve: {
+    alias: {
+      Scripts: path.join(__dirname, 'src/assets/scripts/'),
+      ScriptsContext: '/src/assets/scripts/',
+    },
   },
 
   entry: {
-    index: './src/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [new PugPlugin()],

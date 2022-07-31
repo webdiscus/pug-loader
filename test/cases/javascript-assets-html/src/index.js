@@ -1,2 +1,2 @@
-const html = require('Template/widget.pug');
+const html = require('Views/widget.pug');
 console.log(html);

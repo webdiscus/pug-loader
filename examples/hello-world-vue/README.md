@@ -5,7 +5,7 @@ npm i
 
 ## Start the Vue app in browser
 ```
-npm run serve
+npm run start
 ```
 
 ## Build

@@ -1,0 +1,19 @@
+html
+  head
+    //- html-loader has the BUG: using any query occurs HTMLParser error
+    script(src=require('./main'))
+    script(src=require('../assets/scripts/file1.js'))
+    script(src=require('../assets/scripts/file2'))
+    //- root path in basedir or rootContext
+    script(src=require('/src/assets/scripts/file3.js'))
+    //- alias in rootContext
+    script(src=require('ScriptsContext/file4'))
+    //- absolute alias
+    script(src=require('Scripts/file5.js'))
+
+    //- node module
+    //- Webpack BUG: the script in node modules is not found, by html method only
+        TODO: fix the "Cannot find module './bundle.js'" in generated JS file
+    //- script(src=require('ansis'))
+  body
+    h1 Hello Pug!

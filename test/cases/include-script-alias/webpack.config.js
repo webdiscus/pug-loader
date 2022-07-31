@@ -1,8 +1,6 @@
 const path = require('path');
 const PugPlugin = require('../../pug-plugin');
 
-const webRootPath = path.join(__dirname, 'public/');
-
 module.exports = {
   mode: 'production',
 
@@ -13,12 +11,12 @@ module.exports = {
   },
 
   output: {
-    path: webRootPath,
+    path: path.join(__dirname, 'public/'),
     publicPath: '',
   },
 
   entry: {
-    index: 'src/template/index.pug',
+    index: 'src/views/index.pug',
   },
 
   plugins: [new PugPlugin()],

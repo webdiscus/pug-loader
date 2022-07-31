@@ -1,18 +1,18 @@
-img.a1(src=require('../assets/images/image.jpeg'))
-img.a2(src=require('AliasImages/image.jpeg'))
-img.a3(src=require('@images/image.jpeg'))
+img.a1(src=require('../assets/images/image.png'))
+img.a2(src=require('AliasImages/image.png'))
+img.a3(src=require('@images/image.png'))
 
-- var file = 'image.jpeg'
+- var file = 'image.png'
 img.b1(src=require('../assets/images/' + file))
 img.b2(src=require('AliasImages/' + file))
 //-img.b3(src=require('@images/' + file)) TODO: fix for compile is not possible
 
-- var file = './image.jpeg'
+- var file = './image.png'
 img.c1(src=require('../assets/images/' + file))
 img.c2(src=require('AliasImages/' + file))
 //-img.c3(src=require('@images/' + file)) TODO: fix for compile is not possible
 
-- var file = '../images/image.jpeg'
+- var file = '../images/image.png'
 img.d1(src=require('../assets/images/' + file))
 img.d2(src=require('AliasImages/' + file))
 //-img.d3(src=require('@images/' + file)) TODO: fix for compile is not possible

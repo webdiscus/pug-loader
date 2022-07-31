@@ -17,14 +17,14 @@ export const getCompareFileList = function (receivedPath, expectedPath) {
   };
 };
 
-export const getCompareFileContents = function (receivedFile, expectedFile, filter = /.(html|css|css.map)$/) {
+export const getCompareFileContents = function (receivedFile, expectedFile, filter = /.(html|css|css.map|js|js.map)$/) {
   return filter.test(receivedFile) && filter.test(expectedFile)
     ? { received: readTextFileSync(receivedFile), expected: readTextFileSync(expectedFile) }
     : { received: '', expected: '' };
 };
 
 export const compareFileListAndContent = (PATHS, relTestCasePath, done) => {
-  const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+  const absTestPath = path.join(PATHS.testSource, relTestCasePath),
     webRootPath = path.join(absTestPath, PATHS.webRoot),
     expectedPath = path.join(absTestPath, PATHS.expected);
 
@@ -50,7 +50,7 @@ export const compareContent = (
   receivedFile = 'index.html',
   expectedFile = 'index.html'
 ) => {
-  const absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+  const absTestPath = path.join(PATHS.testSource, relTestCasePath);
 
   compile(PATHS, relTestCasePath, {}).then(() => {
     const received = readTextFileSync(path.join(absTestPath, PATHS.webRoot, receivedFile));
@@ -67,7 +67,7 @@ export const compareTemplateFunction = (
   receivedFile = 'index.js',
   expectedFile = 'index.html'
 ) => {
-  const absTestPath = path.join(PATHS.testOutput, relTestCasePath);
+  const absTestPath = path.join(PATHS.testSource, relTestCasePath);
 
   compile(PATHS, relTestCasePath, {}).then(() => {
     const received = execScriptSync(path.join(absTestPath, PATHS.webRoot, receivedFile));
@@ -86,4 +86,19 @@ export const exceptionContain = function (PATHS, relTestCasePath, containString,
       expect(error.toString()).toContain(containString);
       done();
     });
+};
+
+export const stdoutContain = function (PATHS, relTestCasePath, containString, done) {
+  const stdout = jest.spyOn(console._stdout, 'write').mockImplementation(() => {});
+
+  compile(PATHS, relTestCasePath, {}).then(() => {
+    const { calls } = stdout.mock;
+    const output = calls.length > 0 ? calls[0][0] : '';
+
+    stdout.mockClear();
+    stdout.mockRestore();
+
+    expect(output).toContain(containString);
+    done();
+  });
 };

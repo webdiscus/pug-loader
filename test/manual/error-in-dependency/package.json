@@ -1,5 +1,5 @@
 {
-  "name": "app-hello-world",
+  "name": "error-in-dependency",
   "version": "1.0.0",
   "description": "Test: Error parsing body of the with expression, #14",
   "author": "webdiscus",

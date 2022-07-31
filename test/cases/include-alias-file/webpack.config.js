@@ -1,21 +1,24 @@
 const path = require('path');
 const PugPlugin = require('../../pug-plugin');
 
-const webRootPath = path.join(__dirname, 'public/');
-
 module.exports = {
   mode: 'production',
 
   resolve: {
     alias: {
-      ALIAS_TO_SCRIPT: path.resolve(__dirname, 'src/includes/script.js'),
-      ALIAS_TO_SCRIPT_TS: path.resolve(__dirname, 'src/includes/script.ts'),
+      ALIAS_CONTEXT_DIR: '/src/includes/',
+      ALIAS_CONTEXT_FILE: '/src/includes/text.txt',
+      ALIAS_FILE: path.resolve(__dirname, 'src/includes/text.txt'),
+      ALIAS_EXTERNAL_FILE: path.resolve(__dirname, '../../fixtures/text.txt'),
+      ALIAS_SCRIPT_MAIN: path.resolve(__dirname, 'src/scripts/main.js'),
+      ALIAS_SCRIPT_VENDOR: path.resolve(__dirname, 'src/scripts/vendor.js'),
     },
   },
 
   output: {
-    path: webRootPath,
+    path: path.join(__dirname, 'public/'),
     publicPath: '',
+    filename: 'assets/[name].js',
   },
 
   entry: {
@@ -24,7 +27,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      pretty: true,
+      //pretty: true,
     }),
   ],
 

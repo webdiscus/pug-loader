@@ -10,20 +10,20 @@ pre.
     See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
 //- let data = encodeURIComponent('{"a":"a&b?[]:#*@+,;=$(/)"}');
 
-//-img(src=require('./image.jpeg?format=webp&sizes[]=200,sizes[]=300&not_encoded_data={"a":"123"}&data=' + data))
-//-img(src=require('./image.jpeg?format=webp&sizes[]=200,sizes[]=300&not_encoded_data={"a":"123"}&data=234'))
+//-img(src=require('./image.png?format=webp&sizes[]=80,sizes[]=90&not_encoded_data={"a":"123"}&data=' + data))
+//-img(src=require('./image.png?format=webp&sizes[]=90,sizes[]=90&not_encoded_data={"a":"123"}&data=234'))
 
 //- note: reserved chars in RFC 3986 must be encoded
     this example occurs error, to fix it, see above
-//-img(src=require('./image.jpeg?key=val&data={"a":"a&b?[]:#*@+,;=$(/!)"}'))
+//-img(src=require('./image.png?key=val&data={"a":"a&b?[]:#*@+,;=$(/!)"}'))
 
 //- test query parameters for https://github.com/dazuaz/responsive-loader
-img.query1(src=require('./image.jpeg?format=webp&size=100'))
+img.query1(src=require('./image.png?format=webp&size=100'))
 
-img.query2(src=require('./image.jpeg?{size:102, format: "webp", placeholder: true}'))
-img.query3(src=require("./image.jpeg?{size:103, format: 'webp', placeholder: true}"))
-img.query4(src=require("./image.jpeg?{size:104, format: \"webp\", placeholder: true}"))
-img.query5(src=require(`./image.jpeg?{size:105, format: '${'webp'}', placeholder: true}`))
+img.query2(src=require('./image.png?{size:102, format: "webp", placeholder: true}'))
+img.query3(src=require("./image.png?{size:103, format: 'webp', placeholder: true}"))
+img.query4(src=require("./image.png?{size:104, format: \"webp\", placeholder: true}"))
+img.query5(src=require(`./image.png?{size:105, format: '${'webp'}', placeholder: true}`))
 
 //- SyntaxError: JSON5: invalid character '`'
-//-img.query6(src=require('./image.jpeg?{size:100, format: `webp`, placeholder: true}'))
+//-img.query6(src=require('./image.png?{size:100, format: `webp`, placeholder: true}'))

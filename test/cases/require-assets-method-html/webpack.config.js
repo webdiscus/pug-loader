@@ -11,16 +11,14 @@ module.exports = {
   },
 
   entry: {
-    index: './src/pages/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 

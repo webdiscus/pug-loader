@@ -21,13 +21,13 @@ module.exports = {
   // collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  // collectCoverageFrom: ['src/**/*.js'],
+  collectCoverageFrom: ['../src/**/*.js'],
 
   // The directory where Jest should output its coverage files
   // coverageDirectory: null,
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', './utils/', './output/'],
+  //coveragePathIgnorePatterns: ['/node_modules/'],
 
   // Indicates which provider should be used to instrument code for coverage.
   // Allowed values are babel (default) or v8.
@@ -201,7 +201,7 @@ module.exports = {
   // testSequencer: '@jest/test-sequencer',
 
   // Default timeout of a test in milliseconds.
-  // testTimeout: 5000,
+  testTimeout: 10000,
 
   // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
   // testURL: "http://localhost",

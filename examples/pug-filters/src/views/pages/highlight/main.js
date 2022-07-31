@@ -1,1 +1,1 @@
-console.log('\n>> Highlight page');
+console.log('\n>> Highlight');

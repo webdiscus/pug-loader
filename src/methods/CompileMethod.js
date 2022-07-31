@@ -1,0 +1,74 @@
+const resolver = require('../Resolver');
+const { scriptStore } = require('../ModuleProxy');
+const { injectExternalData, hmrFile } = require('../Utils');
+
+/**
+ * Compile into template function and export a JS module.
+ */
+class CompileMethod {
+  constructor({ templateFile, templateName, esModule }) {
+    this.templateFile = templateFile;
+    this.templateName = templateName;
+    this.exportCode = esModule ? 'export default ' : 'module.exports=';
+  }
+
+  /**
+   * Returns the require() string with interpolated value for a resource file.
+   *
+   * @param {string} value The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  require(value, issuer) {
+    const interpolatedValue = resolver.interpolate(value, issuer);
+
+    return `require(${interpolatedValue})`;
+  }
+
+  /**
+   * Returns the require() string with interpolated value for the script file.
+   * The filename from the script tag will be stored for usage in pug-plugin.
+   *
+   * @param {string} value The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  requireScript(value, issuer) {
+    const resolvedFile = resolver.interpolate(value, issuer, true);
+    scriptStore.add(resolvedFile);
+
+    return `require('${resolvedFile}')`;
+  }
+
+  /**
+   * Export template code for using at runtime.
+   *
+   * @param {string} source The template source code.
+   * @param {{}} locals The variables passed in template function.
+   * @return {string}
+   */
+  export(source, locals) {
+    if (Object.keys(locals).length > 0) {
+      source = injectExternalData(source, locals);
+    }
+    return source + ';' + this.exportCode + this.templateName + ';';
+  }
+
+  /**
+   * Export code with error message.
+   *
+   * @param {Error} error
+   * @param {Function} getErrorMessage
+   * @return {string}
+   */
+  exportError(error, getErrorMessage) {
+    const requireHmrScript = `' + require('${hmrFile}') + '`;
+    const errStr = error.toString().replace(/'/g, "\\'");
+    const message = getErrorMessage.call(null, errStr, requireHmrScript);
+    scriptStore.add(hmrFile);
+
+    return this.exportCode + `() => '${message}';`;
+  }
+}
+
+module.exports = CompileMethod;

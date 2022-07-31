@@ -23,9 +23,9 @@
 // },
 
 const ansis = require('ansis');
+const { loaderName } = require('../Utils');
 const adapter = require('./highlight/adapter');
 
-const { loaderName } = require('../utils');
 const filterName = 'highlight';
 const labelError = `\n${ansis.black.bgRedBright(`[${loaderName}:${filterName}]`)}`;
 

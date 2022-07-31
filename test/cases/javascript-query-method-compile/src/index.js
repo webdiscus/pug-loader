@@ -1,6 +1,6 @@
-// require with alias 'Template'
+// require with alias 'Views'
 
-const tmpl = require('Template/widget.pug');
+const tmpl = require('Views/widget.pug');
 const html = tmpl({
   a: 10,
   b: 'abc',

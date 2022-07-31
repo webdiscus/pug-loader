@@ -1,30 +1,30 @@
-img(src=require('./image.jpeg'))
+img(src=require('./image.png'))
 
 - var basename = 'logo';
 
 //- test the prefix only as alias
-img.prefix(src=require('@/images/logo.jpeg'))
+img.prefix(src=require('@/images/logo.png'))
 
 //- test the single char as alias
-img.char(src=require('&/images/logo.jpeg'))
+img.char(src=require('&/images/logo.png'))
 
 //- note: if alias value is a string, the variable can be used
 
 //- test alias value as string
-img.a1(src=require('ImagesA/' + basename + '-a1.jpeg'))
-img.a2(src=require('~ImagesA/' + basename + '-a2.jpeg'))
-img.a3(src=require('@ImagesA/' + basename + '-a3.jpeg'))
+img.a1(src=require('ImagesA/' + basename + '-a1.png'))
+img.a2(src=require('~ImagesA/' + basename + '-a2.png'))
+img.a3(src=require('@ImagesA/' + basename + '-a3.png'))
 
 //- test alias value as string contained a prefix in name
-img.b1(src=require('ImagesB/logo-b1.jpeg'))
-img.b2(src=require('~ImagesB/logo-b2.jpeg'))
-img.b3(src=require('@ImagesB/logo-b3.jpeg'))
+img.b1(src=require('ImagesB/logo-b1.png'))
+img.b2(src=require('~ImagesB/logo-b2.png'))
+img.b3(src=require('@ImagesB/logo-b3.png'))
 //- this works too
 -
   var logos = {
-    bc1: require('ImagesB/logo-b1.jpeg'),
-    bc2: require('~ImagesB/logo-b2.jpeg'),
-    bc3: require('@ImagesB/logo-b3.jpeg'),
+    bc1: require('ImagesB/logo-b1.png'),
+    bc2: require('~ImagesB/logo-b2.png'),
+    bc3: require('@ImagesB/logo-b3.png'),
   };
 each src, className in logos
   img(src=src class=className)
@@ -33,12 +33,12 @@ each src, className in logos
 //- LIMITATION for compile method:
     If the alias is an array of paths, then only the first path is returned
     because it is not possible to determine the correct path containing the interpolated filename.
-//-img.c1(src=require('ImagesC/' + basename + '-c1.jpeg'))
-img.c1(src=require('ImagesC/logo-c1.jpeg'))
-img.c2(src=require('~ImagesC/logo-c2.jpeg'))
-img.c3(src=require('@ImagesC/logo-c3.jpeg'))
+//-img.c1(src=require('ImagesC/' + basename + '-c1.png'))
+img.c1(src=require('ImagesC/logo-c1.png'))
+img.c2(src=require('~ImagesC/logo-c2.png'))
+img.c3(src=require('@ImagesC/logo-c3.png'))
 
 //- test alias value as array contained a prefix in name
-img.d1(src=require('ImagesD/logo-d1.jpeg'))
-img.d2(src=require('~ImagesD/logo-d2.jpeg'))
-img.d3(src=require('@ImagesD/logo-d3.jpeg'))
+img.d1(src=require('ImagesD/logo-d1.png'))
+img.d2(src=require('~ImagesD/logo-d2.png'))
+img.d3(src=require('@ImagesD/logo-d3.png'))

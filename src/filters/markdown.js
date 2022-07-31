@@ -1,8 +1,8 @@
 const path = require('path');
 const ansis = require('ansis');
+const { loaderName } = require('../Utils');
 const adapter = require('./highlight/adapter');
 
-const { loaderName } = require('../utils');
 const filterName = 'markdown';
 const moduleName = 'markdown-it';
 const labelError = `\n${ansis.black.bgRedBright(`[${loaderName}:${filterName}]`)}`;
@@ -44,11 +44,14 @@ const filter = {
    * @param {string} langPrefix CSS language prefix for fenced blocks of code. Can be useful for external highlighters.
    *  Use this option only if used external highlighters on frontend, in browser.
    *  If the option {highlight: {use: '...'}} is used then langPrefix is ignored.
+   * @param {boolean} github Apply github syntax styles.
    * @public
    * @api
    */
-  init({ highlight, langPrefix }) {
+  init({ highlight, langPrefix, github }) {
     if (this.module != null) return;
+
+    this.github = github === true;
 
     let options = {
       // enable HTML tags in markdown source
@@ -77,13 +80,35 @@ const filter = {
   /**
    * Apply the filter.
    *
-   * @param {string} text
+   * @param {string} content
    * @returns {string}
    * @public
    * @api
    */
-  apply(text) {
-    return this.module.render(text);
+  apply(content) {
+    if (this.github) {
+      content = this.applyGithubSyntax(content);
+    }
+
+    return this.module.render(content);
+  },
+
+  /**
+   * Apply github syntax styles for Note, Warning.
+   *
+   * @param {string} content
+   * @return {string}
+   */
+  applyGithubSyntax(content) {
+    const match = /(\*\*Note\*\*|\*\*Warning\*\*)/g;
+    const replacements = {
+      '**Note**':
+        '<span class="color-fg-accent"><svg class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>Note</span>',
+      '**Warning**':
+        '<span class="color-fg-attention"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.22 1.754a.25.25 0 00-.44 0L1.698 13.132a.25.25 0 00.22.368h12.164a.25.25 0 00.22-.368L8.22 1.754zm-1.763-.707c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0114.082 15H1.918a1.75 1.75 0 01-1.543-2.575L6.457 1.047zM9 11a1 1 0 11-2 0 1 1 0 012 0zm-.25-5.25a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0v-2.5z"></path></svg>Warning</span>',
+    };
+
+    return content.replace(match, (value) => replacements[value]);
   },
 };
 

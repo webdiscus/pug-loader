@@ -2,9 +2,6 @@ const path = require('path');
 const PugPlugin = require('../../pug-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-const basePath = path.resolve(__dirname);
-const webRootPath = path.join(__dirname, 'public/');
-
 module.exports = {
   stats: {
     children: true,
@@ -13,16 +10,16 @@ module.exports = {
   mode: 'production',
 
   resolve: {
-    plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
+    plugins: [new TsConfigPathsPlugin({ configFile: path.join(__dirname, 'tsconfig.json') })],
   },
 
   output: {
-    path: webRootPath,
+    path: path.join(__dirname, 'public/'),
     publicPath: '',
   },
 
   entry: {
-    index: 'src/template/index.pug',
+    index: 'src/views/index.pug',
   },
 
   plugins: [new PugPlugin()],
