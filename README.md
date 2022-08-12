@@ -401,10 +401,10 @@ If the filter has no options, use `true` as an option to enable the filter.
 > See the complete information on the [pug filter](https://webdiscus.github.io/pug-loader/pug-filters/) site and in the [sources](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters).
 
 ### `watchFiles`
-Type: `Array<RegExp>` Default: `[ /\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i ]`<br>
-This option allows you to configure a list of `RegExp` to watch for file changes in resolved dependencies.\
+Type: `Array<RegExp|string>` Default: `[ /\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i ]`<br>
+This option allows you to configure watching of individual resolved dependencies.\
 The default value enables watching of Pug, scripts, markdown, etc. 
-and ignores images, styles to avoid double processing via Webpack and via Pug's own compiler.
+and ignores images, styles to avoid double processing via Webpack and via Pug's ist own compiler.
 
 In some cases, you may want to use one SCSS file for styling 
 and include another SCSS file with a Pug filter for code syntax highlighting.
@@ -419,8 +419,18 @@ to do this, add to the `watchFiles` option:
   ]
 }
 ```
+
+For watching of a file, add full path, for example:
+```js
+{
+  watchFiles: [
+    path.join(__dirname, './src/config.yml'),
+  ]
+}
+```
+
 > **Note:**
-> Default RegExp array will be extends, not overridden.
+> Default value of `watchFiles` will be extends, not overridden.
 
 ---
 

@@ -1,5 +1,10 @@
 # Change log
 
+## 2.8.1 (2022-08-12)
+- feat: add supports for a string value by the `watchFiles` option
+- fix: resolve style in Pug from node_modules by module name, e.g.: `link(href=require('bootstrap') rel='stylesheet')`
+- chore: inner optimisations for using with the pug-plugin
+
 ## 2.8.0 (2022-08-03)
 - feat: add resolving of file alias for scripts and styles
 - feat: improve resolving of script files specified w/o extension

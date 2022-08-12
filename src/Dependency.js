@@ -1,11 +1,6 @@
 const { isWin } = require('./Utils');
 const path = require('path');
 
-// TODO: after changes recompile JS files imported in `main.js`, which is in defined script tag.
-//   For example, change the examples/hello-world-app/src/app/App.js:
-//   - first changes -> live reload -> display changes
-//   - next changes -> live reload -> display first changes (possible required file is cached)
-
 /**
  * Dependencies in code for watching a changes.
  * @singleton
@@ -19,10 +14,19 @@ class Dependency {
   init({ loaderContext, watchFiles }) {
     // avoid double push in array by watching
     if (!this.isInit && watchFiles != null) {
-      if (!Array.isArray(watchFiles)) watchFiles = [watchFiles];
-      this.watchFiles.push(...watchFiles);
       this.isInit = true;
+
+      if (!Array.isArray(watchFiles)) watchFiles = [watchFiles];
+
+      for (let i = 0; i < watchFiles.length; i++) {
+        let re = watchFiles[i];
+        if (re.constructor.name !== 'RegExp') {
+          re = new RegExp(re);
+        }
+        this.watchFiles.push(re);
+      }
     }
+
     this.loaderContext = loaderContext;
   }
 

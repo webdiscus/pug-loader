@@ -3,6 +3,7 @@ const path = require('path');
 // the 'enhanced-resolve' package already used in webpack, don't need to define it in package.json
 const ResolverFactory = require('enhanced-resolve');
 const dependency = require('./Dependency');
+const { plugin } = require('./Modules');
 const { isWin, pathToPosix } = require('./Utils');
 const { resolveException, unsupportedInterpolationException } = require('./Exeptions');
 
@@ -15,6 +16,10 @@ class Resolver {
   hasAlias = false;
   hasPlugins = false;
 
+  styleResolveOptions = {
+    restrictions: [/\.(css|scss|sass|less|styl)$/],
+  };
+
   /**
    * @param {string} basedir The the root directory of absolute paths.
    * @param {{}} options The webpack `resolve` options.
@@ -26,10 +31,26 @@ class Resolver {
     this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
 
     this.resolveFile = ResolverFactory.create.sync({
-      preferRelative: true,
       ...options,
+      preferRelative: options.preferRelative !== false,
       // restrict default extensions list '.js', '.json', '.wasm' for faster resolving
       extensions: options.extensions.length ? options.extensions : ['.js'],
+    });
+
+    // resolver for a style from the link tag
+    this.resolveStyle = ResolverFactory.create.sync({
+      ...options,
+      preferRelative: options.preferRelative !== false,
+      byDependency: {},
+      conditionNames: ['style', 'sass'],
+      // firstly try to resolve 'browser' or 'style' fields in package.json to get compiled CSS bundle of a module,
+      // e.g. bootstrap has the 'style' field, but material-icons has the 'browser' field for resolving the CSS file;
+      // if a module has not a client specified field, then must be used path to client file of the module,
+      // like `module-name/dist/bundle.css`
+      mainFields: ['style', 'browser', 'sass', 'main'],
+      mainFiles: ['_index', 'index'],
+      extensions: ['.scss', '.sass', '.css'],
+      restrictions: plugin.isUsed() ? plugin.getStyleRestrictions() : this.styleResolveOptions.restrictions,
     });
   }
 
@@ -38,13 +59,15 @@ class Resolver {
    *
    * @param {string} file The file to resolve.
    * @param {string} templateFile The template file.
-   * @param {boolean} [isScript=false] Whether the file is required in script tag.
+   * @param {string} [type = 'default'] The require type: 'default', 'script', 'style'.
    * @return {string}
    */
-  resolve(file, templateFile, isScript = false) {
+  resolve(file, templateFile, type = 'default') {
     const context = path.dirname(templateFile);
-    let resolvedFile = null;
+    const isScript = type === 'script';
+    const isStyle = type === 'style';
     let isAliasArray = false;
+    let resolvedFile = null;
 
     // resolve an absolute path by prepending options.basedir
     if (file[0] === '/') {
@@ -68,14 +91,14 @@ class Resolver {
       // remove optional prefix in request for enhanced resolver
       if (isAliasArray) request = this.removeAliasPrefix(request);
       try {
-        resolvedFile = this.resolveFile(context, request);
+        resolvedFile = isStyle ? this.resolveStyle(context, request) : this.resolveFile(context, request);
       } catch (error) {
         resolveException(error, file, templateFile);
       }
     }
 
     if (isScript) {
-      resolvedFile = this.resolveExtension(resolvedFile);
+      resolvedFile = this.resolveScriptExtension(resolvedFile);
     } else {
       dependency.add(resolvedFile);
     }
@@ -91,13 +114,14 @@ class Resolver {
    *
    * @param {string} value The expression to resolve.
    * @param {string} templateFile The template file.
-   * @param {boolean} [isScript = false] Whether the file is required in script tag.
+   * @param {string} [type = 'default'] The require type: 'default', 'script', 'style'.
    * @return {string}
    */
-  interpolate(value, templateFile, isScript = false) {
+  interpolate(value, templateFile, type = 'default') {
     value = value.trim();
-
     const [, quote, file] = /(^"|'|`)(.+?)(?=`|'|")/.exec(value) || [];
+    const isScript = type === 'script';
+    const isStyle = type === 'style';
     let interpolatedValue = null;
     let valueFile = file;
 
@@ -148,7 +172,9 @@ class Resolver {
     if (interpolatedValue == null) {
       if (file.indexOf('{') < 0 && !file.endsWith('/')) {
         try {
-          const resolvedValueFile = this.resolveFile(context, valueFile);
+          const resolvedValueFile = isStyle
+            ? this.resolveStyle(context, valueFile)
+            : this.resolveFile(context, valueFile);
           interpolatedValue = value.replace(file, resolvedValueFile);
         } catch (error) {
           resolveException(error, value, templateFile);
@@ -179,12 +205,12 @@ class Resolver {
       resolvedFile = resolvedValue;
     }
 
-    if (isScript) {
+    if (isScript || isStyle) {
       if (!resolvedFile) {
         unsupportedInterpolationException(value, templateFile);
       }
+      if (isScript) resolvedFile = this.resolveScriptExtension(resolvedFile);
 
-      resolvedFile = this.resolveExtension(resolvedFile);
       return isWin ? pathToPosix(resolvedFile) : resolvedFile;
     }
 
@@ -201,7 +227,7 @@ class Resolver {
    * @param {string} request The request of script.
    * @return {string}
    */
-  resolveExtension(request) {
+  resolveScriptExtension(request) {
     const [resource, query] = request.split('?');
     const scriptExtensionRegexp = /\.(js|ts)$/;
     const resolvedFile = scriptExtensionRegexp.test(resource) ? resource : require.resolve(resource);

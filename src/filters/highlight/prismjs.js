@@ -1,5 +1,6 @@
 const path = require('path');
 const ansis = require('ansis');
+const { outToConsole } = require('../../Utils');
 
 const label = 'prismjs';
 const labelInfo = `\n${ansis.black.bgGreen(`[${label}]`)}`;
@@ -111,7 +112,7 @@ const prismjs = {
   loadLanguage(language) {
     if (!this.supportedLanguages.has(language)) {
       if (this.verbose) {
-        console.log(`\n${labelWarn} Unsupported language '${ansis.red(language)}' is ignored!`);
+        outToConsole(`${labelWarn} Unsupported language '${ansis.red(language)}' is ignored!\n`);
       }
       return false;
     }
@@ -124,7 +125,7 @@ const prismjs = {
     const loaded = [...loadedLanguages, ...Object.keys(Prism.languages)];
 
     if (this.verbose) {
-      console.log(`${labelInfo} Load language ${ansis.cyan(language)}`);
+      outToConsole(`${labelInfo} Load language ${ansis.cyan(language)}`);
     }
 
     getLoader(components, [language], loaded).load((lang) => {
@@ -137,7 +138,7 @@ const prismjs = {
         delete Prism.languages[lang];
 
         if (this.verbose && language !== lang) {
-          console.log(` - load dependency ${ansis.cyan(lang)}`);
+          outToConsole(` - load dependency ${ansis.cyan(lang)}`);
         }
 
         require(pathToLanguage);

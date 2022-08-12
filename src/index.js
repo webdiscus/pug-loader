@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
 const walk = require('pug-walk');
-const { plugin, scriptStore } = require('./ModuleProxy');
+const { plugin, scriptStore } = require('./Modules');
 const dependency = require('./Dependency');
 const resolver = require('./Resolver');
 const loader = require('./Loader');
@@ -65,7 +65,15 @@ const loadFilters = (filters) => {
  * @param {string} value
  * @return {boolean}
  */
-const hasRequire = (value) => value != null && typeof value === 'string' && value.indexOf('require(') > -1;
+const isRequired = (value) => value != null && typeof value === 'string' && value.indexOf('require(') > -1;
+
+/**
+ * Whether the node attribute belongs to style.
+ *
+ * @param {Array<name: string, val: string>} item
+ * @return {boolean}
+ */
+const isStyle = (item) => item.name === 'rel' && item.val.indexOf('stylesheet') > -1;
 
 /**
  * The pug plugin to resolve path for include, extends, require.
@@ -94,22 +102,23 @@ const resolvePlugin = {
   preCodeGen(ast) {
     return walk(ast, (node) => {
       if (node.type === 'Code') {
-        // resolving for require of a code, like `- var data = require('./data.js')`
+        // resolving for require in code, like `- var data = require('./data.js')`
         const value = node.val;
-        if (hasRequire(value)) {
-          const result = loader.resolveResource(value, node.filename);
-          if (result != null) node.val = result;
+        if (isRequired(value)) {
+          node.val = loader.resolveResource(value, node.filename);
         }
       } else if (node.attrs) {
-        // resolving for tag attributes, like `img(src=require('./image.jpeg'))`
+        // resolving of required files in tag attributes
         for (let attr of node.attrs) {
           const value = attr.val;
-          if (hasRequire(value)) {
-            const result =
-              node.name === 'script'
-                ? loader.resolveScript(value, attr.filename)
-                : loader.resolveResource(value, attr.filename);
-            if (result != null) attr.val = result;
+          if (isRequired(value)) {
+            if (node.name === 'script') {
+              attr.val = loader.resolveScript(value, attr.filename);
+            } else if (node.name === 'link' && node.attrs.find(isStyle)) {
+              attr.val = loader.resolveStyle(value, attr.filename);
+            } else {
+              attr.val = loader.resolveResource(value, attr.filename);
+            }
           }
         }
       }
@@ -125,16 +134,15 @@ const resolvePlugin = {
 const compile = function (content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
-  const { resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
   const webpackOptions = loaderContext._compiler.options || {};
+  const { resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
   const isPlugin = plugin.isUsed();
-  let customData = {};
-
-  if (!loaderOptions.name) loaderOptions.name = 'template';
-  if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
-
   let basedir = loaderOptions.basedir || context;
+  let customData = {};
+  let compileResult, result;
+
   if (basedir.slice(-1) !== '/') basedir += '/';
+  if (!loaderOptions.name) loaderOptions.name = 'template';
 
   const compilerOptions = {
     // used to resolve import/extends and to improve errors
@@ -170,19 +178,38 @@ const compile = function (content, callback) {
     // output compiled function to stdout, must be false
     debug: loaderOptions.debug === true,
 
-    /**
-     * @deprecated This option is deprecated and must be false, see https://pugjs.org/api/reference.html#options
-     * Use the `pretty` option of the pug-plugin to format generated HTML.
-     **/
+    // the pretty option is deprecated and must be false, see https://pugjs.org/api/reference.html#options
+    // use the `pretty` option of the pug-plugin to format generated HTML.
     pretty: false,
   };
 
+  if (loaderContext.cacheable != null) loaderContext.cacheable(true);
+
   if (!isPlugin) {
+    // trim indent by using as standalone, e.g. with vue
     const template = trimIndent(content);
     if (template !== false) content = template;
     // TODO: drop support HtmlWebpackPlugin in next major version 3.x, because must be used pug-plugin instead
     customData = HtmlWebpackPlugin.getUserOptions(filename, webpackOptions);
   }
+
+  // prevent double initialisation with same options, occurs when many Pug files used in one webpack config
+  if (!plugin.isCached(context)) {
+    if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
+
+    resolver.init({
+      basedir,
+      options: webpackOptions.resolve || {},
+    });
+  }
+
+  loader.init({
+    filename,
+    resourceQuery,
+    options: loaderOptions,
+    customData,
+    isPlugin,
+  });
 
   scriptStore.init({
     issuer: filename,
@@ -193,22 +220,6 @@ const compile = function (content, callback) {
     watchFiles: loaderOptions.watchFiles,
   });
 
-  resolver.init({
-    basedir: compilerOptions.basedir,
-    options: webpackOptions.resolve || {},
-  });
-
-  loader.init({
-    filename,
-    resourceQuery,
-    options: loaderOptions,
-    customData,
-    isPlugin,
-  });
-
-  if (loaderContext.cacheable) loaderContext.cacheable(true);
-
-  let compileResult, result;
   try {
     /** @type {{body: string, dependencies: []}} */
     compileResult = pug.compileClientWithDependenciesTracked(content, compilerOptions).body;
@@ -260,5 +271,3 @@ module.exports = function (content, map, meta) {
     callback(null, result, map, meta);
   });
 };
-
-module.exports.scriptStore = scriptStore;

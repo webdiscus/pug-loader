@@ -1,5 +1,6 @@
 const path = require('path');
 const PugPlugin = require('pug-plugin');
+//const PugPlugin = require('../../../pug-plugin'); // for local development only
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -49,7 +50,7 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        verbose: !isProd, // output information about the process to console
+        //verbose: !isProd, // output information about the process to console
         // module extracts CSS from style source files required directly in Pug
         extractCss: {
           // output filename of styles

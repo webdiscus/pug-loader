@@ -1,5 +1,5 @@
 const resolver = require('../Resolver');
-const { scriptStore } = require('../ModuleProxy');
+const { scriptStore } = require('../Modules');
 const { injectExternalData, hmrFile } = require('../Utils');
 
 /**
@@ -34,8 +34,21 @@ class CompileMethod {
    * @return {string}
    */
   requireScript(value, issuer) {
-    const resolvedFile = resolver.interpolate(value, issuer, true);
+    const resolvedFile = resolver.interpolate(value, issuer, 'script');
     scriptStore.add(resolvedFile);
+
+    return `require('${resolvedFile}')`;
+  }
+
+  /**
+   * Returns the require() string with interpolated value for the style file.
+   *
+   * @param {string} value The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  requireStyle(value, issuer) {
+    const resolvedFile = resolver.interpolate(value, issuer, 'style');
 
     return `require('${resolvedFile}')`;
   }

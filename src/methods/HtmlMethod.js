@@ -1,6 +1,6 @@
 const VMScript = require('../VMScript');
 const resolver = require('../Resolver');
-const { scriptStore } = require('../ModuleProxy');
+const { scriptStore } = require('../Modules');
 const { isRequireableScript, hmrFile } = require('../Utils');
 
 /**
@@ -13,12 +13,14 @@ class HtmlMethod {
   constructor({ templateFile, templateName, esModule }) {
     const loaderRequire = this.loaderRequire.bind(this);
     const loaderRequireScript = this.loaderRequireScript.bind(this);
+    const loaderRequireStyle = this.loaderRequireStyle.bind(this);
 
     this.templateFile = templateFile;
     this.vmscript = new VMScript({
       templateName,
       loaderRequire,
       loaderRequireScript,
+      loaderRequireStyle,
     });
   }
 
@@ -68,10 +70,21 @@ class HtmlMethod {
    * @return {string}
    */
   loaderRequireScript(file, issuer) {
-    let resolvedFile = resolver.resolve(file, issuer, true);
+    let resolvedFile = resolver.resolve(file, issuer, 'script');
     scriptStore.add(resolvedFile);
 
     return resolvedFile;
+  }
+
+  /**
+   * Resolve style file after compilation of source code.
+   *
+   * @param {string} file The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  loaderRequireStyle(file, issuer) {
+    return resolver.resolve(file, issuer, 'style');
   }
 
   /**
@@ -96,7 +109,19 @@ class HtmlMethod {
    * @return {string}
    */
   requireScript(file, issuer) {
-    return this.vmscript.require(file, issuer, true);
+    return this.vmscript.require(file, issuer, 'script');
+  }
+
+  /**
+   * Returns the expression with the name of the handler function in the template source code,
+   * which will be called when this template is compiled in the VM.
+   *
+   * @param {string} file The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  requireStyle(file, issuer) {
+    return this.vmscript.require(file, issuer, 'style');
   }
 
   /**

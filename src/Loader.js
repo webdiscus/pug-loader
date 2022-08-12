@@ -108,6 +108,7 @@ class Loader {
 
     if (isWin) templateFile = pathToPosix(templateFile);
 
+    // in value replace all `require` with handler name depend on a method
     while (~pos) {
       let startPos = pos + openTagLen;
       let endPos = startPos;
@@ -150,6 +151,20 @@ class Loader {
     if (isWin) templateFile = pathToPosix(templateFile);
 
     return this.method.requireScript(file, templateFile);
+  }
+
+  /**
+   * Resolve style file in the link tag.
+   *
+   * @param {string} value
+   * @param {string} templateFile
+   * @return {string}
+   */
+  resolveStyle(value, templateFile) {
+    const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
+    if (isWin) templateFile = pathToPosix(templateFile);
+
+    return this.method.requireStyle(file, templateFile);
   }
 
   /**

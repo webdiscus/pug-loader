@@ -1,6 +1,6 @@
 const VMScript = require('../VMScript');
 const resolver = require('../Resolver');
-const { scriptStore } = require('../ModuleProxy');
+const { scriptStore } = require('../Modules');
 const { isRequireableScript, hmrFile } = require('../Utils');
 
 /**
@@ -10,6 +10,7 @@ class RenderMethod {
   constructor({ templateFile, templateName, esModule }) {
     const loaderRequire = this.loaderRequire.bind(this);
     const loaderRequireScript = this.loaderRequireScript.bind(this);
+    const loaderRequireStyle = this.loaderRequireStyle.bind(this);
 
     this.templateFile = templateFile;
     this.exportCode = esModule ? 'export default ' : 'module.exports=';
@@ -17,6 +18,7 @@ class RenderMethod {
       templateName,
       loaderRequire,
       loaderRequireScript,
+      loaderRequireStyle,
     });
   }
 
@@ -77,8 +79,21 @@ class RenderMethod {
    * @return {string}
    */
   loaderRequireScript(file, issuer) {
-    const resolvedFile = resolver.resolve(file, issuer, true);
+    const resolvedFile = resolver.resolve(file, issuer, 'script');
     scriptStore.add(resolvedFile);
+
+    return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
+  }
+
+  /**
+   * Resolve style file after compilation of source code.
+   *
+   * @param {string} file The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  loaderRequireStyle(file, issuer) {
+    const resolvedFile = resolver.resolve(file, issuer, 'style');
 
     return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
   }
@@ -105,7 +120,19 @@ class RenderMethod {
    * @return {string}
    */
   requireScript(file, issuer) {
-    return this.vmscript.require(file, issuer, true);
+    return this.vmscript.require(file, issuer, 'script');
+  }
+
+  /**
+   * Returns the expression with the name of the handler function in the template source code,
+   * which will be called when this template is compiled in the VM.
+   *
+   * @param {string} file The required file.
+   * @param {string} issuer The issuer of required file.
+   * @return {string}
+   */
+  requireStyle(file, issuer) {
+    return this.vmscript.require(file, issuer, 'style');
   }
 
   /**

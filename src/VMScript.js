@@ -3,18 +3,23 @@ const dependency = require('./Dependency');
 const { executeTemplateFunctionException } = require('./Exeptions');
 
 class VMScript {
-  requireHandlerName = '__PUG_LOADER_REQUIRE__';
-  requireScriptHandlerName = '__PUG_LOADER_REQUIRE_SCRIPT__';
+  requireTypes = {
+    default: '__PUG_LOADER_REQUIRE__',
+    script: '__PUG_LOADER_REQUIRE_SCRIPT__',
+    style: '__PUG_LOADER_REQUIRE_STYLE__',
+  };
 
   /**
    * @param {string} templateName The template filename.
    * @param {Function} loaderRequire The method function for resolving a resource file in template.
    * @param {Function} loaderRequireScript The method function for resolving a script file in template.
+   * @param {Function} loaderRequireStyle The method function for resolving a style file in template.
    */
-  constructor({ templateName, loaderRequire, loaderRequireScript }) {
+  constructor({ templateName, loaderRequire, loaderRequireScript, loaderRequireStyle }) {
     const contextOptions = { require };
-    contextOptions[this.requireHandlerName] = loaderRequire;
-    contextOptions[this.requireScriptHandlerName] = loaderRequireScript;
+    contextOptions[this.requireTypes.default] = loaderRequire;
+    contextOptions[this.requireTypes.script] = loaderRequireScript;
+    contextOptions[this.requireTypes.style] = loaderRequireStyle;
 
     this.contextObject = vm.createContext(contextOptions);
     this.templateName = templateName;
@@ -25,12 +30,13 @@ class VMScript {
    *
    * @param {string} file The argument of require function.
    * @param {string} issuer The issuer of file.
-   * @param {boolean} isScript Whether require argument if a file from script tag.
+   * @param {string} type The require type, one of the this.requireTypes keys.
    * @return {string}
    */
-  require(file, issuer, isScript = false) {
-    const handlerName = isScript ? this.requireScriptHandlerName : this.requireHandlerName;
-    return `${handlerName}(${file},'${issuer}')`;
+  require(file, issuer, type = 'default') {
+    const requireType = this.requireTypes[type];
+
+    return `${requireType}(${file},'${issuer}')`;
   }
 
   /**
