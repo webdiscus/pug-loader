@@ -12,8 +12,12 @@ class ScriptStore {
     this.issuer = issuer;
   }
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   has(file) {
-    return this.files.find((item) => item.file === file);
+    return this.files.find((item) => item.file === file) != null;
   }
 
   /**

@@ -1,5 +1,21 @@
 # Change log
 
+## 2.9.0 (2022-09-27)
+- feat: add resolving for require in conditional, e.g.:
+  ```pug
+  if condition
+    img(src=require('./image1.png'))
+  else
+    img(src=require('./image2.png'))
+  ```
+- feat: add resolving for require in mixin argument, e.g. `+image(require('./logo.png'), 'logo')`
+- feat: add resolving for require in `each in` and in `each of` iteration object, e.g. `each [key, img] of new Map([['apple', require('./apple.png')], ['sony', require('./sony.png')]])`
+- refactor: replace pug-walk lib with optimized up to x2.5 faster implementation without recursion
+- test(BREAKING): drop support for Node v12, because lastest `jest` v29 supports >= Node v14
+
+## 2.8.2 (2022-09-21)
+- chore: optimize script store for pug-plugin
+
 ## 2.8.1 (2022-08-12)
 - feat: add supports for a string value by the `watchFiles` option
 - fix: resolve style in Pug from node_modules by module name, e.g.: `link(href=require('bootstrap') rel='stylesheet')`

@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
-const walk = require('pug-walk');
 const { plugin, scriptStore } = require('./Modules');
 const dependency = require('./Dependency');
 const resolver = require('./Resolver');
@@ -76,6 +75,97 @@ const isRequired = (value) => value != null && typeof value === 'string' && valu
 const isStyle = (item) => item.name === 'rel' && item.val.indexOf('stylesheet') > -1;
 
 /**
+ * Resolve filenames in Pug node.
+ *
+ * @param {Object} node The Pug AST Node.
+ */
+const resolveNode = (node) => {
+  switch (node.type) {
+    case 'Code':
+      if (isRequired(node.val)) {
+        node.val = loader.resolveResource(node.val, node.filename);
+      }
+      break;
+    case 'Mixin':
+      if (isRequired(node.args)) {
+        node.args = loader.resolveResource(node.args, node.filename);
+      }
+      break;
+    case 'Each':
+    case 'EachOf':
+      if (isRequired(node.obj)) {
+        node.obj = loader.resolveResource(node.obj, node.filename);
+      }
+      break;
+    default:
+      if (node.attrs && node.attrs.length > 0) {
+        // resolving of required files in tag attributes
+        for (let attr of node.attrs) {
+          const value = attr.val;
+          if (isRequired(value)) {
+            if (node.name === 'script') {
+              attr.val = loader.resolveScript(value, attr.filename);
+            } else if (node.name === 'link' && node.attrs.find(isStyle)) {
+              attr.val = loader.resolveStyle(value, attr.filename);
+            } else {
+              attr.val = loader.resolveResource(value, attr.filename);
+            }
+          }
+        }
+      }
+      break;
+  }
+};
+
+/**
+ * Traverse all Pug nodes and resolve filename in each node.
+ *
+ * @note: This is implementation of the 'pug-walk' logic without recursion and up to x2.5 faster.
+ *
+ * @param {Object} tree The tree of Pug nodes.
+ */
+const walkTree = (tree) => {
+  let stack = [tree];
+  let ast, i;
+
+  while ((ast = stack.pop())) {
+    while (true) {
+      resolveNode(ast);
+
+      switch (ast.type) {
+        case 'Tag':
+        case 'Code':
+        case 'Case':
+        case 'Mixin':
+        case 'When':
+        case 'While':
+        case 'EachOf':
+          if (ast.block) stack.push(ast.block);
+          break;
+        case 'Each':
+          if (ast.block) stack.push(ast.block);
+          if (ast.alternate) stack.push(ast.alternate);
+          break;
+        case 'Conditional':
+          if (ast.consequent) stack.push(ast.consequent);
+          if (ast.alternate) stack.push(ast.alternate);
+          break;
+        default:
+          break;
+      }
+
+      if (!ast.nodes || ast.nodes.length === 0) break;
+
+      const lastIndex = ast.nodes.length - 1;
+      for (i = 0; i < lastIndex; i++) {
+        stack.push(ast.nodes[i]);
+      }
+      ast = ast.nodes[lastIndex];
+    }
+  }
+};
+
+/**
  * The pug plugin to resolve path for include, extends, require.
  *
  * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
@@ -94,35 +184,14 @@ const resolvePlugin = {
   },
 
   /**
-   * Resolve the filename for require().
+   * Resolve the filename in require().
    *
-   * @param {{}} ast The parsed tree of pug template.
+   * @param {{}} tree The parsed tree of pug template.
    * @return {{}}
    */
-  preCodeGen(ast) {
-    return walk(ast, (node) => {
-      if (node.type === 'Code') {
-        // resolving for require in code, like `- var data = require('./data.js')`
-        const value = node.val;
-        if (isRequired(value)) {
-          node.val = loader.resolveResource(value, node.filename);
-        }
-      } else if (node.attrs) {
-        // resolving of required files in tag attributes
-        for (let attr of node.attrs) {
-          const value = attr.val;
-          if (isRequired(value)) {
-            if (node.name === 'script') {
-              attr.val = loader.resolveScript(value, attr.filename);
-            } else if (node.name === 'link' && node.attrs.find(isStyle)) {
-              attr.val = loader.resolveStyle(value, attr.filename);
-            } else {
-              attr.val = loader.resolveResource(value, attr.filename);
-            }
-          }
-        }
-      }
-    });
+  preCodeGen(tree) {
+    walkTree(tree);
+    return tree;
   },
 };
 
@@ -255,7 +324,10 @@ const compile = function (content, callback) {
   callback(null, result);
 };
 
+//let profilerTime = 0;
+
 module.exports = function (content, map, meta) {
+  //const startTime = performance.now();
   const loaderContext = this;
   const callback = loaderContext.async();
 
@@ -268,6 +340,11 @@ module.exports = function (content, map, meta) {
       // it will NOT interrupt the compilation process
       loaderContext.emitError(error);
     }
+
+    // Profiling of common runtime.
+    // profilerTime += performance.now() - startTime;
+    // console.log('>>> pug-loader time :', profilerTime);
+
     callback(null, result, map, meta);
   });
 };

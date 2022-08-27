@@ -141,6 +141,11 @@ describe('require code', () => {
 });
 
 describe('require resource', () => {
+  test('require-in-all-pug-references', (done) => {
+    const relTestCasePath = 'require-in-all-pug-references';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-alias-array-compile', (done) => {
     const relTestCasePath = 'require-alias-array-compile';
     compareFileListAndContent(PATHS, relTestCasePath, done);
@@ -228,6 +233,11 @@ describe('require resource', () => {
 
   test('require-assets-method-html', (done) => {
     const relTestCasePath = 'require-assets-method-html';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('require-resource-in-mixin-argument', (done) => {
+    const relTestCasePath = 'require-resource-in-mixin-argument';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
