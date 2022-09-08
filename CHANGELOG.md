@@ -1,6 +1,9 @@
 # Change log
 
-## 2.9.0 (2022-09-27)
+## 2.9.1 (2022-09-08)
+- fix: fixed last stable version of ansis in package.json to avoid issues in dependency
+
+## 2.9.0 (2022-08-27)
 - feat: add resolving for require in conditional, e.g.:
   ```pug
   if condition
@@ -13,7 +16,7 @@
 - refactor: replace pug-walk lib with optimized up to x2.5 faster implementation without recursion
 - test(BREAKING): drop support for Node v12, because lastest `jest` v29 supports >= Node v14
 
-## 2.8.2 (2022-09-21)
+## 2.8.2 (2022-08-21)
 - chore: optimize script store for pug-plugin
 
 ## 2.8.1 (2022-08-12)
