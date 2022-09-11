@@ -1,5 +1,10 @@
 # Change log
 
+## 2.9.2 (2022-09-10)
+- fix: resolve modules whose package.json contains `exports` field
+- fix: added minimal required version of `enhanced-resolve` in `peerDependencies` to avoid using incompatible version by other modules
+- chore: update packages
+
 ## 2.9.1 (2022-09-08)
 - fix: fixed last stable version of ansis in package.json to avoid issues in dependency
 

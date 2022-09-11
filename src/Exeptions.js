@@ -1,7 +1,8 @@
 const ansis = require('ansis');
+const { red, redBright, yellow, cyan, green, gray } = require('ansis/colors');
 const { loaderName } = require('./Utils');
 
-const ansisLoaderName = `\n${ansis.red(`[${loaderName}]`)}`;
+const ansisLoaderName = `\n${red`[${loaderName}]`}`;
 const htmlLoaderName = `<span style="color:#e36049">[${loaderName}]</span>`;
 let lastError = null;
 
@@ -28,7 +29,7 @@ const PugLoaderError = function (message, error = '') {
     lastError = error.toString();
     throw new Error(lastError);
   }
-  lastError = message + `\n\nOriginal Error:\n` + error;
+  lastError = message + `\n\n${redBright`Original Error:`}\n` + error;
   throw new PugLoaderException(lastError);
 };
 
@@ -40,8 +41,7 @@ const PugLoaderError = function (message, error = '') {
  */
 const resolveException = (error, file, templateFile) => {
   const message =
-    `${ansisLoaderName} The file ${ansis.yellow(file)} can't be resolved in the pug template:\n` +
-    ansis.cyan(templateFile);
+    `${ansisLoaderName} The file ${yellow(file)} can't be resolved in the pug template:\n` + cyan(templateFile);
 
   PugLoaderError(message, error);
 };
@@ -53,12 +53,9 @@ const resolveException = (error, file, templateFile) => {
  */
 const unsupportedInterpolationException = (value, templateFile) => {
   const message =
-    `${ansisLoaderName} the expression ${ansis.yellow(
-      value
-    )} can't be interpolated with the 'compile' method in the pug template: ${ansis.cyan(templateFile)}\n` +
-    `${ansis.yellow(
-      'Possible solution: '
-    )} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias.`;
+    `${ansisLoaderName} the expression ${yellow(value)} can't be interpolated with the 'compile' method.\n` +
+    `Template: ${cyan(templateFile)}\n` +
+    `${yellow`Possible solution: `} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias.`;
 
   PugLoaderError(message);
 };
@@ -69,7 +66,7 @@ const unsupportedInterpolationException = (value, templateFile) => {
  * @throws {Error}
  */
 const executeTemplateFunctionException = (error, sourceFile) => {
-  const message = `${ansisLoaderName} Failed to execute template function.\n` + `Template file: ${sourceFile}`;
+  const message = `${ansisLoaderName} Failed to execute template function.\nTemplate file: ${cyan(sourceFile)}`;
 
   PugLoaderError(message, error);
 };
@@ -81,8 +78,8 @@ const executeTemplateFunctionException = (error, sourceFile) => {
  */
 const filterNotFoundException = (filterName, availableFilters) => {
   const message =
-    `${ansisLoaderName} The 'embedFilters' option contains unknown filter: ${ansis.red(filterName)}.\n` +
-    `Available embedded filters: ${ansis.green(availableFilters)}.`;
+    `${ansisLoaderName} The 'embedFilters' option contains unknown filter: ${red(filterName)}.\n` +
+    `Available embedded filters: ${green(availableFilters)}.`;
 
   PugLoaderError(message);
 };
@@ -94,9 +91,7 @@ const filterNotFoundException = (filterName, availableFilters) => {
  */
 const filterLoadException = (filterName, filterPath, error) => {
   const message =
-    `${ansisLoaderName} Error by load the ${ansis.red(filterName)} filter.\n` +
-    `Filter file: ${ansis.cyan(filterPath)}\n` +
-    error;
+    `${ansisLoaderName} Error by load the ${red(filterName)} filter.\nFilter file: ${cyan(filterPath)}\n` + error;
 
   PugLoaderError(message);
 };
@@ -106,7 +101,7 @@ const filterLoadException = (filterName, filterPath, error) => {
  * @param {Error} error
  */
 const filterInitException = (filterName, error) => {
-  const message = `${ansisLoaderName} Error by initialisation the ${ansis.red(filterName)} filter.\n` + error;
+  const message = `${ansisLoaderName} Error by initialisation the ${red(filterName)} filter.\n` + error;
 
   PugLoaderError(message);
 };

@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",
@@ -57,26 +57,27 @@
   },
   "peerDependencies": {
     "pug": ">=3.0.2",
-    "webpack": ">=5.32.0"
+    "webpack": ">=5.32.0",
+    "enhanced-resolve": ">=5.7.0"
   },
   "dependencies": {
-    "ansis": "1.4.0",
-    "parse5": "^7.0.0",
-    "pug": ">=3.0.2",
+    "ansis": "1.5.2",
+    "parse5": "^7.1.1",
+    "pug": "^3.0.2",
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.13",
-    "@babel/preset-env": "^7.18.10",
+    "@babel/core": "^7.19.0",
+    "@babel/preset-env": "^7.19.0",
     "@types/jest": "^28.1.8",
     "css-loader": "^6.7.1",
     "html-loader": "^4.1.0",
     "html-webpack-plugin": "^5.5.0",
-    "jest": "^29.0.1",
+    "jest": "^29.0.3",
     "prettier": "^2.7.1",
     "prismjs": "^1.29.0",
-    "pug-plugin": "~4.2.0",
-    "responsive-loader": "^3.1.0",
+    "pug-plugin": "~4.3.1",
+    "responsive-loader": "^3.1.1",
     "sharp": "^0.30.7",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "webpack": "^5.74.0"

@@ -30,14 +30,17 @@ class Resolver {
     this.hasAlias = Object.keys(this.aliases).length > 0;
     this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
 
+    // resolver for scripts from the 'script' tag, npm modules and other js files
     this.resolveFile = ResolverFactory.create.sync({
       ...options,
       preferRelative: options.preferRelative !== false,
+      // resolve 'exports' field in package.json, default value is ['webpack', 'production', 'browser']
+      conditionNames: ['require', 'node'],
       // restrict default extensions list '.js', '.json', '.wasm' for faster resolving
       extensions: options.extensions.length ? options.extensions : ['.js'],
     });
 
-    // resolver for a style from the link tag
+    // resolver for styles from the 'link' tag
     this.resolveStyle = ResolverFactory.create.sync({
       ...options,
       preferRelative: options.preferRelative !== false,
@@ -90,6 +93,7 @@ class Resolver {
       let request = file;
       // remove optional prefix in request for enhanced resolver
       if (isAliasArray) request = this.removeAliasPrefix(request);
+
       try {
         resolvedFile = isStyle ? this.resolveStyle(context, request) : this.resolveFile(context, request);
       } catch (error) {
