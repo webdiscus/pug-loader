@@ -120,7 +120,7 @@ const resolveNode = (node) => {
 /**
  * Traverse all Pug nodes and resolve filename in each node.
  *
- * @note: This is implementation of the 'pug-walk' logic without recursion and up to x2.5 faster.
+ * @note: This is implementation of the 'pug-walk' logic without recursion, up to x2.5 faster.
  *
  * @param {Object} tree The tree of Pug nodes.
  */

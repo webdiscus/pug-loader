@@ -1,5 +1,8 @@
 # Change log
 
+## 2.9.3 (2022-09-17)
+- chore: add peerDependenciesMeta to package.json for optional modules
+
 ## 2.9.2 (2022-09-10)
 - fix: resolve modules whose package.json contains `exports` field
 - fix: added minimal required version of `enhanced-resolve` in `peerDependencies` to avoid using incompatible version by other modules
