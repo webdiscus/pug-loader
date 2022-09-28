@@ -1226,11 +1226,14 @@ module.exports = defineConfig({
   transpileDependencies: true,
 
   chainWebpack: (config) => {
-    const pugRule = config.module.rule('pug');
-
     // clear all existing pug loaders
+    const pugRule = config.module.rule('pug');
     pugRule.uses.clear();
     pugRule.oneOfs.clear();
+
+    // exclude `pug-loader` from the witchery of the baggy `thread-loader` that is used in production mode
+    const jsRule = config.module.rule('js');
+    jsRule.exclude.add(/pug-loader/);
   },
 
   configureWebpack: {

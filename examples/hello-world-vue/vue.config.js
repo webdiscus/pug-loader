@@ -19,17 +19,25 @@ const pugLoaderOptions = {
 };
 
 module.exports = defineConfig({
+  publicPath: 'auto',
   transpileDependencies: true,
 
   chainWebpack: (config) => {
-    const pugRule = config.module.rule('pug');
-
-    // IMPORTANT: clear all existing pug loader settings
+    // IMPORTANT: clear all existing pug loader settings to add new @webdiscus/pug-loader,
     // defaults pug loader is the `pug-plain-loader`
+    const pugRule = config.module.rule('pug');
     pugRule.uses.clear();
     pugRule.oneOfs.clear();
+
+    // MEGA IMPORTANT for build in production mode:
+    // Vue use the buggy `thread-loader` that try to call all loaders via Worker,
+    // but the `pug-loader` can't work in Worker, because is async and use Webpack API.
+    // We need to exclude `pug-loader` from the witchery of the baggy `thread-loader`.
+    const jsRule = config.module.rule('js');
+    jsRule.exclude.add(/pug-loader/);
   },
 
+  runtimeCompiler: true,
   configureWebpack: {
     module: {
       rules: [

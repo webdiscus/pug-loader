@@ -11,27 +11,22 @@
     "lint": "vue-cli-service lint"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.10",
-    "@babel/eslint-parser": "^7.18.9",
+    "@babel/core": "^7.19.3",
+    "@babel/eslint-parser": "^7.19.1",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
-    "@webdiscus/pug-loader": "^2.8.1",
-    "css-loader": "^6.7.1",
-    "eslint": "^8.21.0",
-    "eslint-plugin-vue": "^9.3.0",
-    "html-loader": "^4.1.0",
+    "@webdiscus/pug-loader": "^2.9.3",
+    "eslint": "^8.24.0",
+    "eslint-plugin-vue": "^9.5.1",
     "markdown-it": "^13.0.1",
-    "prismjs": "^1.28.0",
-    "sass": "^1.54.1",
-    "sass-loader": "^13.0.2",
+    "prismjs": "^1.29.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "core-js": "^3.22.6",
-    "vue": "^3.2.36"
+    "vue": "^3.2.40"
   },
   "eslintConfig": {
     "root": true,
