@@ -1,5 +1,9 @@
 # Change log
 
+## 2.9.4 (2022-10-11)
+- fix: resolving of assets in pug templates with url query
+- chore: update packages
+
 ## 2.9.3 (2022-09-17)
 - chore: add peerDependenciesMeta to package.json for optional modules
 

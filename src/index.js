@@ -204,7 +204,7 @@ const compile = function (content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
   const webpackOptions = loaderContext._compiler.options || {};
-  const { resourcePath: filename, rootContext: context, resourceQuery } = loaderContext;
+  const { rootContext: context, resource, resourcePath: filename, resourceQuery } = loaderContext;
   const isPlugin = plugin.isUsed();
   let basedir = loaderOptions.basedir || context;
   let customData = {};
@@ -281,7 +281,8 @@ const compile = function (content, callback) {
   });
 
   scriptStore.init({
-    issuer: filename,
+    // filename with url query
+    issuer: resource,
   });
 
   dependency.init({

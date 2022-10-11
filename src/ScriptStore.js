@@ -40,14 +40,13 @@ class ScriptStore {
   /**
    * @param {string} name The unique name of entry point.
    * @param {string} file The source file of script.
-   * @param {string} issuer The source file of issuer of the required file.
+   * @param {Set} issuers The issuer source files of the required file. One script can be used in many templates.
    */
-  setName(name, file, issuer) {
-    let fileItem = this.files.find((item) => item.file === file && item.issuer.request === issuer);
-    if (fileItem) {
-      // update the name for the script
-      // after rebuild by HMR the same request can be generated with other asset name
-      fileItem.name = name;
+  setName(name, file, issuers) {
+    for (let item of this.files) {
+      if (!item.name && item.file === file && issuers.has(item.issuer.request)) {
+        item.name = name;
+      }
     }
   }
 
