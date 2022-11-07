@@ -79,7 +79,7 @@ module.exports = (env, argv) => {
         {
           test: /\.(woff2?|ttf|otf|eot|svg)$/,
           type: 'asset/resource',
-          include: /assets\/fonts/, // handles fonts from `assets/fonts` directory only
+          include: /assets[\\/]fonts/, // handles fonts from `assets/fonts` directory only
           generator: {
             // output filename of fonts
             filename: 'assets/fonts/[name][ext][query]',
@@ -90,7 +90,7 @@ module.exports = (env, argv) => {
         {
           test: /\.(png|svg|jpe?g|webp)$/i,
           type: 'asset/resource',
-          include: /assets\/images/, // handle images from `assets/images` directory only
+          include: /assets[\\/]images/, // handle images from `assets/images` directory only
           generator: {
             // output filename of images
             filename: 'assets/img/[name].[hash:8][ext]',
