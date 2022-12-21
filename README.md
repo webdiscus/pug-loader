@@ -151,8 +151,7 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    publicPath: '/', // defined any path, `auto` is supported too
-    // output filename of JS files
+    // output hashed filename of JS files
     filename: 'assets/js/[name].[contenthash:8].js'
   },
 
@@ -170,7 +169,7 @@ module.exports = {
     // enable processing of Pug files defined in webpack entry
     new PugPlugin({
       extractCss: {
-        // output filename of CSS files
+        // output hashed filename of CSS files
         filename: 'assets/css/[name].[contenthash:8].css',
       },
     })
@@ -181,9 +180,6 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
-        options: {
-          method: 'render', // fastest method to generate static HTML files
-        }
       },
       {
         test: /\.(css|sass|scss)$/,

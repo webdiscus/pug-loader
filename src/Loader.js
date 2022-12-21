@@ -4,12 +4,9 @@ const HtmlMethod = require('./methods/HtmlMethod');
 const RenderMethod = require('./methods/RenderMethod');
 const CompileMethod = require('./methods/CompileMethod');
 
-/**
- * @singleton
- */
 class Loader {
-  method = null;
-  methods = [
+  static compiler = null;
+  static methods = [
     {
       method: 'compile',
       query: 'pug-compile',
@@ -31,18 +28,27 @@ class Loader {
    * @param {{}} customData The custom data.
    * @param {boolean} isPlugin Whether the pug-loader work under pug-plugin.
    */
-  init({ filename: templateFile, resourceQuery, options, customData, isPlugin }) {
-    const { data, esModule, method, name: templateName } = options;
+  static init({ filename: templateFile, resourceQuery, options, customData, isPlugin }) {
+    const { data, esModule, method, name: templateName, self: useSelf } = options;
 
     // the rule: a method defined in the resource query has the highest priority over a method defined in the loaderName options
     // because a method from loaderName options is global but a query method override a global method
     const queryData = getQueryData(resourceQuery);
 
-    this.method = this.methodFactory({ method, templateFile, templateName, queryData, esModule, isPlugin });
+    this.compiler = this.compilerFactory({
+      method,
+      templateFile,
+      templateName,
+      queryData,
+      esModule,
+      isPlugin,
+      useSelf,
+    });
 
     // remove pug method from query data to pass in pug only clean data
-    if (queryData.hasOwnProperty(this.method.query)) {
-      delete queryData[this.method.query];
+    const query = this.compiler.query;
+    if (queryData.hasOwnProperty(query)) {
+      delete queryData[query];
     }
 
     this.data = merge(data || {}, customData || {}, queryData);
@@ -61,9 +67,10 @@ class Loader {
    * @param {Object} queryData
    * @param {boolean} esModule
    * @param {boolean} isPlugin
+   * @param {boolean} useSelf Whether the `self` option is true.
    * @return {CompileMethod|RenderMethod|HtmlMethod}
    */
-  methodFactory({ method, templateFile, templateName, queryData, esModule, isPlugin }) {
+  static compilerFactory({ method, templateFile, templateName, queryData, esModule, isPlugin, useSelf }) {
     const methodFromQuery = this.methods.find((item) => queryData.hasOwnProperty(item.query));
     const methodFromOptions = this.methods.find((item) => method === item.method);
 
@@ -77,7 +84,7 @@ class Loader {
 
     switch (methodName) {
       case 'compile':
-        return new CompileMethod({ templateFile, templateName, esModule });
+        return new CompileMethod({ templateFile, templateName, esModule, useSelf });
       case 'render':
         return new RenderMethod({ templateFile, templateName, esModule });
       case 'html':
@@ -94,8 +101,8 @@ class Loader {
    * @param {string} templateFile The filename of the template where resolves the resource.
    * @return {string}
    */
-  resolveResource(value, templateFile) {
-    const method = this.method;
+  static resolveResource(value, templateFile) {
+    const compiler = this.compiler;
     const openTag = 'require(';
     const openTagLen = openTag.length;
     let pos = value.indexOf(openTag);
@@ -125,7 +132,7 @@ class Loader {
       }
 
       const file = value.slice(startPos, endPos);
-      const replacement = method.require(file, templateFile);
+      const replacement = compiler.require(file, templateFile);
 
       result += value.slice(lastPos, pos) + replacement;
       lastPos = endPos + 1;
@@ -146,11 +153,11 @@ class Loader {
    * @param {string} templateFile
    * @return {string}
    */
-  resolveScript(value, templateFile) {
+  static resolveScript(value, templateFile) {
     const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
     if (isWin) templateFile = pathToPosix(templateFile);
 
-    return this.method.requireScript(file, templateFile);
+    return this.compiler.requireScript(file, templateFile);
   }
 
   /**
@@ -160,11 +167,11 @@ class Loader {
    * @param {string} templateFile
    * @return {string}
    */
-  resolveStyle(value, templateFile) {
+  static resolveStyle(value, templateFile) {
     const [, file] = /require\((.+?)(?=\))/.exec(value) || [];
     if (isWin) templateFile = pathToPosix(templateFile);
 
-    return this.method.requireStyle(file, templateFile);
+    return this.compiler.requireStyle(file, templateFile);
   }
 
   /**
@@ -173,8 +180,8 @@ class Loader {
    * @param {string} source
    * @return {string}
    */
-  export(source) {
-    return this.method.export(source, this.data);
+  static export(source) {
+    return this.compiler.export(source, this.data);
   }
 
   /**
@@ -184,9 +191,9 @@ class Loader {
    * @param {Function} getErrorMessage
    * @return {string}
    */
-  exportError(error, getErrorMessage) {
-    return this.method.exportError(error, getErrorMessage);
+  static exportError(error, getErrorMessage) {
+    return this.compiler.exportError(error, getErrorMessage);
   }
 }
 
-module.exports = new Loader();
+module.exports = Loader;

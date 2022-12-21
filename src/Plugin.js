@@ -1,12 +1,10 @@
 /**
  * The share point between pug-plugin and pug-loader instances.
- *
- * @singleton
  */
 class Plugin {
-  used = false;
-  options = null;
-  contextCache = new Set();
+  static used = false;
+  static options = null;
+  static contextCache = new Set();
 
   /**
    * Set use state of pug-plugin.
@@ -17,7 +15,7 @@ class Plugin {
    *
    * @param {{}} options The options of Pug plugin.
    */
-  init(options) {
+  static init(options) {
     this.used = true;
     this.options = options;
   }
@@ -27,7 +25,7 @@ class Plugin {
    * @see https://webpack.js.org/configuration/resolve/#resolverestrictions
    * @return {Array<RegExp|string>}
    */
-  getStyleRestrictions() {
+  static getStyleRestrictions() {
     return this.options ? [this.options.extractCss.test] : [];
   }
 
@@ -35,11 +33,11 @@ class Plugin {
    * Whether is pug-plugin used.
    * @return {boolean}
    */
-  isUsed() {
+  static isUsed() {
     return this.used;
   }
 
-  isCached(context) {
+  static isCached(context) {
     if (this.contextCache.has(context)) return true;
     this.contextCache.add(context);
 
@@ -50,10 +48,10 @@ class Plugin {
    * Reset states.
    * Used for tests to reset state after each test case.
    */
-  reset() {
+  static reset() {
     this.used = false;
     this.contextCache.clear();
   }
 }
 
-module.exports = new Plugin();
+module.exports = Plugin;

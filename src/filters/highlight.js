@@ -22,12 +22,12 @@
 //   },
 // },
 
-const ansis = require('ansis');
-const { loaderName } = require('../Utils');
+const { green, cyan } = require('ansis/colors');
+const { labelError } = require('../Utils');
 const adapter = require('./highlight/adapter');
 
 const filterName = 'highlight';
-const labelError = `\n${ansis.black.bgRedBright(`[${loaderName}:${filterName}]`)}`;
+const filterLabelError = labelError(filterName);
 
 // for usage the `[]` chars in pug inline filter, the chars must be written as HTML entity
 // e,g. the `#[:highlight(js) const arr = [1, 2];]` must be as `#[:highlight(js) const arr = &lbrack;1, 2&rbrack;;]`,
@@ -62,9 +62,9 @@ const filter = {
 
     if (!moduleName || !adapter.isSupported(moduleName)) {
       const error =
-        `\n${labelError} In webpack config is used unsupported highlight module ${ansis.cyan(moduleName)}.\n` +
+        `\n${filterLabelError} In webpack config is used unsupported highlight module ${cyan(moduleName)}.\n` +
         `Supported modules: ` +
-        ansis.green(adapter.getNamesOfSupportedModules().join(', ')) +
+        green(adapter.getNamesOfSupportedModules().join(', ')) +
         '.';
       throw new Error(error);
     }

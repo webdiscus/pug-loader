@@ -1,9 +1,10 @@
 const ansis = require('ansis');
-const { red, redBright, yellow, cyan, green, gray } = require('ansis/colors');
-const { loaderName } = require('./Utils');
+const { red, redBright, yellow, cyan, green } = require('ansis/colors');
+const { loaderName, labelError } = require('./Utils');
 
-const ansisLoaderName = `\n${red`[${loaderName}]`}`;
-const htmlLoaderName = `<span style="color:#e36049">[${loaderName}]</span>`;
+const loaderLabel = labelError();
+const filterLabel = labelError('filter');
+const loaderHtmlLabel = `<span style="color:#e36049">[${loaderName}]</span>`;
 let lastError = null;
 
 class PugLoaderException extends Error {
@@ -41,7 +42,7 @@ const PugLoaderError = function (message, error = '') {
  */
 const resolveException = (error, file, templateFile) => {
   const message =
-    `${ansisLoaderName} The file ${yellow(file)} can't be resolved in the pug template:\n` + cyan(templateFile);
+    `${loaderLabel} The file ${yellow(file)} can't be resolved in the pug template:\n` + cyan(templateFile);
 
   PugLoaderError(message, error);
 };
@@ -53,7 +54,7 @@ const resolveException = (error, file, templateFile) => {
  */
 const unsupportedInterpolationException = (value, templateFile) => {
   const message =
-    `${ansisLoaderName} the expression ${yellow(value)} can't be interpolated with the 'compile' method.\n` +
+    `${loaderLabel} the expression ${yellow(value)} can't be interpolated with the 'compile' method.\n` +
     `Template: ${cyan(templateFile)}\n` +
     `${yellow`Possible solution: `} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias.`;
 
@@ -66,9 +67,16 @@ const unsupportedInterpolationException = (value, templateFile) => {
  * @throws {Error}
  */
 const executeTemplateFunctionException = (error, sourceFile) => {
-  const message = `${ansisLoaderName} Failed to execute template function.\nTemplate file: ${cyan(sourceFile)}`;
+  const message = `${loaderLabel} Failed to execute template function.\nTemplate file: ${cyan(sourceFile)}`;
 
   PugLoaderError(message, error);
+};
+
+const loadNodeModuleException = (moduleName) => {
+  throw new Error(
+    `\n${filterLabel} The required ${red(moduleName)} module not found.\n` +
+      `Please install the module: ${cyan`npm i --save-dev ${moduleName}`}`
+  );
 };
 
 /**
@@ -78,7 +86,7 @@ const executeTemplateFunctionException = (error, sourceFile) => {
  */
 const filterNotFoundException = (filterName, availableFilters) => {
   const message =
-    `${ansisLoaderName} The 'embedFilters' option contains unknown filter: ${red(filterName)}.\n` +
+    `${loaderLabel} The 'embedFilters' option contains unknown filter: ${red(filterName)}.\n` +
     `Available embedded filters: ${green(availableFilters)}.`;
 
   PugLoaderError(message);
@@ -91,7 +99,7 @@ const filterNotFoundException = (filterName, availableFilters) => {
  */
 const filterLoadException = (filterName, filterPath, error) => {
   const message =
-    `${ansisLoaderName} Error by load the ${red(filterName)} filter.\nFilter file: ${cyan(filterPath)}\n` + error;
+    `${loaderLabel} Error by load the ${red(filterName)} filter.\nFilter file: ${cyan(filterPath)}\n` + error;
 
   PugLoaderError(message);
 };
@@ -101,7 +109,7 @@ const filterLoadException = (filterName, filterPath, error) => {
  * @param {Error} error
  */
 const filterInitException = (filterName, error) => {
-  const message = `${ansisLoaderName} Error by initialisation the ${red(filterName)} filter.\n` + error;
+  const message = `${loaderLabel} Error by initialisation the ${red(filterName)} filter.\n` + error;
 
   PugLoaderError(message);
 };
@@ -111,7 +119,7 @@ const filterInitException = (filterName, error) => {
  * @returns {string}
  */
 const getPugCompileErrorMessage = (error) => {
-  return `${ansisLoaderName} Pug compilation failed.\n` + error.toString();
+  return `${loaderLabel} Pug compilation failed.\n` + error.toString();
 };
 
 /**
@@ -122,7 +130,7 @@ const getPugCompileErrorMessage = (error) => {
 const errorTemplateHtml = (error, requireHmrScript) => {
   let message = error.replace(/\n/g, '<br>');
   message = ansis.strip(message);
-  message = message.replace(`[${loaderName}]`, htmlLoaderName);
+  message = message.replace(`[${loaderName}]`, loaderHtmlLabel);
 
   return `<!DOCTYPE html><html>
 <head><script src="${requireHmrScript}"></script></head>
@@ -152,6 +160,7 @@ module.exports = {
   resolveException,
   unsupportedInterpolationException,
   executeTemplateFunctionException,
+  loadNodeModuleException,
   getExecuteTemplateFunctionErrorMessage,
   getPugCompileErrorMessage,
   getPugCompileErrorHtml,

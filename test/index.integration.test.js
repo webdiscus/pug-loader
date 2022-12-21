@@ -14,7 +14,7 @@ const PATHS = {
   output: '/assets/',
 };
 
-// 10s is required for test on slow instance like github
+// 10s is required for test on slow instance like GitHub
 const testTimeout = 10000;
 
 beforeAll(() => {});
@@ -384,6 +384,16 @@ describe('options: pass data', () => {
 
   test('options.data entry pug method render', (done) => {
     const relTestCasePath = 'option-data-pug-render';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data with self, compile`, (done) => {
+    const relTestCasePath = 'option-data-self-compile';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test(`options.data with self, render`, (done) => {
+    const relTestCasePath = 'option-data-self-render';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });

@@ -1,27 +1,13 @@
-const path = require('path');
-const ansis = require('ansis');
-const { loaderName } = require('../Utils');
+const { resolveModule } = require('../Utils');
+const { loadNodeModuleException } = require('../Exeptions');
 const adapter = require('./highlight/adapter');
 
 const filterName = 'markdown';
 const moduleName = 'markdown-it';
-const labelError = `\n${ansis.black.bgRedBright(`[${loaderName}:${filterName}]`)}`;
 
-let modulePath = '';
-try {
-  modulePath = require.resolve(moduleName, { paths: [process.cwd()] });
-  if (modulePath) {
-    modulePath = path.dirname(modulePath);
-  }
-} catch (error) {
-  const message = error.toString();
-  if (message.indexOf('Cannot find module') >= 0) {
-    throw new Error(
-      `\n${labelError} The required ${ansis.red(moduleName)} module not found.\n` +
-        `Please install the module: ${ansis.cyan(`npm i --save-dev ${moduleName}`)}`
-    );
-  }
-  throw new Error(`\n${labelError} Error by require the ${ansis.red(moduleName)} module.\n` + error);
+const modulePath = resolveModule(moduleName);
+if (!modulePath) {
+  loadNodeModuleException(moduleName);
 }
 
 const MarkdownIt = require(modulePath);

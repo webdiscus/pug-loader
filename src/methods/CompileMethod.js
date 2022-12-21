@@ -1,4 +1,4 @@
-const resolver = require('../Resolver');
+const Resolver = require('../Resolver');
 const { scriptStore } = require('../Modules');
 const { injectExternalData, hmrFile } = require('../Utils');
 
@@ -6,27 +6,28 @@ const { injectExternalData, hmrFile } = require('../Utils');
  * Compile into template function and export a JS module.
  */
 class CompileMethod {
-  constructor({ templateFile, templateName, esModule }) {
+  constructor({ templateFile, templateName, esModule, useSelf }) {
+    this.useSelf = useSelf;
     this.templateFile = templateFile;
     this.templateName = templateName;
     this.exportCode = esModule ? 'export default ' : 'module.exports=';
   }
 
   /**
-   * Returns the require() string with interpolated value for a resource file.
+   * Returns the string as require() with interpolated value for a resource file.
    *
    * @param {string} value The required file.
    * @param {string} issuer The issuer of required file.
    * @return {string}
    */
   require(value, issuer) {
-    const interpolatedValue = resolver.interpolate(value, issuer);
+    const interpolatedValue = Resolver.interpolate(value, issuer);
 
     return `require(${interpolatedValue})`;
   }
 
   /**
-   * Returns the require() string with interpolated value for the script file.
+   * Returns the string as require() with interpolated value for the script file.
    * The filename from the script tag will be stored for usage in pug-plugin.
    *
    * @param {string} value The required file.
@@ -34,21 +35,21 @@ class CompileMethod {
    * @return {string}
    */
   requireScript(value, issuer) {
-    const resolvedFile = resolver.interpolate(value, issuer, 'script');
+    const resolvedFile = Resolver.interpolate(value, issuer, 'script');
     scriptStore.add(resolvedFile);
 
     return `require('${resolvedFile}')`;
   }
 
   /**
-   * Returns the require() string with interpolated value for the style file.
+   * Returns the string as require() with interpolated value for the style file.
    *
    * @param {string} value The required file.
    * @param {string} issuer The issuer of required file.
    * @return {string}
    */
   requireStyle(value, issuer) {
-    const resolvedFile = resolver.interpolate(value, issuer, 'style');
+    const resolvedFile = Resolver.interpolate(value, issuer, 'style');
 
     return `require('${resolvedFile}')`;
   }
@@ -62,7 +63,7 @@ class CompileMethod {
    */
   export(source, locals) {
     if (Object.keys(locals).length > 0) {
-      source = injectExternalData(source, locals);
+      source = injectExternalData(source, locals, this.useSelf);
     }
     return source + ';' + this.exportCode + this.templateName + ';';
   }

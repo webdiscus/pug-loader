@@ -3,15 +3,14 @@ const path = require('path');
 
 /**
  * Dependencies in code for watching a changes.
- * @singleton
  */
 class Dependency {
-  files = new Set();
-  watchFiles = [/\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i];
-  loaderContext = null;
-  isInit = false;
+  static files = new Set();
+  static watchFiles = [/\.(pug|jade|js.{0,2}|.?js|ts.?|md|txt)$/i];
+  static loaderContext = null;
+  static isInit = false;
 
-  init({ loaderContext, watchFiles }) {
+  static init({ loaderContext, watchFiles }) {
     // avoid double push in array by watching
     if (!this.isInit && watchFiles != null) {
       this.isInit = true;
@@ -35,7 +34,7 @@ class Dependency {
    *
    * @param {string} file
    */
-  add(file) {
+  static add(file) {
     if (!this.watchFiles.find((regex) => regex.test(file))) {
       return;
     }
@@ -50,7 +49,7 @@ class Dependency {
   /**
    * Enable Webpack watching for dependencies.
    */
-  watch() {
+  static watch() {
     const { loaderContext } = this;
     const files = Array.from(this.files);
 
@@ -60,4 +59,4 @@ class Dependency {
   }
 }
 
-module.exports = new Dependency();
+module.exports = Dependency;

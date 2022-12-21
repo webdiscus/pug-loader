@@ -1,7 +1,12 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
+const { green, red, yellow } = require('ansis/colors');
 
 const loaderName = 'pug-loader';
+
+const labelInfo = (label) => `\n${green`[${loaderName}${label ? ':' + label : ''}]`}`;
+const labelWarn = (label) => `\n${yellow`[${loaderName}${label ? ':' + label : ''}]`}`;
+const labelError = (label) => `\n${red`[${loaderName}${label ? ':' + label : ''}]`}`;
 
 const isWin = path.sep === '\\';
 
@@ -29,6 +34,11 @@ if (isWin) hmrFile = pathToPosix(hmrFile);
 
 const scriptExtensionRegexp = /\.js[a-z\d]*$/i;
 const isRequireableScript = (file) => !path.extname(file) || scriptExtensionRegexp.test(file);
+
+// match: var locals_for_with = (locals || {});
+const searchLocalsRegexp = /(?<=locals_for_with = )(?:\(?locals \|\| {}\)?)(?=;)/;
+// match: var self = locals || {};
+const searchSelfRegexp = /(?<=self = )(?:locals \|\| {})(?=;)/;
 
 /**
  * Parse the url query.
@@ -83,9 +93,11 @@ const getQueryData = function (query) {
  *
  * @param {string} funcBody The function as string.
  * @param {{}} locals The object of template variables.
+ * @param {boolean} useSelf Whether the `self` option is true.
  * @return {string}
  */
-const injectExternalData = (funcBody, locals) => {
+const injectExternalData = (funcBody, locals, useSelf) => {
+  const searchRegexp = useSelf === true ? searchSelfRegexp : searchLocalsRegexp;
   const quoteMark = '__REMOVE_QUOTE__';
   let hasQuoteMarks = false;
 
@@ -116,10 +128,7 @@ const injectExternalData = (funcBody, locals) => {
     'var __external_locals__ = ' +
     localsString +
     `;\n` +
-    funcBody.replace(
-      /(?<=locals_for_with = )(?:\(locals \|\| {}\))(?=;)/,
-      'Object.assign({}, __external_locals__, locals || {})'
-    )
+    funcBody.replace(searchRegexp, '{...__external_locals__, ...locals}')
   );
 };
 
@@ -164,14 +173,39 @@ const trimIndent = (content) => {
   return false;
 };
 
+/**
+ * Resolve module path in current working directory of the Node.js process.
+ *
+ * @param {string} moduleName The node module name.
+ * @return {string|boolean} If module exists return resolved module path otherwise false.
+ * @throws
+ */
+const resolveModule = (moduleName) => {
+  let modulePath;
+  try {
+    modulePath = require.resolve(moduleName, { paths: [process.cwd()] });
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      return false;
+    }
+    throw error;
+  }
+
+  return path.dirname(modulePath);
+};
+
 module.exports = {
   loaderName,
+  labelInfo,
+  labelWarn,
+  labelError,
+  outToConsole,
   hmrFile,
   isRequireableScript,
   isWin,
   pathToPosix,
   getQueryData,
-  outToConsole,
   injectExternalData,
   trimIndent,
+  resolveModule,
 };

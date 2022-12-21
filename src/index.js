@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
 const { plugin, scriptStore } = require('./Modules');
-const dependency = require('./Dependency');
-const resolver = require('./Resolver');
-const loader = require('./Loader');
+const Dependency = require('./Dependency');
+const Resolver = require('./Resolver');
+const Loader = require('./Loader');
 const { trimIndent } = require('./Utils');
 
 const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
@@ -83,18 +83,18 @@ const resolveNode = (node) => {
   switch (node.type) {
     case 'Code':
       if (isRequired(node.val)) {
-        node.val = loader.resolveResource(node.val, node.filename);
+        node.val = Loader.resolveResource(node.val, node.filename);
       }
       break;
     case 'Mixin':
       if (isRequired(node.args)) {
-        node.args = loader.resolveResource(node.args, node.filename);
+        node.args = Loader.resolveResource(node.args, node.filename);
       }
       break;
     case 'Each':
     case 'EachOf':
       if (isRequired(node.obj)) {
-        node.obj = loader.resolveResource(node.obj, node.filename);
+        node.obj = Loader.resolveResource(node.obj, node.filename);
       }
       break;
     default:
@@ -104,11 +104,11 @@ const resolveNode = (node) => {
           const value = attr.val;
           if (isRequired(value)) {
             if (node.name === 'script') {
-              attr.val = loader.resolveScript(value, attr.filename);
+              attr.val = Loader.resolveScript(value, attr.filename);
             } else if (node.name === 'link' && node.attrs.find(isStyle)) {
-              attr.val = loader.resolveStyle(value, attr.filename);
+              attr.val = Loader.resolveStyle(value, attr.filename);
             } else {
-              attr.val = loader.resolveResource(value, attr.filename);
+              attr.val = Loader.resolveResource(value, attr.filename);
             }
           }
         }
@@ -180,7 +180,7 @@ const resolvePlugin = {
    * @return {string}
    */
   resolve(filename, templateFile, options) {
-    return resolver.resolve(filename.trim(), templateFile.trim());
+    return Resolver.resolve(filename.trim(), templateFile.trim());
   },
 
   /**
@@ -266,13 +266,13 @@ const compile = function (content, callback) {
   if (!plugin.isCached(context)) {
     if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
 
-    resolver.init({
+    Resolver.init({
       basedir,
       options: webpackOptions.resolve || {},
     });
   }
 
-  loader.init({
+  Loader.init({
     filename,
     resourceQuery,
     options: loaderOptions,
@@ -285,7 +285,7 @@ const compile = function (content, callback) {
     issuer: resource,
   });
 
-  dependency.init({
+  Dependency.init({
     loaderContext,
     watchFiles: loaderOptions.watchFiles,
   });
@@ -298,12 +298,12 @@ const compile = function (content, callback) {
     // The Pug loader tracks all dependencies during compilation and stores them in `Dependency` instance.
   } catch (error) {
     if (error.filename) {
-      dependency.add(error.filename);
+      Dependency.add(error.filename);
     }
-    dependency.watch();
+    Dependency.watch();
 
     // render error message for output in browser
-    const exportError = loader.exportError(error, getPugCompileErrorHtml);
+    const exportError = Loader.exportError(error, getPugCompileErrorHtml);
     const compileError = new Error(getPugCompileErrorMessage(error));
     callback(compileError, exportError);
 
@@ -311,24 +311,21 @@ const compile = function (content, callback) {
   }
 
   try {
-    result = loader.export(compileResult);
+    result = Loader.export(compileResult);
   } catch (error) {
     // render error message for output in browser
-    const exportError = loader.exportError(error, getExecuteTemplateFunctionErrorMessage);
+    const exportError = Loader.exportError(error, getExecuteTemplateFunctionErrorMessage);
     const compileError = new Error(error);
     callback(compileError, exportError);
 
     return;
   }
 
-  dependency.watch();
+  Dependency.watch();
   callback(null, result);
 };
 
-//let profilerTime = 0;
-
 module.exports = function (content, map, meta) {
-  //const startTime = performance.now();
   const loaderContext = this;
   const callback = loaderContext.async();
 
@@ -341,10 +338,6 @@ module.exports = function (content, map, meta) {
       // it will NOT interrupt the compilation process
       loaderContext.emitError(error);
     }
-
-    // Profiling of common runtime.
-    // profilerTime += performance.now() - startTime;
-    // console.log('>>> pug-loader time :', profilerTime);
 
     callback(null, result, map, meta);
   });

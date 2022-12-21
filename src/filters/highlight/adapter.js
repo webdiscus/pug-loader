@@ -1,5 +1,6 @@
-const ansis = require('ansis');
+const { green, cyan } = require('ansis/colors');
 const parser = require('./parser');
+const { labelError } = require('../../Utils');
 
 /**
  * The adapter (bridge, wrapper) provide one interface for different highlighting modules
@@ -26,14 +27,13 @@ const adapter = {
     if (this.module != null) return;
     this.verbose = verbose === true;
 
-    const label = 'highlight adapter';
-    const labelError = `\n${ansis.black.bgRedBright(`[${label}]`)}`;
+    const label = `highlight adapter`;
 
     if (!moduleName || !this.supportedModules.has(moduleName)) {
       const error =
-        `\n${labelError} Used unsupported module ${ansis.cyan(moduleName)}.\n` +
+        `\n${labelError(label)} Used unsupported module ${cyan(moduleName)}.\n` +
         `Supported modules: ` +
-        ansis.green(this.getNamesOfSupportedModules().join(', ')) +
+        green(this.getNamesOfSupportedModules().join(', ')) +
         '.';
       throw new Error(error);
     }

@@ -1,5 +1,5 @@
 const VMScript = require('../VMScript');
-const resolver = require('../Resolver');
+const Resolver = require('../Resolver');
 const { scriptStore } = require('../Modules');
 const { isRequireableScript, hmrFile } = require('../Utils');
 
@@ -62,7 +62,7 @@ class RenderMethod {
    * @return {string}
    */
   loaderRequire(file, issuer) {
-    let resolvedFile = resolver.resolve(file, issuer);
+    let resolvedFile = Resolver.resolve(file, issuer);
 
     if (isRequireableScript(resolvedFile)) return require(resolvedFile);
 
@@ -79,7 +79,7 @@ class RenderMethod {
    * @return {string}
    */
   loaderRequireScript(file, issuer) {
-    const resolvedFile = resolver.resolve(file, issuer, 'script');
+    const resolvedFile = Resolver.resolve(file, issuer, 'script');
     scriptStore.add(resolvedFile);
 
     return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
@@ -93,7 +93,7 @@ class RenderMethod {
    * @return {string}
    */
   loaderRequireStyle(file, issuer) {
-    const resolvedFile = resolver.resolve(file, issuer, 'style');
+    const resolvedFile = Resolver.resolve(file, issuer, 'style');
 
     return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
   }

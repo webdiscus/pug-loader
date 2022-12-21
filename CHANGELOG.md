@@ -1,5 +1,11 @@
 # Change log
 
+## 2.9.5 (2022-12-22)
+- fix: passing `data` option when the `self` options is true in compile method 
+- refactor: optimize code
+- chore: update development packages
+- test: add tests for data and self options
+
 ## 2.9.4 (2022-10-11)
 - fix: resolving of assets in pug templates with url query
 - chore: update packages
@@ -26,7 +32,7 @@
 - feat: add resolving for require in mixin argument, e.g. `+image(require('./logo.png'), 'logo')`
 - feat: add resolving for require in `each in` and in `each of` iteration object, e.g. `each [key, img] of new Map([['apple', require('./apple.png')], ['sony', require('./sony.png')]])`
 - refactor: replace pug-walk lib with optimized up to x2.5 faster implementation without recursion
-- test(BREAKING): drop support for Node v12, because lastest `jest` v29 supports >= Node v14
+- test(BREAKING): drop support for Node v12, because lastest `jest` v29 supports Node.js >= 14.15.0.
 
 ## 2.8.2 (2022-08-21)
 - chore: optimize script store for pug-plugin

@@ -1,5 +1,5 @@
 const vm = require('vm');
-const dependency = require('./Dependency');
+const Dependency = require('./Dependency');
 const { executeTemplateFunctionException } = require('./Exeptions');
 
 class VMScript {
@@ -52,7 +52,7 @@ class VMScript {
       script.runInContext(this.contextObject);
       return this.contextObject[this.templateName](locals);
     } catch (error) {
-      dependency.watch();
+      Dependency.watch();
       executeTemplateFunctionException(error, templateFile);
     }
   }

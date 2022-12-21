@@ -1,6 +1,6 @@
 const path = require('path');
-const ansis = require('ansis');
-const { outToConsole } = require('../Utils');
+const { red, green, cyan, yellow, black, blueBright } = require('ansis/colors');
+const { labelWarn, outToConsole } = require('../Utils');
 
 /**
  * Supports for user options of html-webpack-plugin.
@@ -81,11 +81,11 @@ class HtmlWebpackPlugin {
     const filename = path.relative(this.context, file);
 
     outToConsole(
-      `${ansis.black.bgYellow(`[pug-loader] DEPRECATION WARNING `)} ` +
-        `${ansis.yellow(`Using ${ansis.red('html-webpack-plugin')} with Pug is deprecated!`)}\n` +
-        `The ${ansis.cyan(filename)} file is defined in webpack config by ${ansis.red('HtmlWebpackPlugin')}.\n` +
-        `Use the ${ansis.green('pug-plugin')} instead of ${ansis.red('html-webpack-plugin')}.\n` +
-        `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.\n`
+      `${labelWarn()} ${black.bgYellow`DEPRECATION WARNING `} ` +
+        `${yellow`Using ${red('html-webpack-plugin')} with Pug is deprecated!`}\n` +
+        `The ${cyan(filename)} file is defined in webpack config by ${red('HtmlWebpackPlugin')}.\n` +
+        `Use the ${green('pug-plugin')} instead of ${red('html-webpack-plugin')}.\n` +
+        `For more information, see ${blueBright`https://github.com/webdiscus/pug-plugin`}.\n`
     );
   }
 }

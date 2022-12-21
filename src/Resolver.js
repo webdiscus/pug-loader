@@ -2,21 +2,18 @@ const fs = require('fs');
 const path = require('path');
 // the 'enhanced-resolve' package already used in webpack, don't need to define it in package.json
 const ResolverFactory = require('enhanced-resolve');
-const dependency = require('./Dependency');
+const Dependency = require('./Dependency');
 const { plugin } = require('./Modules');
 const { isWin, pathToPosix } = require('./Utils');
 const { resolveException, unsupportedInterpolationException } = require('./Exeptions');
 
-/**
- * @singleton
- */
 class Resolver {
-  aliasRegexp = /^([~@])?(.*?)(?=\/)/;
-  aliasFileRegexp = /^([~@])?(.*?)$/;
-  hasAlias = false;
-  hasPlugins = false;
+  static aliasRegexp = /^([~@])?(.*?)(?=\/)/;
+  static aliasFileRegexp = /^([~@])?(.*?)$/;
+  static hasAlias = false;
+  static hasPlugins = false;
 
-  styleResolveOptions = {
+  static styleResolveOptions = {
     restrictions: [/\.(css|scss|sass|less|styl)$/],
   };
 
@@ -24,7 +21,7 @@ class Resolver {
    * @param {string} basedir The the root directory of absolute paths.
    * @param {{}} options The webpack `resolve` options.
    */
-  init({ basedir, options }) {
+  static init({ basedir, options }) {
     this.basedir = basedir;
     this.aliases = options.alias || {};
     this.hasAlias = Object.keys(this.aliases).length > 0;
@@ -65,7 +62,7 @@ class Resolver {
    * @param {string} [type = 'default'] The require type: 'default', 'script', 'style'.
    * @return {string}
    */
-  resolve(file, templateFile, type = 'default') {
+  static resolve(file, templateFile, type = 'default') {
     const context = path.dirname(templateFile);
     const isScript = type === 'script';
     const isStyle = type === 'style';
@@ -104,7 +101,7 @@ class Resolver {
     if (isScript) {
       resolvedFile = this.resolveScriptExtension(resolvedFile);
     } else {
-      dependency.add(resolvedFile);
+      Dependency.add(resolvedFile);
     }
 
     return isWin ? pathToPosix(resolvedFile) : resolvedFile;
@@ -121,7 +118,7 @@ class Resolver {
    * @param {string} [type = 'default'] The require type: 'default', 'script', 'style'.
    * @return {string}
    */
-  interpolate(value, templateFile, type = 'default') {
+  static interpolate(value, templateFile, type = 'default') {
     value = value.trim();
     const [, quote, file] = /(^"|'|`)(.+?)(?=`|'|")/.exec(value) || [];
     const isScript = type === 'script';
@@ -218,7 +215,7 @@ class Resolver {
       return isWin ? pathToPosix(resolvedFile) : resolvedFile;
     }
 
-    if (resolvedFile) dependency.add(resolvedFile);
+    if (resolvedFile) Dependency.add(resolvedFile);
 
     return interpolatedValue;
   }
@@ -231,7 +228,7 @@ class Resolver {
    * @param {string} request The request of script.
    * @return {string}
    */
-  resolveScriptExtension(request) {
+  static resolveScriptExtension(request) {
     const [resource, query] = request.split('?');
     const scriptExtensionRegexp = /\.(js|ts)$/;
     const resolvedFile = scriptExtensionRegexp.test(resource) ? resource : require.resolve(resource);
@@ -246,7 +243,7 @@ class Resolver {
    * @return {string | [] | null} If found an alias return resolved normalized path otherwise return null.
    * @private
    */
-  resolveAlias(request) {
+  static resolveAlias(request) {
     if (this.hasAlias === false) return null;
 
     const hasPath = request.indexOf('/') > -1;
@@ -279,7 +276,7 @@ class Resolver {
    * @param {string} request
    * @return {string}
    */
-  removeAliasPrefix(request) {
+  static removeAliasPrefix(request) {
     const [, prefix, aliasName] = this.aliasRegexp.exec(request) || [];
     const alias = (prefix || '') + (aliasName || '');
 
@@ -287,4 +284,4 @@ class Resolver {
   }
 }
 
-module.exports = new Resolver();
+module.exports = Resolver;
