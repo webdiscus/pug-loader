@@ -52,10 +52,10 @@ class ScriptStore {
    * @param {string} name The unique name of entry point.
    */
   static setName(file, issuers, name) {
-    const entry = this.files.find((item) => item.file === file && issuers.has(item.issuer.request));
-
-    if (entry) {
-      entry.name = name;
+    for (let item of this.files) {
+      if (item.file === file && issuers.has(item.issuer.request)) {
+        item.name = name;
+      }
     }
   }
 

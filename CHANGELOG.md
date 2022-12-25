@@ -1,5 +1,8 @@
 # Change log
 
+## 2.9.7 (2022-12-25)
+- fix(for pug-plugin): set correct asset name of script for multi-lang pages
+
 ## 2.9.6 (2022-12-25)
 - fix(for pug-plugin): store unique script and set actual asset name of script by HMR
 
