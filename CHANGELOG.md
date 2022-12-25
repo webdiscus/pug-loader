@@ -1,5 +1,8 @@
 # Change log
 
+## 2.9.6 (2022-12-25)
+- fix(for pug-plugin): store unique script and set actual asset name of script by HMR
+
 ## 2.9.5 (2022-12-22)
 - fix: passing `data` option when the `self` options is true in compile method 
 - refactor: optimize code

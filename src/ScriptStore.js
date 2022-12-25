@@ -18,10 +18,20 @@ class ScriptStore {
   }
 
   /**
+   * Add a script unique by issuer to store.
+   *
    * @param {string} request The required resource file.
    */
   static add(request) {
     const [file] = request.split('?', 1);
+
+    const entry = this.files.find((item) => item.name && item.file === file && item.issuer.request === this.issuer);
+
+    if (entry != null) {
+      entry.name = undefined;
+      entry.issuer.filename = undefined;
+      return;
+    }
 
     // one issuer can have many scripts, one script can be in many issuers
     this.files.push({
@@ -35,15 +45,17 @@ class ScriptStore {
   }
 
   /**
-   * @param {string} name The unique name of entry point.
+   * Set asset name, the filename part w/o path, hash, extension.
+   *
    * @param {string} file The source file of script.
    * @param {Set} issuers The issuer source files of the required file. One script can be used in many templates.
+   * @param {string} name The unique name of entry point.
    */
-  static setName(name, file, issuers) {
-    for (let item of this.files) {
-      if (!item.name && item.file === file && issuers.has(item.issuer.request)) {
-        item.name = name;
-      }
+  static setName(file, issuers, name) {
+    const entry = this.files.find((item) => item.file === file && issuers.has(item.issuer.request));
+
+    if (entry) {
+      entry.name = name;
     }
   }
 
@@ -61,10 +73,6 @@ class ScriptStore {
 
   static getAll() {
     return this.files;
-  }
-
-  static reset() {
-    this.files = [];
   }
 
   static clear() {
