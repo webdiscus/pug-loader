@@ -2,24 +2,22 @@ const path = require('path');
 const PugPlugin = require('../../pug-plugin');
 
 module.exports = {
+  stats: {
+    children: true,
+  },
+
   mode: 'production',
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '',
+    publicPath: '/',
   },
 
   entry: {
-    index: './src/views/index.pug',
+    index: 'src/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      css: {
-        filename: 'assets/css/[name].[contenthash:8].css',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -27,17 +25,8 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'compile',
+          //method: 'render',
         },
-      },
-
-      {
-        test: /\.(css|sass|scss)$/,
-        use: [
-          {
-            loader: 'css-loader',
-          },
-        ],
       },
 
       {

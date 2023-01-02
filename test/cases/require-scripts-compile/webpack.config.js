@@ -8,7 +8,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/[name].[contenthash:8].js',
   },
 
   resolve: {
@@ -22,7 +21,13 @@ module.exports = {
     index: './src/views/index.pug',
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: 'assets/[name].[contenthash:8].js',
+      },
+    }),
+  ],
 
   module: {
     rules: [

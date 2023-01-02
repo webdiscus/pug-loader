@@ -25,8 +25,6 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, 'public'),
       publicPath: '/',
-      // output filename of scripts
-      filename: 'assets/js/[name].[contenthash:8].js',
     },
 
     entry: {
@@ -51,9 +49,12 @@ module.exports = (env, argv) => {
       // enable processing of Pug files from entry
       new PugPlugin({
         //verbose: !isProd, // output information about the process to console
-        // module extracts CSS from style source files required directly in Pug
-        extractCss: {
-          // output filename of styles
+        js: {
+          // output filename of extracted JS file from source script defined in Pug
+          filename: 'assets/js/[name].[contenthash:8].js',
+        },
+        css: {
+          // output filename of extracted CSS file from source style defined in Pug
           filename: 'assets/css/[name].[contenthash:8].css',
         },
       }),
@@ -64,9 +65,6 @@ module.exports = (env, argv) => {
         {
           test: /\.pug$/,
           loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
-          options: {
-            method: 'render', // fastest method to generate static HTML files
-          },
         },
 
         // styles

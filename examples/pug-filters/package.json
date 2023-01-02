@@ -8,14 +8,14 @@
     "build": "webpack --mode=production --progress"
   },
   "devDependencies": {
-    "css-loader": "^6.7.1",
+    "css-loader": "^6.7.3",
     "markdown-it": "^13.0.1",
-    "prismjs": "^1.28.0",
-    "pug-plugin": "^4.5.0",
-    "sass": "^1.54.1",
-    "sass-loader": "^13.0.2",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "prismjs": "^1.29.0",
+    "pug-plugin": "^4.7.0",
+    "sass": "^1.57.1",
+    "sass-loader": "^13.2.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   }
 }

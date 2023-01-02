@@ -129,7 +129,7 @@ npm install pug-plugin --save-dev
 > The pug-plugin enable to use script and style source files directly in Pug, so easy:
 > ```pug
 > link(href=require('./styles.scss') rel='stylesheet')
-> script(src=require('./main.js'))
+> script(src=require('./main.js') defer='defer')
 > ```
 > Generated HTML contains hashed CSS and JS output filenames:
 > ```html
@@ -151,25 +151,27 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    // output hashed filename of JS files
-    filename: 'assets/js/[name].[contenthash:8].js'
   },
 
   entry: {
-    // The Pug file is the entry point for all scripts and styles.
+    // The Pug file is the entry-point for all scripts and styles.
     // Source scripts and styles must be specified directly in Pug.
     // Do not need to define JS and SCSS in the webpack entry.
 
-    index: './src/views/index.pug',      // output to dist/index.html
-    about: './src/views/about/index.pug' // output to dist/about.html
+    index: './src/views/index.pug',      // output dist/index.html
+    about: './src/views/about/index.pug' // output dist/about.html
     // ...
   },
 
   plugins: [
     // enable processing of Pug files defined in webpack entry
     new PugPlugin({
-      extractCss: {
-        // output hashed filename of CSS files
+      js: {
+        // output filename of extracted JS file from source script defined in Pug
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
+      css: {
+        // output filename of extracted CSS file from source style defined in Pug
         filename: 'assets/css/[name].[contenthash:8].css',
       },
     })

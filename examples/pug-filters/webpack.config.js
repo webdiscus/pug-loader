@@ -26,8 +26,6 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, 'dist'),
       publicPath: 'auto',
-      // output filename of scripts
-      filename: 'assets/js/[name].[contenthash:8].js',
     },
 
     entry: {
@@ -40,8 +38,12 @@ module.exports = (env, argv) => {
 
     plugins: [
       new PugPlugin({
-        extractCss: {
-          // output filename of styles
+        js: {
+          // output filename of extracted JS file from source script defined in Pug
+          filename: 'assets/js/[name].[contenthash:8].js',
+        },
+        css: {
+          // output filename of extracted CSS file from source style defined in Pug
           filename: 'assets/css/[name].[contenthash:8].css',
         },
       }),
@@ -53,7 +55,6 @@ module.exports = (env, argv) => {
           test: /\.pug$/,
           loader: PugPlugin.loader,
           options: {
-            method: 'render', // fast method to render static html
             // enable embedded filters
             embedFilters: {
               // :escape

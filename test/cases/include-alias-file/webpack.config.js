@@ -18,7 +18,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '',
-    filename: 'assets/[name].js',
   },
 
   entry: {
@@ -28,6 +27,9 @@ module.exports = {
   plugins: [
     new PugPlugin({
       //pretty: true,
+      js: {
+        filename: 'assets/[name].js',
+      },
     }),
   ],
 

@@ -1,5 +1,15 @@
 # Change log
 
+## 2.10.0 (2023-01-03)
+- feat: resolve required resources in attribute blocks:
+  ```pug
+  img&attributes({
+    src: require('./image.png'),
+    srcset: `${require('./image1.png')} 80w, ${require('./image2.png')} 90w`,
+  })
+  ```
+  - chore: update packages
+
 ## 2.9.7 (2022-12-25)
 - fix(for pug-plugin): set correct asset name of script for multi-lang pages
 

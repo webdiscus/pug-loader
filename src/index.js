@@ -98,22 +98,33 @@ const resolveNode = (node) => {
       }
       break;
     default:
-      if (node.attrs && node.attrs.length > 0) {
-        // resolving of required files in tag attributes
-        for (let attr of node.attrs) {
-          const value = attr.val;
-          if (isRequired(value)) {
-            if (node.name === 'script') {
-              attr.val = Loader.resolveScript(value, attr.filename);
-            } else if (node.name === 'link' && node.attrs.find(isStyle)) {
-              attr.val = Loader.resolveStyle(value, attr.filename);
-            } else {
-              attr.val = Loader.resolveResource(value, attr.filename);
-            }
-          }
-        }
-      }
+      resolveNodeAttributes(node, 'attrs');
+      resolveNodeAttributes(node, 'attributeBlocks');
       break;
+  }
+};
+
+/**
+ * Resolve required filenames in Pug node attributes.
+ *
+ * @param {Object} node The Pug AST Node.
+ * @param {string} attrName The node attribute name.
+ */
+const resolveNodeAttributes = (node, attrName) => {
+  const attrs = node[attrName];
+  if (!attrs || attrs.length === 0) return;
+
+  for (let attr of attrs) {
+    const value = attr.val;
+    if (isRequired(value)) {
+      if (node.name === 'script') {
+        attr.val = Loader.resolveScript(value, attr.filename);
+      } else if (node.name === 'link' && node.attrs.find(isStyle)) {
+        attr.val = Loader.resolveStyle(value, attr.filename);
+      } else {
+        attr.val = Loader.resolveResource(value, attr.filename);
+      }
+    }
   }
 };
 

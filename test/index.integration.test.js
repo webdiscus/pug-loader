@@ -161,6 +161,11 @@ describe('require resource', () => {
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
+  test('require-img-attributes', (done) => {
+    const relTestCasePath = 'require-img-attributes';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
   test('require-img-srcset', (done) => {
     const relTestCasePath = 'require-img-srcset';
     compareFileListAndContent(PATHS, relTestCasePath, done);
