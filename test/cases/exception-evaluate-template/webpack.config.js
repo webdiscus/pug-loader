@@ -5,7 +5,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '',
   },
 
   entry: {
@@ -19,14 +18,6 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           method: 'render',
-        },
-      },
-
-      {
-        test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
     ],

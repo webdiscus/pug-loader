@@ -4,9 +4,9 @@ const { executeTemplateFunctionException } = require('./Exeptions');
 
 class VMScript {
   requireTypes = {
-    default: '__PUG_LOADER_REQUIRE__',
-    script: '__PUG_LOADER_REQUIRE_SCRIPT__',
-    style: '__PUG_LOADER_REQUIRE_STYLE__',
+    default: '__LOADER_REQUIRE__',
+    script: '__LOADER_REQUIRE_SCRIPT__',
+    style: '__LOADER_REQUIRE_STYLE__',
   };
 
   /**
@@ -50,6 +50,7 @@ class VMScript {
     try {
       const script = new vm.Script(source, { filename: templateFile });
       script.runInContext(this.contextObject);
+
       return this.contextObject[this.templateName](locals);
     } catch (error) {
       Dependency.watch();

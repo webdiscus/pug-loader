@@ -268,8 +268,8 @@ const compile = function (content, callback) {
   if (!isPlugin) {
     // trim indent by using as standalone, e.g. with vue
     const template = trimIndent(content);
+
     if (template !== false) content = template;
-    // TODO: drop support HtmlWebpackPlugin in next major version 3.x, because must be used pug-plugin instead
     customData = HtmlWebpackPlugin.getUserOptions(filename, webpackOptions);
   }
 

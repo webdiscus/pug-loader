@@ -41,6 +41,18 @@ const searchLocalsRegexp = /(?<=locals_for_with = )(?:\(?locals \|\| {}\)?)(?=;)
 const searchSelfRegexp = /(?<=self = )(?:locals \|\| {})(?=;)/;
 
 /**
+ * Whether request contains the `inline` query param.
+ *
+ * @param {string} request
+ * @return {boolean}
+ */
+const isInline = (request) => {
+  const [, query] = request.split('?', 2);
+
+  return query != null && /(?:^|&)inline(?:$|&)/.test(query);
+};
+
+/**
  * Parse the url query.
  * See possible resource queries in the test case `parse resource data`.
  *
@@ -203,6 +215,7 @@ module.exports = {
   hmrFile,
   isRequireableScript,
   isWin,
+  isInline,
   pathToPosix,
   getQueryData,
   injectExternalData,

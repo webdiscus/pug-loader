@@ -1,6 +1,6 @@
 import path from 'path';
 import { readTextFileSync } from './utils/file';
-import { getQueryData, trimIndent } from '../src/Utils';
+import { getQueryData, trimIndent, isInline } from '../src/Utils';
 
 const PATHS = {
   testSource: path.join(__dirname, 'cases'),
@@ -172,5 +172,37 @@ describe('remove indents in vue and react templates', () => {
 
     expect(received).toEqual(expected);
     done();
+  });
+});
+
+describe('isInline', () => {
+  test('?inline', () => {
+    const received = isInline('?inline');
+    expect(received).toBeTruthy();
+  });
+
+  test('?inline&param=1', () => {
+    const received = isInline('?inline&param=1');
+    expect(received).toBeTruthy();
+  });
+
+  test('?param=1&inline', () => {
+    const received = isInline('?param=1&inline');
+    expect(received).toBeTruthy();
+  });
+
+  test('?param1=1&inline&param2=1', () => {
+    const received = isInline('?param1=1&inline&param2=1');
+    expect(received).toBeTruthy();
+  });
+
+  test('?inline=other', () => {
+    const received = isInline('?inline=other');
+    expect(received).toBeFalsy();
+  });
+
+  test('?inline-other', () => {
+    const received = isInline('?inline-other');
+    expect(received).toBeFalsy();
   });
 });

@@ -1,5 +1,9 @@
 # Change log
 
+## 2.10.1 (2023-01-15)
+- feat(for pug-plugin): add supports for inline JS
+- refactor: code optimizations
+
 ## 2.10.0 (2023-01-03)
 - feat: resolve required resources in attribute blocks:
   ```pug

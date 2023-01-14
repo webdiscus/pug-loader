@@ -27,7 +27,7 @@ module.exports = {
       // test alias as string contained a prefix in name
       ImagesB: path.join(__dirname, './src/assets-b/images1/'),
       '~ImagesB': path.join(__dirname, './src/assets-b/images2/'),
-      '@ImagesB': path.join(__dirname, './src/assets-b/images3'),
+      '@ImagesB': path.join(__dirname, './src/assets-b/images3/'),
 
       // test alias as array
       ImagesC: [path.join(__dirname, './src/assets/images/'), path.join(__dirname, './src/assets-c/images/')],
