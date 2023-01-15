@@ -1,5 +1,8 @@
 # Change log
 
+## 2.10.2 (2023-01-15)
+- fix(for pug-plugin): resolving of inline JS source file
+
 ## 2.10.1 (2023-01-15)
 - feat(for pug-plugin): add supports for inline JS
 - refactor: code optimizations

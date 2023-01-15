@@ -113,7 +113,7 @@ class RenderMethod {
   /**
    * Returns the expression with the name of the handler function in the template source code,
    * which will be called when this template is compiled in the VM.
-   * The filename from the script tag will be stored for usage in pug-plugin.
+   * The filename from the script tag will be stored for usage in the plugin.
    *
    * @param {string} file The required file.
    * @param {string} issuer The issuer of required file.

@@ -22,17 +22,16 @@ class Loader {
   ];
 
   /**
-   * @param {string} filename The pug template file.
+   * @param {string} filename The template file.
    * @param {string} resourceQuery The URL query of template.
    * @param {{}} options The loader options.
    * @param {{}} customData The custom data.
-   * @param {boolean} isPlugin Whether the pug-loader work under pug-plugin.
+   * @param {boolean} isPlugin Whether the loader work under the plugin.
    */
   static init({ filename: templateFile, resourceQuery, options, customData, isPlugin }) {
     const { data, esModule, method, name: templateName, self: useSelf } = options;
 
-    // the rule: a method defined in the resource query has the highest priority over a method defined in the loaderName options
-    // because a method from loaderName options is global but a query method override a global method
+    // the rule: a query method override a global method defined in the loader options
     const queryData = getQueryData(resourceQuery);
 
     this.compiler = this.compilerFactory({
@@ -45,7 +44,7 @@ class Loader {
       useSelf,
     });
 
-    // remove pug method from query data to pass in pug only clean data
+    // remove method from query data to pass in the template only clean data
     const query = this.compiler.query;
     if (queryData.hasOwnProperty(query)) {
       delete queryData[query];

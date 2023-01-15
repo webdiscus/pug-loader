@@ -74,6 +74,8 @@ const isRequired = (value) => value != null && typeof value === 'string' && valu
  */
 const isStyle = (item) => item.name === 'rel' && item.val.indexOf('stylesheet') > -1;
 
+let lastTag = '';
+
 /**
  * Resolve filenames in Pug node.
  *
@@ -83,7 +85,10 @@ const resolveNode = (node) => {
   switch (node.type) {
     case 'Code':
       if (isRequired(node.val)) {
-        node.val = Loader.resolveResource(node.val, node.filename);
+        node.val =
+          lastTag === 'script'
+            ? Loader.resolveScript(node.val, node.filename)
+            : Loader.resolveResource(node.val, node.filename);
       }
       break;
     case 'Mixin':
@@ -97,6 +102,9 @@ const resolveNode = (node) => {
         node.obj = Loader.resolveResource(node.obj, node.filename);
       }
       break;
+    case 'Tag':
+      lastTag = node.name;
+    // fallthrough
     default:
       resolveNodeAttributes(node, 'attrs');
       resolveNodeAttributes(node, 'attributeBlocks');

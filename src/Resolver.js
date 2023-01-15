@@ -222,7 +222,7 @@ class Resolver {
 
   /**
    * Resolve script request w/o extension.
-   * The extension must be resolved to generate correct unique JS filename in pug-plugin.
+   * The extension must be resolved to generate correct unique JS filename in the plugin.
    * For example: `vendor.min?key=val` resolve to `vendor.min.js?key=val`.
    *
    * @param {string} request The request of script.

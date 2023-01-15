@@ -1,5 +1,5 @@
 /**
- * The share point between pug-plugin and pug-loader instances.
+ * The share point between plugin and loader instances.
  */
 class Plugin {
   static used = false;
@@ -7,13 +7,13 @@ class Plugin {
   static contextCache = new Set();
 
   /**
-   * Set use state of pug-plugin.
+   * Set use state of the plugin.
    *
-   * If pug-plugin is used, then this method will be called by pug-plugin initialisation
-   * to disable some features of pug-plugin, because never used with pug-plugin,
+   * If the plugin is used, then this method will be called by the plugin initialisation
+   * to disable some features of the plugin, because never used with the plugin,
    * but require additional compilation time.
    *
-   * @param {{}} options The options of Pug plugin.
+   * @param {{}} options The options of the plugin.
    */
   static init(options) {
     this.used = true;
@@ -26,11 +26,11 @@ class Plugin {
    * @return {Array<RegExp|string>}
    */
   static getStyleRestrictions() {
-    return this.options ? [this.options.extractCss.test] : [];
+    return this.options ? [this.options.extractCss?.test] : [];
   }
 
   /**
-   * Whether is pug-plugin used.
+   * Whether is the plugin used.
    * @return {boolean}
    */
   static isUsed() {
