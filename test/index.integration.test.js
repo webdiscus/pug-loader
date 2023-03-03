@@ -14,16 +14,6 @@ const PATHS = {
   output: '/assets/',
 };
 
-// 10s is required for test on slow instance like GitHub
-const testTimeout = 10000;
-
-beforeAll(() => {});
-
-beforeEach(() => {
-  // on linux/macOS not work set the testTimeout in jest.config.js
-  jest.setTimeout(testTimeout);
-});
-
 describe('pug tests', () => {
   test('hello-world-simple', (done) => {
     const relTestCasePath = 'hello-world';

@@ -17,7 +17,7 @@
 [![npm](https://img.shields.io/npm/v/@webdiscus/pug-loader?logo=npm&color=brightgreen "npm package")](https://www.npmjs.com/package/@webdiscus/pug-loader "download npm package")
 [![node](https://img.shields.io/node/v/@webdiscus/pug-loader)](https://nodejs.org)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/peer/webpack)](https://webpack.js.org/)
-[![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-loader/peer/pug)](https://github.com/pugjs/pug)
+[![Test](https://github.com/webdiscus/pug-loader/actions/workflows/test.yml/badge.svg)](https://github.com/webdiscus/pug-loader/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/webdiscus/pug-loader/branch/master/graph/badge.svg?token=457T2BK3YN)](https://codecov.io/gh/webdiscus/pug-loader)
 [![node](https://img.shields.io/npm/dm/@webdiscus/pug-loader)](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
@@ -1367,6 +1367,8 @@ h1 #{sayHello('pug')}
 - [pug API Reference][pug-api]
 - [pug-plugin][pug-plugin]
 - [Pug filters]
+- [html-bundler-webpack-plugin][html-bundler-webpack-plugin] - The plugin handles HTML template as entry point, extracts CSS, JS, images from their sources loaded directly in HTML
+
 
 ## License
 
@@ -1383,3 +1385,5 @@ h1 #{sayHello('pug')}
 [`:code`]: https://webdiscus.github.io/pug-loader/pug-filters/code.html
 [`:highlight`]: https://webdiscus.github.io/pug-loader/pug-filters/highlight.html
 [`:markdown`]: https://webdiscus.github.io/pug-loader/pug-filters/markdown.html
+
+[html-bundler-webpack-plugin]: https://github.com/webdiscus/html-bundler-webpack-plugin

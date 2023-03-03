@@ -1,9 +1,9 @@
 .DS_Store
 .idea
+.local
 .run
 .angular
 _ignored
-package-lock.json
 coverage
 coverage.lcov
 node_modules

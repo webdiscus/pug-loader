@@ -1,5 +1,8 @@
 # Change log
 
+## 2.10.3 (2023-03-04)
+- fix: correct loader export when template contain CRLF line separators
+
 ## 2.10.2 (2023-01-15)
 - fix(for pug-plugin): resolving of inline JS source file
 
