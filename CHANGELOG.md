@@ -1,5 +1,8 @@
 # Change log
 
+## 2.10.4 (2023-03-10)
+- fix(for pug-plugin): add missing node modules to compilation after rebuild
+
 ## 2.10.3 (2023-03-04)
 - fix: correct loader export when template contain CRLF line separators
 

@@ -48,7 +48,8 @@ class VMScript {
    */
   run(templateFile, source, locals) {
     try {
-      const script = new vm.Script(source, { filename: templateFile });
+      const [filename] = templateFile.split('?', 1);
+      const script = new vm.Script(source, { filename });
       script.runInContext(this.contextObject);
 
       return this.contextObject[this.templateName](locals);

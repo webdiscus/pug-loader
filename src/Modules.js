@@ -9,5 +9,5 @@ const pugLoaderPath = '@webdiscus/pug-loader';
 
 module.exports = {
   plugin: require(pugLoaderPath + '/src/Plugin.js'),
-  scriptStore: require(pugLoaderPath + '/src/ScriptStore.js'),
+  ScriptCollection: require(pugLoaderPath + '/src/ScriptCollection.js'),
 };

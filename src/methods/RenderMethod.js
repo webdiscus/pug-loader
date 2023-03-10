@@ -1,6 +1,6 @@
 const VMScript = require('../VMScript');
 const Resolver = require('../Resolver');
-const { scriptStore } = require('../Modules');
+const { ScriptCollection } = require('../Modules');
 const { isRequireableScript, hmrFile } = require('../Utils');
 
 /**
@@ -87,7 +87,7 @@ class RenderMethod {
    */
   loaderRequireScript(file, issuer) {
     const resolvedFile = Resolver.resolve(file, issuer, 'script');
-    scriptStore.add(resolvedFile);
+    ScriptCollection.add(resolvedFile, this.templateFile);
 
     return `\\u0027 + require(\\u0027${resolvedFile}\\u0027) + \\u0027`;
   }
@@ -160,13 +160,14 @@ class RenderMethod {
    *
    * @param {Error} error
    * @param {Function} getErrorMessage
+   * @param {string} issuer
    * @return {string}
    */
-  exportError(error, getErrorMessage) {
+  exportError(error, getErrorMessage, issuer) {
     const requireHmrScript = `' + require('${hmrFile}') + '`;
     const errStr = error.toString().replace(/'/g, "\\'");
     const message = getErrorMessage.call(null, errStr, requireHmrScript);
-    scriptStore.add(hmrFile);
+    ScriptCollection.add(hmrFile, this.templateFile);
 
     return this.exportCode + "'" + message + "';";
   }

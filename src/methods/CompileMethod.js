@@ -1,5 +1,5 @@
 const Resolver = require('../Resolver');
-const { scriptStore } = require('../Modules');
+const { ScriptCollection } = require('../Modules');
 const { injectExternalData, hmrFile } = require('../Utils');
 
 /**
@@ -36,7 +36,7 @@ class CompileMethod {
    */
   requireScript(value, issuer) {
     const resolvedFile = Resolver.interpolate(value, issuer, 'script');
-    scriptStore.add(resolvedFile);
+    ScriptCollection.add(resolvedFile, this.templateFile);
 
     return `require('${resolvedFile}')`;
   }
@@ -73,13 +73,14 @@ class CompileMethod {
    *
    * @param {Error} error
    * @param {Function} getErrorMessage
+   * @param {string} issuer
    * @return {string}
    */
-  exportError(error, getErrorMessage) {
+  exportError(error, getErrorMessage, issuer) {
     const requireHmrScript = `' + require('${hmrFile}') + '`;
     const errStr = error.toString().replace(/'/g, "\\'");
     const message = getErrorMessage.call(null, errStr, requireHmrScript);
-    scriptStore.add(hmrFile);
+    ScriptCollection.add(hmrFile, this.templateFile);
 
     return this.exportCode + `() => '${message}';`;
   }

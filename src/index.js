@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const pug = require('pug');
-const { plugin, scriptStore } = require('./Modules');
+const { plugin, ScriptCollection } = require('./Modules');
 const Dependency = require('./Dependency');
 const Resolver = require('./Resolver');
 const Loader = require('./Loader');
@@ -292,16 +292,12 @@ const compile = function (content, callback) {
   }
 
   Loader.init({
-    filename,
+    //filename,
+    filename: resource,
     resourceQuery,
     options: loaderOptions,
     customData,
     isPlugin,
-  });
-
-  scriptStore.init({
-    // filename with url query
-    issuer: resource,
   });
 
   Dependency.init({

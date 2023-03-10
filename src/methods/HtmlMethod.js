@@ -1,6 +1,6 @@
 const VMScript = require('../VMScript');
 const Resolver = require('../Resolver');
-const { scriptStore } = require('../Modules');
+const { ScriptCollection } = require('../Modules');
 const { isRequireableScript, hmrFile } = require('../Utils');
 
 /**
@@ -71,7 +71,7 @@ class HtmlMethod {
    */
   loaderRequireScript(file, issuer) {
     let resolvedFile = Resolver.resolve(file, issuer, 'script');
-    scriptStore.add(resolvedFile);
+    ScriptCollection.add(resolvedFile, this.templateFile);
 
     return resolvedFile;
   }
@@ -142,10 +142,11 @@ class HtmlMethod {
    *
    * @param {Error} error
    * @param {Function} getErrorMessage
+   * @param {string} issuer
    * @return {string}
    */
-  exportError(error, getErrorMessage) {
-    scriptStore.add(hmrFile);
+  exportError(error, getErrorMessage, issuer) {
+    ScriptCollection.add(hmrFile, this.templateFile);
     return getErrorMessage.call(null, error.toString(), hmrFile);
   }
 }
