@@ -235,6 +235,12 @@ describe('require resource', () => {
     const relTestCasePath = 'require-resource-in-mixin-argument';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
+
+  // TODO: enable the test after fix pug-plugin
+  // test('require svg fragment', (done) => {
+  //   const relTestCasePath = 'require-img-svg-fragment';
+  //   compareFileListAndContent(PATHS, relTestCasePath, done);
+  // });
 });
 
 describe('require scripts', () => {

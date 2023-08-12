@@ -27,13 +27,13 @@ class Resolver {
     this.hasAlias = Object.keys(this.aliases).length > 0;
     this.hasPlugins = options.plugins && Object.keys(options.plugins).length > 0;
 
-    // resolver for scripts from the 'script' tag, npm modules and other js files
-    this.resolveFile = ResolverFactory.create.sync({
+    // resolver for scripts from the 'script' tag, npm modules, and other js files
+    this.resolveScript = ResolverFactory.create.sync({
       ...options,
       preferRelative: options.preferRelative !== false,
-      // resolve 'exports' field in package.json, default value is ['webpack', 'production', 'browser']
+      // resolve 'exports' field in package.json, default value is: ['webpack', 'production', 'browser']
       conditionNames: ['require', 'node'],
-      // restrict default extensions list '.js', '.json', '.wasm' for faster resolving
+      // restrict default extensions list '.js', '.json', '.wasm' for faster resolving of script files
       extensions: options.extensions.length ? options.extensions : ['.js'],
     });
 
@@ -43,7 +43,7 @@ class Resolver {
       preferRelative: options.preferRelative !== false,
       byDependency: {},
       conditionNames: ['style', 'sass'],
-      // firstly try to resolve 'browser' or 'style' fields in package.json to get compiled CSS bundle of a module,
+      // firstly, try to resolve 'browser' or 'style' fields in package.json to get compiled CSS bundle of a module,
       // e.g. bootstrap has the 'style' field, but material-icons has the 'browser' field for resolving the CSS file;
       // if a module has not a client specified field, then must be used path to client file of the module,
       // like `module-name/dist/bundle.css`
@@ -52,59 +52,79 @@ class Resolver {
       extensions: ['.scss', '.sass', '.css'],
       restrictions: plugin.isUsed() ? plugin.getStyleRestrictions() : this.styleResolveOptions.restrictions,
     });
+
+    // resolver for resources: scripts w/o an ext (e.g.: require('./data')), images, fonts, etc.
+    this.resolveFile = ResolverFactory.create.sync({
+      ...options,
+      preferRelative: options.preferRelative !== false,
+      // resolve 'exports' field in package.json, default value is: ['webpack', 'production', 'browser']
+      conditionNames: ['require', 'node'],
+      // restrict default extensions list '.js', '.json', '.wasm' for faster resolving of script files
+      extensions: options.extensions.length ? options.extensions : ['.js'],
+      // remove extensions for faster resolving of files different from styles and scripts
+      //extensions: [], // don't work if required js file w/o an ext in template
+    });
   }
 
   /**
    * Resolve filename.
    *
-   * @param {string} file The file to resolve.
+   * @param {string} request The file to resolve.
    * @param {string} templateFile The template file.
    * @param {string} [type = 'default'] The require type: 'default', 'script', 'style'.
    * @return {string}
    */
-  static resolve(file, templateFile, type = 'default') {
+  static resolve(request, templateFile, type = 'default') {
     const context = path.dirname(templateFile);
     const isScript = type === 'script';
     const isStyle = type === 'style';
     let isAliasArray = false;
-    let resolvedFile = null;
+    let resolvedRequest = null;
 
     // resolve an absolute path by prepending options.basedir
-    if (file[0] === '/') {
-      resolvedFile = path.join(this.basedir, file);
+    if (request[0] === '/') {
+      resolvedRequest = path.join(this.basedir, request);
     }
 
     // resolve a relative file
-    if (resolvedFile == null && file[0] === '.') {
-      resolvedFile = path.join(context, file);
+    if (resolvedRequest == null && request[0] === '.') {
+      resolvedRequest = path.join(context, request);
     }
 
     // resolve a file by webpack `resolve.alias`
-    if (resolvedFile == null) {
-      resolvedFile = this.resolveAlias(file);
-      isAliasArray = Array.isArray(resolvedFile);
+    if (resolvedRequest == null) {
+      resolvedRequest = this.resolveAlias(request);
+      isAliasArray = Array.isArray(resolvedRequest);
     }
 
     // fallback to enhanced resolver
-    if (resolvedFile == null || isAliasArray) {
-      let request = file;
+    if (resolvedRequest == null || isAliasArray) {
+      let normalizedRequest = request;
       // remove optional prefix in request for enhanced resolver
-      if (isAliasArray) request = this.removeAliasPrefix(request);
+      if (isAliasArray) normalizedRequest = this.removeAliasPrefix(normalizedRequest);
 
       try {
-        resolvedFile = isStyle ? this.resolveStyle(context, request) : this.resolveFile(context, request);
+        resolvedRequest = isScript
+          ? this.resolveScript(context, normalizedRequest)
+          : isStyle
+          ? this.resolveStyle(context, normalizedRequest)
+          : this.resolveFile(context, normalizedRequest);
       } catch (error) {
-        resolveException(error, file, templateFile);
+        resolveException(error, request, templateFile);
       }
     }
 
+    // request of the svg file can contain a fragment id, e.g., shapes.svg#circle
+    const separator = resolvedRequest.indexOf('#') > 0 ? '#' : '?';
+    const [resolvedFile] = resolvedRequest.split(separator, 1);
+
     if (isScript) {
-      resolvedFile = this.resolveScriptExtension(resolvedFile);
+      resolvedRequest = this.resolveScriptExtension(resolvedRequest);
     } else {
       Dependency.add(resolvedFile);
     }
 
-    return isWin ? pathToPosix(resolvedFile) : resolvedFile;
+    return isWin ? pathToPosix(resolvedRequest) : resolvedRequest;
   }
 
   /**

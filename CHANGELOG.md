@@ -1,5 +1,9 @@
 # Change log
 
+## 2.10.5 (2023-08-12)
+- fix: add the svg file referenced with a fragment, e.g. `icons.svg#home`, to watch dependencies
+- chore: update packages
+
 ## 2.10.4 (2023-03-10)
 - fix(for pug-plugin): add missing node modules to compilation after rebuild
 
