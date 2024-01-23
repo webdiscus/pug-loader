@@ -1,5 +1,8 @@
 # Change log
 
+## 2.10.6 (2024-01-23)
+- fix: caching user data from html-webpack-plugin by template filename with query
+
 ## 2.10.5 (2023-08-12)
 - fix: add the svg file referenced with a fragment, e.g. `icons.svg#home`, to watch dependencies
 - chore: update packages

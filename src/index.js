@@ -278,7 +278,7 @@ const compile = function (content, callback) {
     const template = trimIndent(content);
 
     if (template !== false) content = template;
-    customData = HtmlWebpackPlugin.getUserOptions(filename, webpackOptions);
+    customData = HtmlWebpackPlugin.getUserOptions(resource, webpackOptions);
   }
 
   // prevent double initialisation with same options, occurs when many Pug files used in one webpack config

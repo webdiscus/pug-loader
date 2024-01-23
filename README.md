@@ -1,7 +1,7 @@
 <div align="center">
     <h1>
         <a href="https://pugjs.org">
-            <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+            <img height="120" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
         </a>
         <a href="https://github.com/webpack/webpack">
             <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
@@ -38,13 +38,26 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 <br>
 
 > **Warning**
+> 
+> Until today, **2024**, only this Pug loader **is maintained**. Please support this project by giving it a star ⭐.\
+> All **other Pug loaders are dead** and have not been maintained for a long time:
+>
+> - [pug-loader](https://www.npmjs.com/package/pug-loader) - last update 2018 (6 years ago)
+> - [pug-html-loader](https://npmjs.com/package/pug-html-loader) - last update 2016 (8 years ago)
+> - [pug-plain-loader](https://www.npmjs.com/package/pug-plain-loader) - last update 2020 (4 years ago)
+> - [simple-pug-loader](https://npmjs.com/package/simple-pug-loader) - last update 2021 (3 years ago)
+
+
+<!--
+> **Warning**
 >
 > Since `v2.8.0` the support of the `html-webpack-plugin` is DEPRECATED, because Pug has its own smarty and clever [`pug-plugin`](https://github.com/webdiscus/pug-plugin).
+-->
 
 > **Note**
 > 
-> Instead of `html-webpack-plugin` recommended to use the [`pug-plugin`](https://github.com/webdiscus/pug-plugin).\
-> Pug Plugin enable to use Pug files in webpack entry and generates HTML files that contain the hashed 
+> Instead of `html-webpack-plugin` recommended to use the powerful [`pug-plugin`](https://github.com/webdiscus/pug-plugin).\
+> The Pug Plugin enable to use Pug files in webpack entry and generates HTML files that contain the hashed 
 > output JS and CSS filenames whose source files are specified in the Pug template.
 >
 >💡 **Pug plugin highlights**:

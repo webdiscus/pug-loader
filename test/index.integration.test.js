@@ -20,6 +20,11 @@ describe('pug tests', () => {
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 
+  test('hello-world-simple-render', (done) => {
+    const relTestCasePath = 'hello-world-render';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
   test('hello-world-app', (done) => {
     const relTestCasePath = 'hello-world-app';
     compareFileListAndContent(PATHS, relTestCasePath, done);
@@ -407,6 +412,11 @@ describe('pass data in html-webpack-plugin', () => {
 
   test('pass data from plugin options and query', (done) => {
     const relTestCasePath = 'html-webpack-plugin-options-query';
+    compareFileListAndContent(PATHS, relTestCasePath, done);
+  });
+
+  test('pass diff data in one template', (done) => {
+    const relTestCasePath = 'html-webpack-plugin-diff-data-one-template';
     compareFileListAndContent(PATHS, relTestCasePath, done);
   });
 });
