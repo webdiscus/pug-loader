@@ -77,19 +77,19 @@
     "webpack-merge": "^5.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.22.20",
-    "@types/jest": "^29.5.11",
-    "css-loader": "^6.8.1",
-    "html-loader": "^4.2.0",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@types/jest": "^29.5.12",
+    "css-loader": "^6.10.0",
+    "html-loader": "^5.0.0",
     "html-webpack-plugin": "^5.6.0",
     "jest": "^29.7.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "prismjs": "^1.29.0",
     "pug-plugin": "4.9.9",
     "responsive-loader": "^3.1.2",
     "sharp": "^0.32.6",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "webpack": "^5.89.0"
+    "webpack": "^5.90.1"
   }
 }
