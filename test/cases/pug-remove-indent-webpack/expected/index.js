@@ -1,0 +1,1 @@
+(()=>{var t={188:t=>{t.exports="<h1>Hello World!</h1><p>text</p><div><p>text</p><p>text</p></div><div>block</div>"}},o={};function r(e){var p=o[e];if(void 0!==p)return p.exports;var v=o[e]={exports:{}};return t[e](v,v.exports,r),v.exports}(()=>{const t=r(188);console.log(t)})()})();

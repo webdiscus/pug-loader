@@ -16,7 +16,7 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: path.join(__dirname, 'dist/'),
     publicPath: '',
   },
 

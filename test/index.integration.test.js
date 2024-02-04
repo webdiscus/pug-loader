@@ -1,342 +1,88 @@
-import { compareContent, compareFileListAndContent, compareTemplateFunction, exceptionContain } from './utils/helpers';
+import { compareFiles, exceptionContain } from './utils/helpers';
 import { filterLoadException } from '../src/Exeptions';
 
-const path = require('path');
-
-const PATHS = {
-  base: __dirname,
-  testSource: path.join(__dirname, 'cases'),
-  // relative path in the test directory to web root dir name, same as by a web server (e.g. nginx)
-  webRoot: '/public/',
-  // relative path in the test directory to expected files for test
-  expected: '/expected/',
-  // relative path in the public directory
-  output: '/assets/',
-};
-
 describe('pug tests', () => {
-  test('hello-world-simple', (done) => {
-    const relTestCasePath = 'hello-world';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('hello-world-simple-render', (done) => {
-    const relTestCasePath = 'hello-world-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('hello-world-app', (done) => {
-    const relTestCasePath = 'hello-world-app';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('doctype-html5-mixin', (done) => {
-    const relTestCasePath = 'doctype-html5-mixin';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('remove indents in vue and react templates', (done) => {
-    const relTestCasePath = 'pug-remove-indent-webpack';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test('inline-code-minify', (done) => {
-    const relTestCasePath = 'inline-code-minify';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('escape method compile', (done) => {
-    const relTestCasePath = 'escape-method-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('escape method render', (done) => {
-    const relTestCasePath = 'escape-method-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('escape method html', (done) => {
-    const relTestCasePath = 'escape-method-html';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test('hello-world', () => compareFiles('hello-world'));
+  test('hello-world-app', () => compareFiles('hello-world-app'));
+  test('hello-world-render', () => compareFiles('hello-world-render'));
+  test('doctype-html5-mixin', () => compareFiles('doctype-html5-mixin'));
+  test('inline-code-minify', () => compareFiles('inline-code-minify'));
+  test('escape method compile', () => compareFiles('escape-method-compile'));
+  test('escape method render', () => compareFiles('escape-method-render'));
+  test('escape method html', () => compareFiles('escape-method-html'));
+  test('remove indents in vue and react templates', () => compareFiles('pug-remove-indent-webpack'));
 });
 
 describe('extend / include / raw include', () => {
-  test('extends-alias', (done) => {
-    const relTestCasePath = 'extends-alias';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('extends-relative', (done) => {
-    const relTestCasePath = 'extends-relative';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include alias from resolve.alias', (done) => {
-    const relTestCasePath = 'include-alias-resolve.alias';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include alias from resolve.plugins', (done) => {
-    const relTestCasePath = 'include-alias-resolve.plugins';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include alias from resolve.plugin-compile', (done) => {
-    const relTestCasePath = 'include-alias-resolve.plugins-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include alias from resolve.plugin-render', (done) => {
-    const relTestCasePath = 'include-alias-resolve.plugins-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include-basedir', (done) => {
-    const relTestCasePath = 'include-basedir';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include-relative', (done) => {
-    const relTestCasePath = 'include-relative';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include-script-alias', (done) => {
-    const relTestCasePath = 'include-script-alias';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include-script-relative', (done) => {
-    const relTestCasePath = 'include-script-relative';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('include-alias-file', (done) => {
-    const relTestCasePath = 'include-alias-file';
-    compareContent(PATHS, relTestCasePath, done);
-  });
+  test('extends alias', () => compareFiles('extends-alias'));
+  test('extends relative', () => compareFiles('extends-relative'));
+  test('include alias, resolve.alias', () => compareFiles('include-alias-resolve.alias'));
+  test('include alias, resolve.plugins', () => compareFiles('include-alias-resolve.plugins'));
+  test('include alias, resolve compile', () => compareFiles('include-alias-resolve.plugins-compile'));
+  test('include alias, resolve render', () => compareFiles('include-alias-resolve.plugins-render'));
+  test('include basedir', () => compareFiles('include-basedir'));
+  test('include relative', () => compareFiles('include-relative'));
+  test('include script alias', () => compareFiles('include-script-alias'));
+  test('include script relative', () => compareFiles('include-script-relative'));
+  test('include alias file', () => compareFiles('include-alias-file'));
 });
 
 describe('require code', () => {
-  test('require json via alias', (done) => {
-    const relTestCasePath = 'require-json-alias';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require json relative', (done) => {
-    const relTestCasePath = 'require-json-relative';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require js module relative', (done) => {
-    const relTestCasePath = 'require-js-relative';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test('require json via alias', () => compareFiles('require-json-alias'));
+  test('require json relative', () => compareFiles('require-json-relative'));
+  test('require js module relative', () => compareFiles('require-js-relative'));
 });
 
 describe('require resource', () => {
-  test('require-in-all-pug-references', (done) => {
-    const relTestCasePath = 'require-in-all-pug-references';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-alias-array-compile', (done) => {
-    const relTestCasePath = 'require-alias-array-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-alias-array-render', (done) => {
-    const relTestCasePath = 'require-alias-array-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-fonts', (done) => {
-    const relTestCasePath = 'require-fonts';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-img-attributes', (done) => {
-    const relTestCasePath = 'require-img-attributes';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-img-srcset', (done) => {
-    const relTestCasePath = 'require-img-srcset';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-img-query-compile', (done) => {
-    const relTestCasePath = 'require-img-query-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-img-query-render', (done) => {
-    const relTestCasePath = 'require-img-query-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-img-query-html', (done) => {
-    const relTestCasePath = 'require-img-query-html';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-string', (done) => {
-    const relTestCasePath = 'require-resource-string';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-alias', (done) => {
-    const relTestCasePath = 'require-resource-alias';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-node-module', (done) => {
-    const relTestCasePath = 'require-node-module';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-include-mixin-compile', (done) => {
-    const relTestCasePath = 'require-resource-include-mixin-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-include-mixin-render', (done) => {
-    const relTestCasePath = 'require-resource-include-mixin-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-variable-current-dir', (done) => {
-    const relTestCasePath = 'require-resource-variable-current-dir';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-variable-parent-dir', (done) => {
-    const relTestCasePath = 'require-resource-variable-parent-dir';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-variable-sub-dir', (done) => {
-    const relTestCasePath = 'require-resource-variable-sub-dir';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-assets-method-compile', (done) => {
-    const relTestCasePath = 'require-assets-method-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-assets-method-render', (done) => {
-    const relTestCasePath = 'require-assets-method-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-assets-method-html', (done) => {
-    const relTestCasePath = 'require-assets-method-html';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('require-resource-in-mixin-argument', (done) => {
-    const relTestCasePath = 'require-resource-in-mixin-argument';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  // TODO: enable the test after fix pug-plugin
-  // test('require svg fragment', (done) => {
-  //   const relTestCasePath = 'require-img-svg-fragment';
-  //   compareFileListAndContent(PATHS, relTestCasePath, done);
-  // });
+  test('require-in-all-pug-references', () => compareFiles('require-in-all-pug-references'));
+  test('require-alias-array-compile', () => compareFiles('require-alias-array-compile'));
+  test('require-alias-array-render', () => compareFiles('require-alias-array-render'));
+  test('require-fonts', () => compareFiles('require-fonts'));
+  test('require-img-attributes', () => compareFiles('require-img-attributes'));
+  test('require-img-srcset', () => compareFiles('require-img-srcset'));
+  test('require-img-query-compile', () => compareFiles('require-img-query-compile'));
+  test('require-img-query-render', () => compareFiles('require-img-query-render'));
+  test('require-img-query-html', () => compareFiles('require-img-query-html'));
+  test('require-string', () => compareFiles('require-resource-string'));
+  test('require-alias', () => compareFiles('require-resource-alias'));
+  test('require-node-module', () => compareFiles('require-node-module'));
+  test('require-include-mixin-compile', () => compareFiles('require-resource-include-mixin-compile'));
+  test('require-include-mixin-render', () => compareFiles('require-resource-include-mixin-render'));
+  test('require-variable-current-dir', () => compareFiles('require-resource-variable-current-dir'));
+  test('require-variable-parent-dir', () => compareFiles('require-resource-variable-parent-dir'));
+  test('require-variable-sub-dir', () => compareFiles('require-resource-variable-sub-dir'));
+  test('require-assets-method-compile', () => compareFiles('require-assets-method-compile'));
+  test('require-assets-method-render', () => compareFiles('require-assets-method-render'));
+  test('require-assets-method-html', () => compareFiles('require-assets-method-html'));
+  test('require-resource-in-mixin-argument', () => compareFiles('require-resource-in-mixin-argument'));
+  test('require svg fragment', () => compareFiles('require-img-svg-fragment'));
 });
 
 describe('require scripts', () => {
-  test('method compile', (done) => {
-    const relTestCasePath = 'require-scripts-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('method render', (done) => {
-    const relTestCasePath = 'require-scripts-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('method html', (done) => {
-    const relTestCasePath = 'require-scripts-html';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('webpack config: resolve.modules', (done) => {
-    const relTestCasePath = 'resolve-modules';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test('method compile', () => compareFiles('require-scripts-compile'));
+  test('method render', () => compareFiles('require-scripts-render'));
+  test('method html', () => compareFiles('require-scripts-html'));
+  test('webpack config: resolve.modules', () => compareFiles('resolve-modules'));
 });
 
 describe('require pug in javascript', () => {
-  test(`query method compile`, (done) => {
-    const relTestCasePath = 'javascript-query-method-compile';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
+  test(`query method compile`, () => compareFiles('javascript-query-method-compile'));
+  test(`query method render`, () => compareFiles('javascript-query-method-render'));
+  test(`query methods compile and render`, () => compareFiles('javascript-query-method-all'));
+  test(`js assets, compile`, () => compareFiles('javascript-assets-compile'));
+  test(`js assets, compile with variables`, () => compareFiles('javascript-assets-compile-vars'));
+  test(`js assets, render`, () => compareFiles('javascript-assets-render'));
+  test(`js assets, html`, () => compareFiles('javascript-assets-html'));
+  test(`js esModule=false require, render`, () => compareFiles('javascript-esm-false-require-render'));
+  test(`js esModule=true import, render`, () => compareFiles('javascript-esm-true-import-render'));
+  test(`js inline loader`, () => compareFiles('javascript-inline-loader'));
 
-  test(`query method render`, (done) => {
-    const relTestCasePath = 'javascript-query-method-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`query methods compile and render`, (done) => {
-    const relTestCasePath = 'javascript-query-method-all';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`pug-loader in resource query`, (done) => {
-    const relTestCasePath = 'javascript-inline-loader';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript assets compile`, (done) => {
-    const relTestCasePath = 'javascript-assets-compile';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript assets compile with variables`, (done) => {
-    const relTestCasePath = 'javascript-assets-compile-vars';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript assets, method render`, (done) => {
-    const relTestCasePath = 'javascript-assets-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript assets, method html`, (done) => {
-    const relTestCasePath = 'javascript-assets-html';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript esModule=false require, method render`, (done) => {
-    const relTestCasePath = 'javascript-esm-false-require-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`javascript esModule=true import, method render`, (done) => {
-    const relTestCasePath = 'javascript-esm-true-import-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
 });
 
 describe('embedded filters tests', () => {
-  test(`filter escape, method render`, (done) => {
-    const relTestCasePath = 'filter-escape';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test(`filter code, method render`, (done) => {
-    const relTestCasePath = 'filter-code';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test(`filter highlight, method render`, (done) => {
-    const relTestCasePath = 'filter-highlight';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test(`filter escape, method render`, () => compareFiles('filter-escape'));
+  test(`filter code, method render`, () => compareFiles('filter-code'));
+  test(`filter highlight, method render`, () => compareFiles('filter-highlight'));
 
   test('highlight prismjs - isInitialized', (done) => {
     const prismjs = require('../src/filters/highlight/prismjs');
@@ -351,99 +97,46 @@ describe('embedded filters tests', () => {
 });
 
 describe('options tests', () => {
-  test(`options.method default`, (done) => {
-    const relTestCasePath = 'option-method-default-js';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.method=render`, (done) => {
-    const relTestCasePath = 'option-method-render-js';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.method=html`, (done) => {
-    const relTestCasePath = 'option-method-html-js';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`option-watchFiles, method render`, (done) => {
-    const relTestCasePath = 'option-watchFiles';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test(`method default`, () => compareFiles('option-method-default-js'));
+  test(`method=render`, () => compareFiles('option-method-render-js'));
+  test(`method=html`, () => compareFiles('option-method-html-js'));
+  test(`watchFiles, render`, () => compareFiles('option-watchFiles'));
 });
 
 describe('options: pass data', () => {
-  test(`options.data, entry js, method compile`, (done) => {
-    const relTestCasePath = 'option-data-js-compile';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data, entry js, method render`, (done) => {
-    const relTestCasePath = 'option-data-js-render';
-    compareTemplateFunction(PATHS, relTestCasePath, done);
-  });
-
-  test('options.data entry pug method compile', (done) => {
-    const relTestCasePath = 'option-data-pug-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('options.data entry pug method render', (done) => {
-    const relTestCasePath = 'option-data-pug-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data with self, compile`, (done) => {
-    const relTestCasePath = 'option-data-self-compile';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test(`options.data with self, render`, (done) => {
-    const relTestCasePath = 'option-data-self-render';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test(`entry js, method compile`, () => compareFiles('option-data-js-compile'));
+  test(`entry js, method render`, () => compareFiles('option-data-js-render'));
+  test('entry pug method compile', () => compareFiles('option-data-pug-compile'));
+  test('entry pug method render', () => compareFiles('option-data-pug-render'));
+  test(`use self, compile`, () => compareFiles('option-data-self-compile'));
+  test(`use self, render`, () => compareFiles('option-data-self-render'));
 });
 
 describe('pass data in html-webpack-plugin', () => {
-  test('pass data from plugin options', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-options';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('pass data from plugin options and query', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-options-query';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
-
-  test('pass diff data in one template', (done) => {
-    const relTestCasePath = 'html-webpack-plugin-diff-data-one-template';
-    compareFileListAndContent(PATHS, relTestCasePath, done);
-  });
+  test('pass data from plugin options', () => compareFiles('html-webpack-plugin-options'));
+  test('pass data from plugin options and query', () => compareFiles('html-webpack-plugin-options-query'));
+  test('pass diff data in one template', () => compareFiles('html-webpack-plugin-diff-data-one-template'));
 });
 
 describe('exception tests', () => {
-  test('exception: pug compile', (done) => {
-    const relTestCasePath = 'exception-pug-compile';
+  test('exception: pug compile', () => {
     const containString = `Pug compilation failed.`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-pug-compile', containString);
   });
 
-  test('exception: evaluate template function', (done) => {
-    const relTestCasePath = 'exception-evaluate-template';
+  test('exception: evaluate template function', () => {
     const containString = `Failed to execute template function`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-evaluate-template', containString);
   });
 
-  test('exception: file cannot be resolved', (done) => {
-    const relTestCasePath = 'exception-resolve';
+  test('exception: file cannot be resolved', () => {
     const containString = `can't be resolved`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-resolve', containString);
   });
 
-  test('exception: filter not found', (done) => {
-    const relTestCasePath = 'exception-filter-not-found';
+  test('exception: filter not found', () => {
     const containString = `The 'embedFilters' option contains unknown filter:`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-filter-not-found', containString);
   });
 
   test('exception: by load a filter', (done) => {
@@ -455,16 +148,15 @@ describe('exception tests', () => {
     done();
   });
 
-  test('exception: filter :highlight - unsupported module', (done) => {
+  test('exception: filter :highlight - unsupported module', () => {
     const filterHighlight = require('../src/filters/highlight');
     const adapterHighlight = require('../src/filters/highlight/adapter');
     // reset cached module
     adapterHighlight.module = null;
     filterHighlight.module = null;
 
-    const relTestCasePath = 'exception-filter-highlight-unsupported-module';
     const containString = `unsupported highlight module`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-filter-highlight-unsupported-module', containString);
   });
 
   test('exception: filter :highlight adapter - unsupported module', (done) => {
@@ -480,15 +172,13 @@ describe('exception tests', () => {
     done();
   });
 
-  test("exception: script can't be interpolated with the 'compile' method", (done) => {
-    const relTestCasePath = 'exception-interpolation-unsupported-script';
+  test('exception: script can\'t be interpolated with the \'compile\' method', () => {
     const containString = `can't be interpolated with the 'compile' method`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-interpolation-unsupported-script', containString);
   });
 
-  test("exception: file can't be interpolated with the 'compile' method", (done) => {
-    const relTestCasePath = 'exception-interpolation-unsupported-value';
+  test('exception: file can\'t be interpolated with the \'compile\' method', () => {
     const containString = `can't be interpolated with the 'compile' method`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    return exceptionContain('exception-interpolation-unsupported-value', containString);
   });
 });

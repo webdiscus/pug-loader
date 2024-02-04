@@ -1,8 +1,15 @@
 const path = require('path');
 
 module.exports = {
+  devtool: false,
+  // avoid double error output in console
+  stats: 'errors-warnings',
+
   output: {
-    filename: '[name].js',
+    // clean the output directory before emitting
+    clean: true,
+
+    //filename: '[name].js',
   },
 
   resolveLoader: {
@@ -15,6 +22,12 @@ module.exports = {
 
   module: {
     rules: [],
+  },
+
+  experiments: {
+    //futureDefaults: true,
+    // set behavior as in Webpack <= v5.82 to avoid/decries randomizing of hashing names
+    topLevelAwait: false,
   },
 
   optimization: {},
