@@ -28,7 +28,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'compile',
+          mode: 'compile',
           data: {
             globalVar: 'Global Title!',
             a: 7,

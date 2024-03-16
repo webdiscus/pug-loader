@@ -8,8 +8,6 @@ module.exports = {
   output: {
     // clean the output directory before emitting
     clean: true,
-
-    //filename: '[name].js',
   },
 
   resolveLoader: {

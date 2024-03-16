@@ -21,8 +21,8 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          //method: 'compile',
-          method: 'render',
+          //mode: 'compile',
+          mode: 'render',
           data: {
             optionText: 'world',
           },

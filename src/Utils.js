@@ -1,6 +1,6 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
-const { green, red, yellow } = require('ansis/colors');
+const { green, red, yellow } = require('ansis');
 
 const loaderName = 'pug-loader';
 
@@ -12,7 +12,7 @@ const isWin = path.sep === '\\';
 
 const isJSON = (str) => typeof str === 'string' && str.length > 1 && str[0] === '{' && str[str.length - 1] === '}';
 
-const parseValue = (value) => (isJSON(value) ? JSON.parse(value) : value == null ? '' : value);
+const parseValue = (value) => (isJSON(value) ? JSON.parse(value) : value == null ? '' : decodeURIComponent(value));
 
 const outToConsole = (...args) => process.stdout.write(args.join(' ') + '\n');
 
@@ -34,11 +34,6 @@ if (isWin) hmrFile = pathToPosix(hmrFile);
 
 const scriptExtensionRegexp = /\.js[a-z\d]*$/i;
 const isRequireableScript = (file) => !path.extname(file) || scriptExtensionRegexp.test(file);
-
-// match: var locals_for_with = (locals || {});
-const searchLocalsRegexp = /(?<=locals_for_with = )(?:\(?locals \|\| {}\)?)(?=;)/;
-// match: var self = locals || {};
-const searchSelfRegexp = /(?<=self = )(?:locals \|\| {})(?=;)/;
 
 /**
  * Whether request contains the `inline` query param.
@@ -96,24 +91,20 @@ const getQueryData = function (query) {
 };
 
 /**
- * Inject external variables from the resource query, from the loader options
- * and merge them variables with the `locals` variable.
+ * Stringify JSON data.
  *
- * @note The quality of source code of a function defined in the locals limited by function.toString().
+ * @note The quality of function source code defined in the data limited by function.toString().
  *   See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/toString
- *   If needed 100% working js function passed via loader option `data`, use loader `render` method.
+ *   TODO: for complex data structure should be implemented ideas from https://github.com/yahoo/serialize-javascript/blob/main/index.js
  *
- * @param {string} funcBody The function as string.
- * @param {{}} locals The object of template variables.
- * @param {boolean} useSelf Whether the `self` option is true.
+ * @param {Object} data The JSON data.
  * @return {string}
  */
-const injectExternalData = (funcBody, locals, useSelf) => {
-  const searchRegexp = useSelf === true ? searchSelfRegexp : searchLocalsRegexp;
+const stringifyJSON = (data) => {
   const quoteMark = '__REMOVE_QUOTE__';
   let hasQuoteMarks = false;
 
-  let localsString = JSON.stringify(locals, (key, value) => {
+  let json = JSON.stringify(data, (key, value) => {
     if (typeof value === 'function') {
       value = value.toString().replace(/\n/g, '');
 
@@ -131,17 +122,10 @@ const injectExternalData = (funcBody, locals, useSelf) => {
     return value;
   });
 
-  // remove the quotes around the function body
-  if (hasQuoteMarks) {
-    localsString = localsString.replace(/("__REMOVE_QUOTE__|__REMOVE_QUOTE__")/g, '');
-  }
-
-  return (
-    'var __external_locals__ = ' +
-    localsString +
-    `;\n` +
-    funcBody.replace(searchRegexp, '{...__external_locals__, ...locals}')
-  );
+  return hasQuoteMarks
+    ? // remove the quotes around the function body
+    json.replace(/("__REMOVE_QUOTE__|__REMOVE_QUOTE__")/g, '')
+    : json || '{}';
 };
 
 /**
@@ -186,16 +170,17 @@ const trimIndent = (content) => {
 };
 
 /**
- * Resolve module path in current working directory of the Node.js process.
+ * Resolve absolute path to node module main file what can be dynamically required anywhere in code.
  *
- * @param {string} moduleName The node module name.
- * @return {string|boolean} If module exists return resolved module path otherwise false.
+ * @param {string} moduleName The resolving module name.
+ * @param {string} context The current working directory where is the node_modules folder.
+ * @return {string | false} If module exists return resolved module path otherwise false.
  * @throws
  */
-const resolveModule = (moduleName) => {
-  let modulePath;
+const resolveModule = (moduleName, context = process.cwd()) => {
+  let moduleFile;
   try {
-    modulePath = require.resolve(moduleName, { paths: [process.cwd()] });
+    moduleFile = require.resolve(moduleName, { paths: [process.cwd()] });
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
       return false;
@@ -203,7 +188,7 @@ const resolveModule = (moduleName) => {
     throw error;
   }
 
-  return path.dirname(modulePath);
+  return moduleFile;
 };
 
 module.exports = {
@@ -218,7 +203,7 @@ module.exports = {
   isInline,
   pathToPosix,
   getQueryData,
-  injectExternalData,
+  stringifyJSON,
   trimIndent,
   resolveModule,
 };

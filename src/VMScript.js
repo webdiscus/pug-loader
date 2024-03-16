@@ -26,7 +26,7 @@ class VMScript {
   }
 
   /**
-   * Return template of require function to call custom handler in vm depend on the method.
+   * Return template of require function to call custom handler in vm depend on the mode.
    *
    * @param {string} file The argument of require function.
    * @param {string} issuer The issuer of file.

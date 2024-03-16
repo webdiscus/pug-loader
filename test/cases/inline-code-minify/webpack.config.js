@@ -21,7 +21,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           filters: {
             minify: (content) => content.replace(/\n/g, ''),
           },

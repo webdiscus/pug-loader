@@ -1,10 +1,5 @@
-const path = require('path');
-const { red, green, cyan, yellow, black, blueBright } = require('ansis/colors');
-const { labelWarn, outToConsole } = require('../Utils');
-
 /**
  * Supports for user options of html-webpack-plugin.
- * @singleton
  */
 class HtmlWebpackPlugin {
   used = null;
@@ -53,8 +48,6 @@ class HtmlWebpackPlugin {
         if (pluginData.hasOwnProperty('userOptions')) {
           options.htmlWebpackPlugin.options = pluginData.userOptions;
         }
-
-        this.deprecationWarning(file);
       }
     }
 
@@ -69,23 +62,6 @@ class HtmlWebpackPlugin {
   getOptions(file) {
     return this.plugins.find(
       (item) => item.constructor.name === 'HtmlWebpackPlugin' && item.options.template.indexOf(file) >= 0
-    );
-  }
-
-  /**
-   * @param {string} request
-   * @private
-   */
-  deprecationWarning(request) {
-    const [file] = request.split('?', 1);
-    const filename = path.relative(this.context, file);
-
-    outToConsole(
-      `${labelWarn()} ${black.bgYellow`DEPRECATION WARNING `} ` +
-        `${yellow`Using ${red('html-webpack-plugin')} with Pug is deprecated!`}\n` +
-        `The ${cyan(filename)} file is defined in webpack config by ${red('HtmlWebpackPlugin')}.\n` +
-        `Use the ${green('pug-plugin')} instead of ${red('html-webpack-plugin')}.\n` +
-        `For more information, see ${blueBright`https://github.com/webdiscus/pug-plugin`}.\n`
     );
   }
 }

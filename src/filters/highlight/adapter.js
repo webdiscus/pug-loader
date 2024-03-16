@@ -1,4 +1,4 @@
-const { green, cyan } = require('ansis/colors');
+const { green, cyan } = require('ansis');
 const parser = require('./parser');
 const { labelError } = require('../../Utils');
 

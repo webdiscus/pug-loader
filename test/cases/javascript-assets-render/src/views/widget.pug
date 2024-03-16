@@ -1,9 +1,9 @@
 //- The limitations:
-  // following not works with the `compile` method:
+  // following not works with the `compile` mode:
   - var file = '../images/image.png';
   img(src=require(file))
 
-  // resolve of alias from tsconfig in interpolating string is not supported for `compile` method
+  // resolve of alias from tsconfig in interpolating string is not supported for `compile` mode
   // alias `@data` from tsconfig
   -var cat = 'cat-1';
   -var colorModule = require(`@data/${cat}/color.js`)
@@ -15,7 +15,7 @@
 - var file3 = './subdir/image.png';
 - var file4 = require(file3);
 
-//- the limitation, following not works with the `compile` method:
+//- the limitation, following not works with the `compile` mode:
 - var file5 = '../assets/images/image.png';
 
 h1 Hello World!

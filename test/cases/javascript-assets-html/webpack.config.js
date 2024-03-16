@@ -36,7 +36,7 @@ module.exports = {
           {
             loader: 'pug-loader',
             options: {
-              method: 'html',
+              mode: 'html',
               data: {
                 globalVar: 'Global Title!',
                 a: 7,

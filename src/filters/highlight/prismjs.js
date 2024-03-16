@@ -1,5 +1,5 @@
 const path = require('path');
-const { red, cyan } = require('ansis/colors');
+const { red, cyan } = require('ansis');
 const { labelInfo, labelWarn, outToConsole, resolveModule } = require('../../Utils');
 const { loadNodeModuleException } = require('../../Exeptions');
 
@@ -7,6 +7,7 @@ const label = `prismjs`;
 
 const prismjs = {
   name: 'prismjs',
+  moduleName: 'prismjs',
   prefix: 'language-',
   verbose: false,
   module: null,
@@ -22,20 +23,21 @@ const prismjs = {
   init({ verbose = false }) {
     if (this.module != null) return;
 
-    const moduleName = this.name;
-    this.verbose = verbose;
+    const moduleFile = resolveModule(this.moduleName);
 
-    this.modulePath = resolveModule(moduleName);
-    if (!this.modulePath) {
-      loadNodeModuleException(moduleName);
+    if (!moduleFile) {
+      loadNodeModuleException(this.moduleName);
     }
 
-    // load Prism module
-    this.module = require(this.modulePath);
+    // lazy load Prism module
+    this.module = require(moduleFile);
+    this.modulePath = path.dirname(moduleFile);
 
     // init language loader
     this.components = require(path.join(this.modulePath, 'components.js'));
     this.getLoader = require(path.join(this.modulePath, 'dependencies.js'));
+
+    this.verbose = verbose;
 
     // generate list of supported languages
     const languages = this.components.languages;

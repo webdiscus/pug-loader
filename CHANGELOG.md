@@ -1,5 +1,27 @@
 # Change log
 
+## 2.11.0 (2024-02-16)
+- feat: drop support of the Node < 16,
+  the loader can still works with the Node 14.x >=, but we test only with Node >= 16.16
+- feat: add support the version `14.x` of the `markdown-it` in filters
+- feat: add new `mode` option. Use it instead of the DEPRECATED `method` option name.
+- feat(DEPRECATION): the `method` option is renamed into `mode`.
+  The `method` option can be used until the next major version.
+- feat: add new names for new `mode` option: `compile`, `render`, `html`.
+- feat(DEPRECATION): the `pug-compile`, `pug-render`, `pug-html` method/mode names are deprecated! 
+  This method/mode names can be used until the next major version.
+- fix: decode URL params
+  For example: 
+    from the query `partial.pug?render&text=Hello%20World%21`
+    will be parsed the `text` parameter as `Hello World!`.
+- fix: detecting correct error case by load built-in filter
+- chore: remove DEPRECATION message when the `pug loader` is used with `html-webpack-plugin`, 
+  for reasons of humanity the support of the `html-webpack-plugin` still stay.\
+  For developers is recommended to use the modern powerful [pug-plugin](https://github.com/webdiscus/pug-plugin).
+- refactor: code refactoring
+- test: add test for include a file in the highlight filter
+- docs: improve the readme
+
 ## 2.10.6 (2024-01-23)
 - fix: caching user data from html-webpack-plugin by template filename with query
 

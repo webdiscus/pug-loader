@@ -128,7 +128,7 @@ class Resolver {
   }
 
   /**
-   * Interpolate filename for `compile` method.
+   * Interpolate filename for `compile` mode.
    *
    * @note: the file is the argument of require() and can be any expression, like require('./' + file + '.jpg').
    * See https://webpack.js.org/guides/dependency-management/#require-with-expression.
@@ -201,7 +201,7 @@ class Resolver {
           resolveException(error, value, templateFile);
         }
       } else if (file.indexOf('/') >= 0) {
-        // @note: resolve of alias from tsconfig in interpolating string is not supported for `compile` method,
+        // @note: resolve of alias from tsconfig in interpolating string is not supported for `compile` mode,
         // the following examples not work:
         // `@data/${pathname}/script`
         // `@data/${pathname}/script.js`
@@ -269,7 +269,9 @@ class Resolver {
     const hasPath = request.indexOf('/') > -1;
     const aliasRegexp = hasPath ? this.aliasRegexp : this.aliasFileRegexp;
 
-    // note: when file alias used for `include FILE_ALIAS`, Pug compiler add to alias the `.pug` suffix (it is pug bug)
+    // TODO: find elegant solution for the specific use case
+    // note: when a file alias used in include e.g., `include FILE_ALIAS`,
+    // the Pug compiler adds to the alias the `.pug` extension
     if (!hasPath && request.endsWith('.pug')) {
       request = request.slice(0, -4);
     }

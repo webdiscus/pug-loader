@@ -27,7 +27,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           esModule: true, // Test: transformation of ESM to CommonJS source in PugPlugin.extractHtml
         },
       },

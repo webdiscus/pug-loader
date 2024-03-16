@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.10.6",
+  "version": "2.11.0",
   "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",
@@ -53,13 +53,13 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=14.15"
+    "node": ">=16.16"
   },
   "peerDependencies": {
     "pug": ">=3.0.2",
     "webpack": ">=5.32.0",
     "enhanced-resolve": ">=5.7.0",
-    "markdown-it": "^13.0.1",
+    "markdown-it": ">=13.0.1",
     "prismjs": "^1.29.0"
   },
   "peerDependenciesMeta": {
@@ -71,7 +71,7 @@
     }
   },
   "dependencies": {
-    "ansis": "1.5.6",
+    "ansis": "2.0.3",
     "parse5": "^7.1.2",
     "pug": "^3.0.2",
     "webpack-merge": "^5.10.0"
@@ -84,12 +84,17 @@
     "html-loader": "^5.0.0",
     "html-webpack-plugin": "^5.6.0",
     "jest": "^29.7.0",
+    "mini-css-extract-plugin": "^2.8.1",
     "prettier": "^3.2.5",
     "prismjs": "^1.29.0",
     "pug-plugin": "4.9.9",
     "responsive-loader": "^3.1.2",
+    "sass": "1.67.0",
+    "sass-loader": "13.3.3",
     "sharp": "^0.32.6",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "webpack": "^5.90.1"
+    "webpack": "^5.90.1",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "^5.0.3"
   }
 }

@@ -21,21 +21,23 @@
 [![codecov](https://codecov.io/gh/webdiscus/pug-loader/branch/master/graph/badge.svg?token=457T2BK3YN)](https://codecov.io/gh/webdiscus/pug-loader)
 [![node](https://img.shields.io/npm/dm/@webdiscus/pug-loader)](https://www.npmjs.com/package/@webdiscus/pug-loader)
 
-Pug loader renders Pug files into HTML or compiles them into a template function.
-This Pug loader resolves paths and aliases for `extends` `include` `require()`.
+The Pug Loader renders Pug templates into HTML or compiles it into a template function.
 
-> 💡**Pug loader** supports an **indent** in Vue template.
->
-> _MyComponent.vue_
-> ```html
-> <template lang='pug'>
->   h1 Hello Pug!
->   p Use the '@webdiscus/pug-loader'
-> </template>
-> ```
-> See [how to use Pug with Vue](#using-with-vue) and [source of example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
+### 🚀 [Install and Quick Start](#install-and-quick-start)
 
-<br>
+## 💡 Highlights
+
+- Resolves paths and aliases for **extends**, **include**.
+- Resolves **source asset** files in tag attributes via **require()** function.
+- Resolves **source JS/JSON** files in Pug code via **require()** function.
+- Resolves alias from webpack **resolve.alias** or **tsconfig.json**.
+- Renders Pug template into pure **HTML string**.
+- Compiles Pug template into **template function** for render template in the browser.
+- Generates a template function with both **CommonJS** and **ESM** syntax.
+- Pass data into template from the loader options.
+- Build-in [Pug filters]: [`:escape`] [`:code`] [`:highlight`] [`:markdown`] with highlighting of code blocks
+- Supports an indent in [Vue template](#using-with-vue), see [source of an example](https://github.com/webdiscus/pug-loader/tree/master/examples/hello-world-vue).
+- Watching of changes in all dependencies.
 
 > **Warning**
 > 
@@ -47,38 +49,24 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 > - [pug-plain-loader](https://www.npmjs.com/package/pug-plain-loader) - last update 2020 (4 years ago)
 > - [simple-pug-loader](https://npmjs.com/package/simple-pug-loader) - last update 2021 (3 years ago)
 
-
-<!--
-> **Warning**
->
-> Since `v2.8.0` the support of the `html-webpack-plugin` is DEPRECATED, because Pug has its own smarty and clever [`pug-plugin`](https://github.com/webdiscus/pug-plugin).
--->
-
 > **Note**
 > 
-> Instead of `html-webpack-plugin` recommended to use the powerful [`pug-plugin`](https://github.com/webdiscus/pug-plugin).\
-> The Pug Plugin enable to use Pug files in webpack entry and generates HTML files that contain the hashed 
-> output JS and CSS filenames whose source files are specified in the Pug template.
+> Instead of `html-webpack-plugin` recommended to use [pug-plugin](https://github.com/webdiscus/pug-plugin) or [html-bundler-webpack-plugin ](https://github.com/webdiscus/html-bundler-webpack-plugin).
+> 
+> The **Pug Plugin** allow to use a template as an **entrypoint** and generates static HTML or [template function](https://github.com/webdiscus/html-bundler-webpack-plugin#template-in-js) from Pug template containing source files of scripts, styles, images, fonts and other resources, similar to how it works in [Vite](https://vitejs.dev/guide/#index-html-and-project-root).
 >
->💡 **Pug plugin highlights**:
->
-> - The Pug file is the entry point for all scripts and styles.
-> - Source scripts and styles should be specified directly in Pug.
-> - All JS and CSS files will be extracted from their sources specified in Pug.
-> - No longer need to define scripts and styles in the webpack entry.
-> - No longer need to import styles in JavaScript to inject them into HTML via additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
->
-> Please see [usage examples](https://github.com/webdiscus/pug-plugin#usage-examples) and the demo app [Hello World](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
-
+>  Please see [usage examples](https://github.com/webdiscus/pug-plugin#usage-examples) and the demo app [Hello World](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
 
 ## Contents
 
 1. [Install and Quick start](#install-and-quick-start)
+   - [Using pug-plugin](#using-pug-plugin)
+   - [Using html-webpack-plugin](#using-html-webpack-plugin)
 2. [Options](#options)
-3. [Using methods](#method-compile)
-   - [compile](#method-compile)
-   - [render](#method-render)
-   - [html](#method-html)
+3. [Using modes](#mode-compile)
+   - [compile](#mode-compile)
+   - [render](#mode-render)
+   - [html](#mode-html)
 4. [Using Pug filters](#embed-filters)
    - [:escape](#filter-escape)
    - [:code](#filter-code)
@@ -99,33 +87,21 @@ This Pug loader resolves paths and aliases for `extends` `include` `require()`.
 13. [Example Pug filters](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters)
 14. [More examples](https://github.com/webdiscus/pug-loader/tree/master/test/cases)
 
-<a id="features" name="features" href="#features"></a>
-## Features
-
-- rendering Pug into pure `HTML string`
-- compiling Pug into `template function` for usage in JavaScript
-- generates a template function with both `CommonJS` and `ESM` syntax
-- resolves alias from webpack `resolve.alias`
-- resolves alias from `tsconfig.json` `compilerOptions.paths`,
-  requires [tsconfig-paths-webpack-plugin](https://github.com/dividab/tsconfig-paths-webpack-plugin)
-- resolves required images in the attribute `srcset` of `img` tag
-- resolves required JavaScript modules or JSON in pug
-- integrated [Pug filters]: [`:escape`] [`:code`] [`:highlight`] [`:markdown`] with highlighting of code blocks
-- passing custom data into Pug template
-- watching of changes in all dependencies
-
----
 
 <a id="install-and-quick-start" name="install-and-quick-start" href="#install-and-quick-start"></a>
 ## Install and Quick start
 
 **Choose your way:**
-- compile Pug files defined in webpack entry using the [`pug-plugin`](https://github.com/webdiscus/pug-plugin).
-  It is a very easy intuitive way.
-- compile Pug files defined in the [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) using a pug-loader.
-  It is non-intuitive and very complex way.
-  
-### Usage of [`pug-plugin`](https://github.com/webdiscus/pug-plugin)
+
+- Using the [pug-plugin](https://github.com/webdiscus/pug-plugin).
+  It is a **very easy** intuitive way.
+- Using the [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) with the **pug-loader**.
+  It is a **very complex** non-intuitive way.
+
+<a id="using-pug-plugin" name="using-pug-plugin"></a>
+### Using only the [pug-plugin](https://github.com/webdiscus/pug-plugin)
+
+The **pug-plugin** contains already the **pug** and **pug-loader** packages.
 For details and examples please see the [pug-plugin](https://github.com/webdiscus/pug-plugin) site.
 
 Install the `pug-plugin`:
@@ -134,28 +110,62 @@ Install the `pug-plugin`:
 npm install pug-plugin --save-dev
 ```
 
-> **Note:**
-> The `pug-plugin` already contains the [pug-loader](https://github.com/webdiscus/pug-loader), not need to install an additional Pug loader.
+Install additional packages for styles:
 
-> **Warning**
->
-> The pug-plugin enable to use script and style source files directly in Pug, so easy:
-> ```pug
-> link(href=require('./styles.scss') rel='stylesheet')
-> script(src=require('./main.js') defer='defer')
-> ```
-> Generated HTML contains hashed CSS and JS output filenames:
-> ```html
-> <link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
-> <script src="/assets/js/main.f4b855d8.js"></script>
-> ```
->
-> - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
-> - Don't import styles in JS. Use `require()` for style files in Pug.
-> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin processes files from webpack entry.
-> - Don't use `mini-css-extract-plugin` to extract CSS from styles. The Pug plugin extract CSS from styles required in Pug.
+```
+npm install css-loader sass-loader sass --save-dev
+```
 
-Change your **webpack.config.js** according to the following minimal configuration:
+Start with a Pug template. Add the `link` and `script` tags.
+You can include asset source files such as SCSS, JS, images, and other media files directly in a Pug template.
+
+The plugin resolves `script(src="...")` `link(href="...")` and `img(src="..." srcset="...")` that references your script, style and image source files.
+
+For example, there is the template ./src/views/home.pug:
+
+```pug
+html
+  head
+    //- variable from Webpack config
+    title= title
+    //- relative path to favicon source file
+    link(href="./favicon.ico" rel="icon")
+    //- relative path to SCSS source file
+    link(href="./style.scss" rel="stylesheet")
+    //- relative path to JS source file -->
+    script(src="./main.js" defer="defer")
+  body
+    h1 Hello World!
+    //- relative path to image source file
+    img(src="./picture.png")
+```
+
+All source filenames should be relative to the entrypoint template, or you can use [Webpack alias](https://webpack.js.org/configuration/resolve/#resolvealias).
+The references are rewritten in the generated HTML so that they link to the correct output files.
+
+The generated HTML contains URLs of the output filenames:
+
+```html
+<html>
+  <head>
+    <title>Homepage</title>
+    <link href="img/favicon.3bd858b4.ico" rel="icon" />
+    <link href="css/style.05e4dd86.css" rel="stylesheet" />
+    <script src="js/main.f4b855d8.js" defer="defer"></script>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <img src="img/picture.58b43bd8.png" />
+  </body>
+</html>
+```
+
+If the `entry` plugin option is a path, the plugin finds all templates automatically
+and keep the same directory structure in the output directory.
+
+If the `entry` plugin option is an object, the key is an output filename without `.html` extension and the value is a template file.
+
+Very simple and clear **webpack.config.js**, all relevant settings are in one place, in plugin options:
 
 ```js
 const path = require('path');
@@ -166,26 +176,30 @@ module.exports = {
     path: path.join(__dirname, 'dist/'),
   },
 
-  entry: {
-    // The Pug file is the entry-point for all scripts and styles.
-    // Source scripts and styles must be specified directly in Pug.
-    // Do not need to define JS and SCSS in the webpack entry.
-
-    index: './src/views/index.pug',      // output dist/index.html
-    about: './src/views/about/index.pug' // output dist/about.html
-    // ...
-  },
-
   plugins: [
-    // enable processing of Pug files defined in webpack entry
     new PugPlugin({
+      // automatically processing all templates in the path
+      entry: 'src/views/',
+      // - OR - define many pages manually (key is output filename w/o `.html`)
+      entry: {
+        // simple page config w/o variables
+        index: 'src/views/home.pug', // => dist/index.html
+        // advanced page config with variables
+        'news/sport': { // => dist/news/sport.html
+          import: 'src/views/news/sport/index.pug', // template file
+          data: { title: 'Sport news' }, // pass variables into template
+        },
+      },
+      data: {...}, // pass global data into all templates
       js: {
-        // output filename of extracted JS file from source script defined in Pug
-        filename: 'assets/js/[name].[contenthash:8].js',
+        // JS output filename, used if `inline` option is false (defaults)
+        filename: 'js/[name].[contenthash:8].js',
+        //inline: true, // inlines JS into HTML
       },
       css: {
-        // output filename of extracted CSS file from source style defined in Pug
-        filename: 'assets/css/[name].[contenthash:8].css',
+        // CSS output filename, used if `inline` option is false (defaults)
+        filename: 'css/[name].[contenthash:8].css',
+        //inline: true, // inlines CSS into HTML
       },
     })
   ],
@@ -193,59 +207,159 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.pug$/,
-        loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
+        test: /\.(s?css|sass)$/,
+        use: ['css-loader', 'sass-loader']
       },
       {
-        test: /\.(css|sass|scss)$/,
-        use: ['css-loader', 'sass-loader']
+        test: /\.(ico|png|jp?g|webp|svg)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'img/[name].[hash:8][ext][query]',
+        },
       },
     ],
   },
 };
 ```
 
+> **Note**
+> 
+> No additional plugins or loader required.
+
+<a id="using-html-webpack-plugin" name="using-html-webpack-plugin"></a>
 ### Using with [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 
 > **Warning**
 >
-> Since `v2.8.0` the support of `html-webpack-plugin` is DEPRECATED.
-> Use the [`pug-plugin`](https://github.com/webdiscus/pug-plugin) instead.
+> This way is not recommended!
 
-
-Install the `pug-loader` only if you use the `html-webpack-plugin`.
+Install the `@webdiscus/pug-loader` only if you use the `html-webpack-plugin`.
 
 ```
-npm install @webdiscus/pug-loader --save-dev
+npm install @webdiscus/pug-loader html-webpack-plugin --save-dev
 ```
 
-Change your **webpack.config.js** according to the following minimal configuration:
+Install additional packages for styles:
+
+```
+npm install css-loader sass-loader sass --save-dev
+```
+
+Install additional plugin to extract CSS:
+
+```
+npm install mini-css-extract-plugin --save-dev
+```
+
+Using the `html-webpack-plugin` you should require a source asset file in the Pug template. 
+
+For example, there is the template ./src/views/home.pug:
+
+```pug
+html
+  head
+    //- variable from plugin options, very ugly access
+    title= htmlWebpackPlugin.options.data.title
+    //- relative path to favicon source file
+    link(href=require("./favicon.ico") rel="icon")
+    //- JS and CSS will be injected into HTML automatically, anywhere here
+    //- Note: you have no control over the position or order of injected files
+  body
+    h1 Home
+    //- relative path to image source file
+    img(src=require("./picture.png"))
+```
+
+Very complex **webpack.config.js**:
 
 ```js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   output: {
-    path: path.join(__dirname, 'public/'),
-    publicPath: '/', // must be defined any path, `auto` is not supported yet
+    path: path.join(__dirname, 'dist/'),
+    // JS output filename must be defined only here
+    filename: 'js/[name].[contenthash:8].js',
   },
+
+  entry: {
+    // Source files of styles and scripts must be defined here, separately from their templates.
+    // How to bind each generated bundle to the HTML page?
+    // Answer: using the `chunks` plugin option.
+    index: ['./src/views/home/main.js', './src/views/home/style.scss'],
+    'news/sport': ['./src/views/news/sport/main.js', './src/views/news/sportstyle.scss'],
+  },
+
   plugins: [
+    // For one page must be initialized the plugin instance.
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src/index.pug'),
+      template: path.join(__dirname, 'src/views/home/index.pug'),
+      // HTML output filename
       filename: 'index.html',
+      // bind the generated JS and CSS files to this template via chunks,
+      // this is a very terrible "crutch"
+      chunks: ['index'],
+      // pass variables into template,
+      // access in template is very ugly: `htmlWebpackPlugin.options.data.title`
+      data: { title: 'Home' }
+    }),
+
+    // For other page must be initialized yet one plugin instance.
+    // It's very very bad practice and ugly syntax!
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'src/views/news/sport/index.pug'),
+      // HTML output filename
+      filename: 'news/sport.html',
+      // bind the generated JS and CSS files to this template via chunks option,
+      // you're not confused yet using chunks?
+      chunks: ['news/sport'],
+      // access in template is very ugly: `htmlWebpackPlugin.options.data.title`,
+      // using `pug-plugin`, the variable in Pug is accessible w/o any scope: `title` 
+      // (of cause, in `pug-plugin` you can define a variable scope, if you want)
+      data: { title: 'Sport news' }
+    }),
+    
+    // ... Do you have the joy of adding yet one page using the HtmlWebpackPlugin?
+    // No? Then try to use the `pug-plugin`.
+
+    // Yet one plugin to extract CSS and inject one into HTML.
+    new MiniCssExtractPlugin({
+      // CSS output filename defined in another place, here
+      filename: 'css/[name].[contenthash:8].css',
     }),
   ],
+
   module: {
     rules: [
+      // requires to define the pug loader
       {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
+      },
+      {
+        test: /\.(s?css|sass)$/,
+        // requires additional MiniCssExtractPlugin loader
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.(png|jpe?g|ico)/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'img/[name].[hash:8][ext]',
+        },
       },
     ],
   },
 };
 ```
+
+Why do many developers switch from Webpack to other bundlers?
+One of the reasons they cite is the complex configuration many different plugins and loaders for one simple thing - rendering an HTML page with assets.
+
+The [pug-plugin](https://github.com/webdiscus/pug-plugin) "changes the rule of the game".
+Just one plugin replaces the functionality of many [plugins and loaders](https://github.com/webdiscus/html-bundler-webpack-plugin#list-of-plugins) and makes configuration very simple and clear.
 
 ### Using in JavaScript
 
@@ -344,19 +458,30 @@ This option is **deprecated** by pugjs and always is `false`. Don't use it.
 
 ## Additional options
 
-### `method`
+### `mode`
+
+> **Warning**
+> 
+> Since the version `2.11.0`, the `method` option name is renamed into `mode`.\
+> The `method` option is **DEPRECATED**.
+> 
+> The `method` values are renamed:
+> - `pug-compile` => `compile`
+> - `pug-render` => `render`
+> 
+> The `method` option name and _old_ values can be used until the next major version.
 
 Type: `string` Default: `compile`<br>
 Values:
 - `compile` the Pug template compiles into a template function and in JavaScript can be called with variables to render into HTML at runtime. \
-  The query parameter is `?pug-compile`. Can be used if the method is `render`. \
-  Use this method, if the template have variables passed from JavaScript at runtime. [see usage](#method-compile)
+  The query parameter is `?compile`. Can be used if the mode is `render`. \
+  Use this mode, if the template have variables passed from JavaScript at runtime. [see usage](#mode-compile)
 - `render` the Pug template renders into HTML at compile time and exported as a string.
   All required resource will be processed by the webpack and separately included as added strings wrapped to a function. \
-  The query parameter is `?pug-render`. Can be used if the method is `compile` or is not defined in options. \
-  Use this method, if the template does not have variables passed from JavaScript at runtime. The method generates the most compact and fastest code. [see usage](#method-render)
-- `html` the template renders into a pure HTML string at compile time. The method need an addition loader to handles the HTML. \
-  Use this method if the rendered HTML needs to be processed by additional loader, e.g. by `html-loader` [see usage](#method-html)
+  The query parameter is `?render`. Can be used if the mode is `compile` or is not defined in options. \
+  Use this mode, if the template does not have variables passed from JavaScript at runtime. The mode generates the most compact and fastest code. [see usage](#mode-render)
+- `html` the template renders into a pure HTML string at compile time. The mode need an addition loader to handles the HTML. \
+  Use this mode if the rendered HTML needs to be processed by additional loader, e.g. by `html-loader` [see usage](#mode-html)
 
 > Asset resources such as `img(src=require('./image.jpeg'))` are handled at compile time by the webpack using [**asset/resource**](https://webpack.js.org/guides/asset-modules/#resource-assets).
 
@@ -373,13 +498,13 @@ Values:
   The default value is `false` for compatibility with the JS modules that is generated by the original pug-loader.
 
 > **Note:**
-> The option `esModule` is irrelevant for the `html` method, because it returns a pure HTML string.
+> The option `esModule` is irrelevant for the `html` mode, because it returns a pure HTML string.
 
 💡 For generates smaller and faster template function, it is recommended to use following options:
 
 ```js
 {
-  method: 'render',
+  mode: 'render',
   esModule: true,
 }
 ```
@@ -389,9 +514,9 @@ Values:
 Type: `Object` Default: `{}`<br>
 The custom data will be passed in all Pug templates, it can be useful by pass global data.
 
-> ⚠️ Limitation with the `compile` method.\
+> ⚠️ Limitation with the `compile` mode.\
 > A string representing the source code of the function is limited by the `function.toString()`, see [examples](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/toString#examples). \
-> For native work of the function passed via the `data` loader option, use the `render` method.
+> For native work of the function passed via the `data` loader option, use the `render` mode.
 
 ### `embedFilters`
 Type: `Object` Default: `undefined`<br>
@@ -445,10 +570,10 @@ For watching of a file, add full path, for example:
 
 ---
 
-<a id="method-compile" name="method-compile" href="#method-compile"></a>
-## Using `compile` method
+<a id="mode-compile" name="mode-compile" href="#mode-compile"></a>
+## Using `compile` mode
 
-This method is used by default.\
+This mode is used by default.\
 In JavaScript the required template will be compiled into template function.\
 In webpack config add to `module.rules`:
 
@@ -457,7 +582,7 @@ In webpack config add to `module.rules`:
   test: /\.pug$/,
     loader: '@webdiscus/pug-loader',
     options: {
-    method: 'compile' // default method `compile` can be omitted
+    mode: 'compile' // default mode `compile` can be omitted
   }
 }
 ```
@@ -467,27 +592,27 @@ const tmpl = require('template.pug');
 const html = tmpl({ key: 'value' }); // the HTML string
 ```
 
-To render the Pug direct into HTML, use the query parameter `?pug-render`.
+To render the Pug direct into HTML, use the query parameter `?render`.
 
 ```js
-// compile into template function, because loader option 'method' defaults is 'compile'
+// compile into template function, because loader option 'mode' defaults is 'compile'
 const tmpl = require('template.pug');
 const html = tmpl({ key: 'value' });
 
-// render the Pug file into HTML, using the parameter 'pug-render'
-const html2 = require('template2.pug?pug-render');
+// render the Pug file into HTML, using the parameter 'render'
+const html2 = require('template2.pug?render');
 ```
 
 > **Note:**
-> If the query parameter `pug-render` is set, then will be used rendering for this template, independent of the loader option `method`.
-> Variables passed in template with method `render` will be used at compile time.
+> If the query parameter `render` is set, then will be used rendering for this template, independent of the loader option `mode`.
+> Variables passed in template with mode `render` will be used at compile time.
 
 ---
 
-<a id="method-render" name="method-render" href="#method-render"></a>
-## Using `render` method
+<a id="mode-render" name="mode-render" href="#mode-render"></a>
+## Using `render` mode
 
-This method will render the Pug into HTML at compile time. \
+This mode will render the Pug into HTML at compile time. \
 In webpack config add to `module.rules`:
 
 ```js
@@ -495,8 +620,8 @@ In webpack config add to `module.rules`:
   test: /\.pug$/,
     loader: '@webdiscus/pug-loader',
     options: {
-    method: 'render'
-  }
+      mode: 'render',
+    },
 }
 ```
 
@@ -506,23 +631,23 @@ In JavaScript the result of require() is an HTML string.
 const html = require('template.pug'); // the HTML string
 ```
 
-To generate a template function for passing the data in Pug at realtime, use the query parameter `?pug-compile`.
+To generate a template function for passing the data in Pug at realtime, use the query parameter `?compile`.
 
 ```js
-// render into HTML, because loader option 'method' is 'render'
+// render into HTML, because loader option 'mode' is 'render'
 const html = require('template.pug');
 
-// compile into template function, using the parameter 'pug-compile'
-const tmpl2 = require('template2.pug?pug-compile');
+// compile into template function, using the parameter 'compile'
+const tmpl2 = require('template2.pug?compile');
 const html2 = tmpl2({ ... });
 ```
 
 ---
 
-<a id="method-html" name="method-html" href="#method-html"></a>
-## Using `html` method
+<a id="mode-html" name="mode-html" href="#mode-html"></a>
+## Using `html` mode
 
-This method will render the Pug to pure HTML and should be used with an additional loader to handle HTML. \
+This mode will render the Pug to pure HTML and should be used with an additional loader to handle HTML. \
 In webpack config add to `module.rules`:
 
 ```js
@@ -538,7 +663,7 @@ In webpack config add to `module.rules`:
     {
       loader: '@webdiscus/pug-loader',
       options: {
-        method: 'html',
+        mode: 'html',
       },
     },
   ],
@@ -849,11 +974,6 @@ body
 
 ### Passing data in HtmlWebpackPlugin
 
-> **Warning**
->
-> Since `v2.8.0` the support of `html-webpack-plugin` is DEPRECATED.
-> Use the [`pug-plugin`](https://github.com/webdiscus/pug-plugin) instead.
-
 The user data can be passed into Pug template with two ways:
 
 - via HtmlWebpackPlugin options
@@ -1013,12 +1133,12 @@ For example, add to `tsconfig.json` an alias to the `paths` option:
 
 > **Warning**
 >
-> The `compile` method can resolve the filename as a string only and the filename can't be interpolated.
+> The `compile` mode can resolve the filename as a string only and the filename can't be interpolated.
 > ```pug
 > img(src=require('Images/logo.png')) // It works.
 > 
 > - const file = 'logo.png'
-> img(src=require('Images/' + file))  // ERROR: Can't be resolved with 'compile' method. 
+> img(src=require('Images/' + file))  // ERROR: Can't be resolved with 'compile' mode. 
 > ```
 
 <a id="resolve-webpack-context" name="resolve-webpack-context" href="#resolve-webpack-context"></a>
@@ -1073,7 +1193,7 @@ img(src=require('../images/logo.png'))
 
 > **Warning**
 >
-> Following relative path will be resolved with `render` and `html` methods, but `NOT` with `compile` method:
+> Following relative path will be resolved with `render` and `html` modes, but `NOT` with `compile` mode:
 > ```pug 
 >   img(src=require('../../images/logo.png'))
 > ```
@@ -1084,7 +1204,7 @@ img(src=require('../images/logo.png'))
 
 You can use the filename as a variable.
 
-Usage examples work with all methods:
+Usage examples work with all modes:
 ```pug
 - const file = 'logo.png'
 img(src=require('./images/' + file))
@@ -1096,16 +1216,16 @@ img(src=require(`Images/${file}`)
 
 > **Warning**
 >
-> Limitation using the `compile` method:\
+> Limitation using the `compile` mode:\
 > the variable `MUST NOT` contain a path, only a filename, because is interpolated at compile time.\
-> For example, the 'compile' method can't resolve following:
+> For example, the 'compile' mode can't resolve following:
 > ```pug
 >   - var file = '../images/logo.png'
 >   img(src=require(file))
 > ```
 
-Using a variable with `render` or `html` method, the variable `MAY` contain a path, because is resolved at runtime.\
-Following example work only with `render` or `html` method:
+Using a variable with `render` or `html` mode, the variable `MAY` contain a path, because is resolved at runtime.\
+Following example work only with `render` or `html` mode:
 ```pug
 - const file = '../relative/path/to/logo.png'
 img(src=require(file))
@@ -1142,7 +1262,7 @@ module.exports = {
         test: /\.pug$/,
         loader: '@webdiscus/pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           doctype: 'html',
           plugins: [require('pug-plugin-ng')],
         },
@@ -1258,7 +1378,7 @@ module.exports = defineConfig({
               resourceQuery: /^\?vue/u,
               loader: '@webdiscus/pug-loader',
               options: {
-                method: 'html', // render Pug into pure HTML string
+                mode: 'html', // render Pug into pure HTML string
                 ...pugLoaderOptions,
               },
             },
@@ -1266,7 +1386,7 @@ module.exports = defineConfig({
             {
               loader: '@webdiscus/pug-loader',
               options: {
-                method: 'compile', // compile Pug into template function
+                mode: 'compile', // compile Pug into template function
                 ...pugLoaderOptions,
               },
             },
@@ -1287,10 +1407,11 @@ For additional information see please the discussion:
 ```html
 <template lang='pug'>
   h1 Hello Pug!
-  p Paragraph
+  p Use the '@webdiscus/pug-loader'
 </template>
 ```
-> **Note:**
+> **Note**
+> 
 > You can use an indent for Pug code in Vue template.
 
 **Using Pug in JavaScript**

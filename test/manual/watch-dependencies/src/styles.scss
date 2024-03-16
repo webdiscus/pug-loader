@@ -1,7 +1,15 @@
+// styles.scss
+@use 'github-markdown-css';
+@use 'prismjs';
+
 body {
   font-family: sans-serif;
-  font-size: 20px;
+  font-size: 14px;
   margin: 0;
+}
+
+h1 {
+  color: darkcyan;
 }
 
 .content {

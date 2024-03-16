@@ -2,22 +2,13 @@ const { resolveModule } = require('../Utils');
 const { loadNodeModuleException } = require('../Exeptions');
 const adapter = require('./highlight/adapter');
 
-const filterName = 'markdown';
-const moduleName = 'markdown-it';
-
-const modulePath = resolveModule(moduleName);
-if (!modulePath) {
-  loadNodeModuleException(moduleName);
-}
-
-const MarkdownIt = require(modulePath);
-
 /**
  * Embedded filter markdown.
  * @singleton
  */
-const filter = {
-  name: filterName,
+const markdown = {
+  name: 'markdown',
+  moduleName: 'markdown-it',
   module: null,
   langPrefix: '',
 
@@ -36,6 +27,14 @@ const filter = {
    */
   init({ highlight, langPrefix, github }) {
     if (this.module != null) return;
+
+    const moduleFile = resolveModule(this.moduleName);
+
+    if (!moduleFile) {
+      loadNodeModuleException(this.moduleName);
+    }
+
+    const MarkdownIt = require(moduleFile);
 
     this.github = github === true;
 
@@ -98,4 +97,4 @@ const filter = {
   },
 };
 
-module.exports = filter;
+module.exports = markdown;

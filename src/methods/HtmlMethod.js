@@ -6,7 +6,7 @@ const { isRequireableScript, hmrFile } = require('../Utils');
 /**
  * Render into HTML and return the pure string.
  *
- * This method require an additional loader, like `html-loader`, to handle the HTML string.
+ * The HTML mode requires an additional loader, like `html-loader`, to handle the HTML string.
  * The require() function for resources must be omitted to allow handle the `src` in `html-loader`.
  */
 class HtmlMethod {

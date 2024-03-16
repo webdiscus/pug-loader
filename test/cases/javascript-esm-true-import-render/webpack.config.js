@@ -28,7 +28,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           esModule: true,
           data: {
             globalVar: 'Global Title!',

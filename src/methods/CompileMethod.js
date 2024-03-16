@@ -1,13 +1,12 @@
 const Resolver = require('../Resolver');
 const { ScriptCollection } = require('../Modules');
-const { injectExternalData, hmrFile } = require('../Utils');
+const { stringifyJSON, hmrFile } = require('../Utils');
 
 /**
  * Compile into template function and export a JS module.
  */
 class CompileMethod {
-  constructor({ templateFile, templateName, esModule, useSelf }) {
-    this.useSelf = useSelf;
+  constructor({ templateFile, templateName, esModule }) {
     this.templateFile = templateFile;
     this.templateName = templateName;
     this.exportCode = esModule ? 'export default ' : 'module.exports=';
@@ -55,17 +54,25 @@ class CompileMethod {
   }
 
   /**
-   * Export template code for using at runtime.
+   * Export the compiled template function contained resolved source asset files.
+   * Note: the export is required for `compile` mode.
    *
-   * @param {string} source The template source code.
-   * @param {{}} locals The variables passed in template function.
-   * @return {string}
+   * @param {string} templateFunction The source code of the template function.
+   * @param {{}} data The object with external variables passed in template from data option.
+   * @return {string} The exported template function.
    */
-  export(source, locals) {
-    if (Object.keys(locals).length > 0) {
-      source = injectExternalData(source, locals, this.useSelf);
+  export(templateFunction,  data ) {
+    const functionName = this.templateName;
+    const exportFunctionName = 'exportFn';
+
+    if (!Object.keys(data).length) {
+      return `${templateFunction};${this.exportCode}${functionName};`;
     }
-    return source + ';' + this.exportCode + this.templateName + ';';
+
+    return `${templateFunction};
+        var data = ${stringifyJSON(data)};
+        var ${exportFunctionName} = (context) => ${functionName}(Object.assign(data, context));
+        ${this.exportCode}${exportFunctionName};`;
   }
 
   /**

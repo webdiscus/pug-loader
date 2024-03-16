@@ -39,7 +39,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           embedFilters: {
             // :escape
             escape: true,

@@ -47,7 +47,7 @@ module.exports = {
           {
             loader: 'pug-loader',
             options: {
-              method: 'html',
+              mode: 'html',
             },
           },
         ],

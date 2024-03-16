@@ -1,0 +1,10 @@
+html
+  head
+    //- variable from Webpack config
+    title= htmlWebpackPlugin.options.data.title
+    //- relative path to favicon source file
+    link(href=require("../../images/favicon.ico") rel="icon")
+  body
+    h1 Home
+    //- relative path to image source file
+    img(src=require("../../images/picture.png"))

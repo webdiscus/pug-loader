@@ -25,7 +25,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'render',
+          mode: 'render',
           watchFiles: /\.(s?css)$/i,
           embedFilters: {
             code: {

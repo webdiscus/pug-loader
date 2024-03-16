@@ -1,5 +1,5 @@
 const ansis = require('ansis');
-const { red, redBright, yellow, cyan, green } = require('ansis/colors');
+const { red, redBright, yellow, cyan, green } = require('ansis');
 const { loaderName, labelError } = require('./Utils');
 
 const loaderLabel = labelError();
@@ -54,9 +54,9 @@ const resolveException = (error, file, templateFile) => {
  */
 const unsupportedInterpolationException = (value, templateFile) => {
   const message =
-    `${loaderLabel} the expression ${yellow(value)} can't be interpolated with the 'compile' method.\n` +
+    `${loaderLabel} the expression ${yellow(value)} can't be interpolated with the 'compile' mode.\n` +
     `Template: ${cyan(templateFile)}\n` +
-    `${yellow`Possible solution: `} Try to use the loader option 'method' as 'render' or change your dynamic filename to static or use webpack alias.`;
+    `${yellow`Possible solution: `} Try to use the loader option 'mode' as 'render' or change your dynamic filename to static or use webpack alias.`;
 
   PugLoaderError(message);
 };

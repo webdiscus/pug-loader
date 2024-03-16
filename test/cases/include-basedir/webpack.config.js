@@ -22,7 +22,7 @@ module.exports = {
         loader: 'pug-loader',
         options: {
           basedir: path.join(__dirname, 'src/'),
-          //method: 'render',
+          //mode: 'render',
         },
       },
     ],

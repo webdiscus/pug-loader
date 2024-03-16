@@ -19,6 +19,8 @@ describe('extend / include / raw include', () => {
   test('include alias, resolve.alias', () => compareFiles('include-alias-resolve.alias'));
   test('include alias, resolve.plugins', () => compareFiles('include-alias-resolve.plugins'));
   test('include alias, resolve compile', () => compareFiles('include-alias-resolve.plugins-compile'));
+  // TODO: fix ERROR: Cannot find module '././image.webp'
+  //test('include alias, resolve compile2', () => compareFiles('include-alias-resolve.plugins-compile2'));
   test('include alias, resolve render', () => compareFiles('include-alias-resolve.plugins-render'));
   test('include basedir', () => compareFiles('include-basedir'));
   test('include relative', () => compareFiles('include-relative'));
@@ -76,14 +78,13 @@ describe('require pug in javascript', () => {
   test(`js esModule=false require, render`, () => compareFiles('javascript-esm-false-require-render'));
   test(`js esModule=true import, render`, () => compareFiles('javascript-esm-true-import-render'));
   test(`js inline loader`, () => compareFiles('javascript-inline-loader'));
-
 });
 
 describe('embedded filters tests', () => {
   test(`filter escape, method render`, () => compareFiles('filter-escape'));
   test(`filter code, method render`, () => compareFiles('filter-code'));
+  test(`:code include files`, () => compareFiles('filter-code-include-files'));
   test(`filter highlight, method render`, () => compareFiles('filter-highlight'));
-
   test('highlight prismjs - isInitialized', (done) => {
     const prismjs = require('../src/filters/highlight/prismjs');
     // reset cached module
@@ -97,9 +98,15 @@ describe('embedded filters tests', () => {
 });
 
 describe('options tests', () => {
-  test(`method default`, () => compareFiles('option-method-default-js'));
-  test(`method=render`, () => compareFiles('option-method-render-js'));
-  test(`method=html`, () => compareFiles('option-method-html-js'));
+  test(`name`, () => compareFiles('option-name'));
+  test(`esModule=false`, () => compareFiles('option-esModule-false'));
+  test(`esModule=true`, () => compareFiles('option-esModule-true'));
+
+  test(`default mode in js`, () => compareFiles('option-mode-default-js'));
+  test(`render mode in js`, () => compareFiles('option-mode-render-js'));
+  test(`mix modes in js: default with render`, () => compareFiles('option-mode-default-with-render-js'));
+  test(`html mode`, () => compareFiles('option-mode-html-js'));
+
   test(`watchFiles, render`, () => compareFiles('option-watchFiles'));
 });
 
@@ -112,7 +119,8 @@ describe('options: pass data', () => {
   test(`use self, render`, () => compareFiles('option-data-self-render'));
 });
 
-describe('pass data in html-webpack-plugin', () => {
+describe('using html-webpack-plugin', () => {
+  test('multiple pages pass data, js, scss, image', () => compareFiles('html-webpack-plugin'));
   test('pass data from plugin options', () => compareFiles('html-webpack-plugin-options'));
   test('pass data from plugin options and query', () => compareFiles('html-webpack-plugin-options-query'));
   test('pass diff data in one template', () => compareFiles('html-webpack-plugin-diff-data-one-template'));
@@ -172,13 +180,13 @@ describe('exception tests', () => {
     done();
   });
 
-  test('exception: script can\'t be interpolated with the \'compile\' method', () => {
-    const containString = `can't be interpolated with the 'compile' method`;
+  test('exception: script can\'t be interpolated with the \'compile\' mode', () => {
+    const containString = `can't be interpolated with the 'compile' mode`;
     return exceptionContain('exception-interpolation-unsupported-script', containString);
   });
 
-  test('exception: file can\'t be interpolated with the \'compile\' method', () => {
-    const containString = `can't be interpolated with the 'compile' method`;
+  test('exception: file can\'t be interpolated with the \'compile\' mode', () => {
+    const containString = `can't be interpolated with the 'compile' mode`;
     return exceptionContain('exception-interpolation-unsupported-value', containString);
   });
 });

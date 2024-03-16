@@ -1,62 +1,19 @@
-const fs = require('fs');
-const path = require('path');
 const pug = require('pug');
-const { plugin, ScriptCollection } = require('./Modules');
+const { plugin } = require('./Modules');
 const Dependency = require('./Dependency');
 const Resolver = require('./Resolver');
 const Loader = require('./Loader');
+const Filter = require('./Filter');
 const { trimIndent } = require('./Utils');
 
 const HtmlWebpackPlugin = require('./extras/HtmlWebpackPlugin');
 
 const {
-  filterNotFoundException,
-  filterLoadException,
-  filterInitException,
   getPugCompileErrorMessage,
   getPugCompileErrorHtml,
   getExecuteTemplateFunctionErrorMessage,
 } = require('./Exeptions');
 
-const filtersDir = path.join(__dirname, './filters/');
-
-/**
- * Load embedded pug filters.
- * @param {{filterName: string, options: boolean|string|object}} filters
- */
-const loadFilters = (filters) => {
-  for (const filterName in filters) {
-    const options = filters[filterName];
-    if (options) {
-      let filterPath = path.resolve(filtersDir, filterName + '.js');
-      let filter;
-
-      try {
-        filter = require(filterPath);
-      } catch (error) {
-        const message = error.toString();
-
-        if (message.indexOf('Cannot find module') >= 0 && message.indexOf('Please install the module') < 0) {
-          const entries = fs.readdirSync(filtersDir, { withFileTypes: true });
-          const files = entries.filter((file) => !file.isDirectory()).map((file) => path.basename(file.name, '.js'));
-          filterNotFoundException(filterName, files.join(', '));
-        }
-        filterLoadException(filterName, filterPath, error);
-      }
-
-      try {
-        // filter module may have the `init(options)` method
-        if (filter.init != null) {
-          filter.init(options);
-        }
-        // add filter to pug compiler
-        pug.filters[filterName] = filter.apply.bind(filter);
-      } catch (error) {
-        filterInitException(filterName, error);
-      }
-    }
-  }
-};
 
 /**
  * Whether the node value contains the require().
@@ -137,54 +94,6 @@ const resolveNodeAttributes = (node, attrName) => {
 };
 
 /**
- * Traverse all Pug nodes and resolve filename in each node.
- *
- * @note: This is implementation of the 'pug-walk' logic without recursion, up to x2.5 faster.
- *
- * @param {Object} tree The tree of Pug nodes.
- */
-const walkTree = (tree) => {
-  let stack = [tree];
-  let ast, i;
-
-  while ((ast = stack.pop())) {
-    while (true) {
-      resolveNode(ast);
-
-      switch (ast.type) {
-        case 'Tag':
-        case 'Code':
-        case 'Case':
-        case 'Mixin':
-        case 'When':
-        case 'While':
-        case 'EachOf':
-          if (ast.block) stack.push(ast.block);
-          break;
-        case 'Each':
-          if (ast.block) stack.push(ast.block);
-          if (ast.alternate) stack.push(ast.alternate);
-          break;
-        case 'Conditional':
-          if (ast.consequent) stack.push(ast.consequent);
-          if (ast.alternate) stack.push(ast.alternate);
-          break;
-        default:
-          break;
-      }
-
-      if (!ast.nodes || ast.nodes.length === 0) break;
-
-      const lastIndex = ast.nodes.length - 1;
-      for (i = 0; i < lastIndex; i++) {
-        stack.push(ast.nodes[i]);
-      }
-      ast = ast.nodes[lastIndex];
-    }
-  }
-};
-
-/**
  * The pug plugin to resolve path for include, extends, require.
  *
  * @type {{resolve: (function(string, string, {}): string), preCodeGen: (function({}): *)}}
@@ -203,13 +112,53 @@ const resolvePlugin = {
   },
 
   /**
-   * Resolve the filename in require().
+   * Traverse all Pug nodes and resolve filename in each node.
    *
-   * @param {{}} tree The parsed tree of pug template.
+   * @note: This is the implementation of the 'pug-walk' logic without a recursion, up to x2.5 faster.
+   *
+   * @param {{}} tree The parsed tree of the pug template.
    * @return {{}}
    */
   preCodeGen(tree) {
-    walkTree(tree);
+    const stack = [tree];
+    let ast, lastIndex, i;
+
+    while ((ast = stack.pop())) {
+      while (true) {
+        resolveNode(ast);
+
+        switch (ast.type) {
+          case 'Tag':
+          case 'Code':
+          case 'Case':
+          case 'Mixin':
+          case 'When':
+          case 'While':
+          case 'EachOf':
+            if (ast.block) stack.push(ast.block);
+            break;
+          case 'Each':
+            if (ast.block) stack.push(ast.block);
+            if (ast.alternate) stack.push(ast.alternate);
+            break;
+          case 'Conditional':
+            if (ast.consequent) stack.push(ast.consequent);
+            if (ast.alternate) stack.push(ast.alternate);
+            break;
+          default:
+            break;
+        }
+
+        if (!ast.nodes || ast.nodes.length === 0) break;
+
+        lastIndex = ast.nodes.length - 1;
+        for (i = 0; i < lastIndex; i++) {
+          stack.push(ast.nodes[i]);
+        }
+        ast = ast.nodes[lastIndex];
+      }
+    }
+
     return tree;
   },
 };
@@ -219,7 +168,7 @@ const resolvePlugin = {
  * @param {function(error: Error|null, result: string?)?} callback The asynchronous callback function.
  * @return {string|undefined}
  */
-const compile = function (content, callback) {
+const compile = function(content, callback) {
   const loaderContext = this;
   const loaderOptions = loaderContext.getOptions() || {};
   const webpackOptions = loaderContext._compiler.options || {};
@@ -231,6 +180,17 @@ const compile = function (content, callback) {
 
   if (basedir.slice(-1) !== '/') basedir += '/';
   if (!loaderOptions.name) loaderOptions.name = 'template';
+
+  // prevent double initialisation with same options, occurs when many Pug files used in one webpack config
+  if (!plugin.isCached(context)) {
+    // load custom filters into loaderOptions.filters
+    Filter.loadFilters(loaderOptions);
+
+    Resolver.init({
+      basedir,
+      options: webpackOptions.resolve || {},
+    });
+  }
 
   const compilerOptions = {
     // used to resolve import/extends and to improve errors
@@ -279,16 +239,6 @@ const compile = function (content, callback) {
 
     if (template !== false) content = template;
     customData = HtmlWebpackPlugin.getUserOptions(resource, webpackOptions);
-  }
-
-  // prevent double initialisation with same options, occurs when many Pug files used in one webpack config
-  if (!plugin.isCached(context)) {
-    if (loaderOptions.embedFilters) loadFilters(loaderOptions.embedFilters);
-
-    Resolver.init({
-      basedir,
-      options: webpackOptions.resolve || {},
-    });
   }
 
   Loader.init({
@@ -340,7 +290,7 @@ const compile = function (content, callback) {
   callback(null, result);
 };
 
-module.exports = function (content, map, meta) {
+module.exports = function(content, map, meta) {
   const loaderContext = this;
   const callback = loaderContext.async();
 

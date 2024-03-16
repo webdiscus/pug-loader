@@ -1,9 +1,9 @@
 //- The limitations:
-  // following not works with the `compile` method:
+  // following not works with the `compile` mode:
   - var file = '../assets/images/image.png';
   img(src=require(file))
 
-  // resolve of alias from tsconfig in interpolating string is not supported for `compile` method
+  // resolve of alias from tsconfig in interpolating string is not supported for `compile` mode
   // alias `@data` from tsconfig
   -var cat = 'cat-1';
   -var colorModule = require(`@data/${cat}/color.js`)
@@ -41,7 +41,7 @@ img.d4(src=require(`@Images/image.png`))
 img.e1(src=require(`@TSImages/image.png`))
 
 //- Webpack Error: Can't resolve '@TSImages' in require expression.
-    This is the limitation of the webpack resolve.plugins for `compile` method, no solution.
+    This is the limitation of the webpack resolve.plugins for `compile` mode, no solution.
     img.e2(src=require(`@TSImages/` + file))
 
 //- test option `basedir` and trim()

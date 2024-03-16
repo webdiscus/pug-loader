@@ -21,7 +21,7 @@ module.exports = {
         test: /\.pug$/,
         loader: 'pug-loader',
         options: {
-          method: 'compile',
+          mode: 'compile',
         },
       },
 

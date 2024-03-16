@@ -1,0 +1,28 @@
+//- ok
+  img.a1(src=require('../assets/images/image.webp'))
+  img.a2(src=require('AliasImages/image.webp'))
+  img.a3(src=require('@images/image.webp'))
+
+//- ok
+  - var file = 'image.webp'
+  img.b1(src=require('../assets/images/' + file))
+  img.b2(src=require('AliasImages/' + file))
+//-img.b3(src=require('@images/' + file)) TODO: fix for compile is not possible
+
+//- TODO: ERROR: Cannot find module '././image.webp'
+- var file = './image.webp'
+img.c1(src=require('../assets/images/' + file))
+//-  img.c2(src=require('AliasImages/' + file))
+//-img.c3(src=require('@images/' + file)) TODO: fix for compile is not possible
+
+//- TODO: ERROR: Cannot find module './../images/image.webp'
+  - var file = '../images/image.webp'
+  img.d1(src=require('../assets/images/' + file))
+  img.d2(src=require('AliasImages/' + file))
+//-img.d3(src=require('@images/' + file)) TODO: fix for compile is not possible
+
+//- ok
+  - var colors = require('@data/colors.json')
+  .colors
+    each color in colors
+      div(style=`color:${color.hex};`)= color.name
