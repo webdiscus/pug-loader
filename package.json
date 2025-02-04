@@ -1,6 +1,6 @@
 {
   "name": "@webdiscus/pug-loader",
-  "version": "2.11.0",
+  "version": "2.11.1",
   "description": "Pug loader renders Pug files into HTML or compiles them into a template function.",
   "keywords": [
     "pug",
@@ -71,10 +71,10 @@
     }
   },
   "dependencies": {
-    "ansis": "2.0.3",
-    "parse5": "^7.1.2",
-    "pug": "^3.0.2",
-    "webpack-merge": "^5.10.0"
+    "ansis": "3.10.0",
+    "parse5": "^7.2.1",
+    "pug": "^3.0.3",
+    "webpack-merge": "^6.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",

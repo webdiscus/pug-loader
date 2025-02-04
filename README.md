@@ -41,11 +41,11 @@ The Pug Loader renders Pug templates into HTML or compiles it into a template fu
 
 > **Warning**
 > 
-> Until today, **2024**, only this Pug loader **is maintained**. Please support this project by giving it a star ⭐.\
+> As of **2025**, only this Pug loader **is maintained**. Please support this project by giving it a star ⭐.\
 > All **other Pug loaders are dead** and have not been maintained for a long time:
 >
-> - [pug-loader](https://www.npmjs.com/package/pug-loader) - last update 2018 (6 years ago)
-> - [pug-html-loader](https://npmjs.com/package/pug-html-loader) - last update 2016 (8 years ago)
+> - [pug-loader](https://www.npmjs.com/package/pug-loader) - last update 2018 (7 years ago)
+> - [pug-html-loader](https://npmjs.com/package/pug-html-loader) - last update 2025 (the second to last update was in 2016, 8 years ago)
 > - [pug-plain-loader](https://www.npmjs.com/package/pug-plain-loader) - last update 2020 (4 years ago)
 > - [simple-pug-loader](https://npmjs.com/package/simple-pug-loader) - last update 2021 (3 years ago)
 

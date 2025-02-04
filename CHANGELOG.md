@@ -1,5 +1,9 @@
 # Change log
 
+## 2.11.1 (2025-02-04)
+
+- chore: update dependencies
+
 ## 2.11.0 (2024-02-16)
 - feat: drop support of the Node < 16,
   the loader can still works with the Node 14.x >=, but we test only with Node >= 16.16

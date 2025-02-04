@@ -137,6 +137,12 @@ describe('exception tests', () => {
     return exceptionContain('exception-evaluate-template', containString);
   });
 
+  test('exception: evaluate template function 2', () => {
+    // test the concrete error message of the pug compiler
+    const containString = `Anonymous blocks are not allowed unless they are part of a mixin.`;
+    return exceptionContain('exception-evaluate-template2', containString);
+  });
+
   test('exception: file cannot be resolved', () => {
     const containString = `can't be resolved`;
     return exceptionContain('exception-resolve', containString);
